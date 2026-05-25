@@ -1,0 +1,14 @@
+{% extends "portfolio/base.html" %}
+
+{% block content %}
+<div class="card wide">
+    <h2>Eliminar clase</h2>
+    <p>Confirma que deseas eliminar la clase <strong>{{ object.title }}</strong>.</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="submit-btn">Eliminar</button>
+        <a href="{% url 'home' %}" class="submit-btn">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

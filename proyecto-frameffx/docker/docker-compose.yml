@@ -1,0 +1,7 @@
+services:
+  web:
+    volumes:
+      - media_volume:/code/media
+
+volumes:
+  media_volume:

@@ -1,0 +1,437 @@
+{% extends "portfolio/base.html" %}
+{# 
+    Panel Principal del Usuario (Dashboard)
+    He diseñado esta vista para que sea el centro neurálgico de la plataforma.
+    Aquí utilizo sentencias condicionales de Django `{% if %}` para mostrar dinámicamente:
+    1. Las métricas del usuario.
+    2. El catálogo de clases disponibles con filtros de búsqueda.
+    3. El historial de reservas y compras si el usuario está autenticado.
+#}
+
+{% block title %}Panel de Clases – FrameffX{% endblock %}
+
+{% block content %}
+
+<div id="stripe-success-banner" class="stripe-banner stripe-banner-ok" role="alert" style="display:none">
+  <span class="stripe-banner-icon">&#10003;</span>
+  <div class="stripe-banner-body">
+    <strong>¡Reserva confirmada!</strong>
+    <p>Tu pago fue procesado correctamente. La clase aparece en «Mis clases reservadas».</p>
+  </div>
+  <button class="stripe-banner-close" onclick="this.parentElement.style.display='none'" aria-label="Cerrar">&times;</button>
+</div>
+<div id="stripe-cancel-banner" class="stripe-banner stripe-banner-warn" role="alert" style="display:none">
+  <span class="stripe-banner-icon">&#9888;</span>
+  <div class="stripe-banner-body">
+    <strong>Pago cancelado</strong>
+    <p>No se ha realizado ningún cobro. Puedes intentarlo de nuevo cuando quieras.</p>
+  </div>
+  <button class="stripe-banner-close" onclick="this.parentElement.style.display='none'" aria-label="Cerrar">&times;</button>
+</div>
+
+<section class="home-hero">
+    <div class="home-hero-copy">
+        <p class="home-eyebrow">FrameffX</p>
+        <h1>Catálogo de clases</h1>
+        <p class="home-sub">Explora el marketplace de clases y asegura tu lugar.</p>
+        <div class="home-hero-actions">
+            <a href="#clases-disponibles" class="submit-btn home-btn-primary">Ver clases disponibles</a>
+            {% if user.is_authenticated %}
+            <a href="#mis-reservas" class="submit-btn home-btn-secondary">Mis reservas</a>
+            <a href="#mis-compras" class="submit-btn home-btn-secondary">Mis compras</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if user.is_authenticated %}
+    <aside class="home-summary card">
+        <p class="stat-title">Mi resumen</p>
+        <div class="home-kpis">
+            <div>
+                <p class="home-kpi-label">Reservadas</p>
+                <p class="home-kpi-value">{{ reservas_activas|length }}</p>
+            </div>
+            <div>
+                <p class="home-kpi-label">Finalizadas</p>
+                <p class="home-kpi-value">{{ reservas_finalizadas|length }}</p>
+            </div>
+            <div>
+                <p class="home-kpi-label">Compras</p>
+                <p class="home-kpi-value">{{ pedidos_completados|length }}</p>
+            </div>
+        </div>
+        <p class="home-summary-note">Solo se muestran clases activas para nuevas reservas.</p>
+    </aside>
+    {% endif %}
+</section>
+
+<section class="card home-filter-panel" aria-label="Filtros de clases disponibles">
+    <div class="home-filter-head">
+        <h2>Clases disponibles</h2>
+        <p>Filtra por nombre y orden para encontrar la clase que necesitas.</p>
+    </div>
+
+    <form method="get" class="home-filters">
+        <div class="form-field">
+            <label for="titulo">Nombre de la clase</label>
+            <input type="text" id="titulo" name="titulo" value="{{ titulo }}" placeholder="Ej. Blender para principiantes">
+        </div>
+
+        <div class="form-field">
+            <label for="orden">Orden</label>
+            <select id="orden" name="orden">
+                <option value="">Mas recientes</option>
+                <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
+                <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
+                <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
+            </select>
+        </div>
+
+        <div class="home-filter-actions">
+            <button type="submit" class="submit-btn home-btn-primary">Buscar</button>
+            <a href="{% url 'home' %}" class="submit-btn home-btn-secondary">Limpiar</a>
+        </div>
+    </form>
+</section>
+
+<section id="clases-disponibles" class="home-listing" aria-label="Listado de clases disponibles">
+    {% if teachings %}
+    <div class="grid home-grid">
+        {% for teach in teachings %}
+        <article class="card home-card">
+            <div class="home-card-top">
+                <h2>{{ teach.title }}</h2>
+                <span class="home-status home-status-{{ teach.estado }}">{{ teach.get_estado_display }}</span>
+            </div>
+
+            <p class="home-card-description">{{ teach.description|truncatechars:180 }}</p>
+
+            <div class="home-meta-row">
+                <div>
+                    <p class="stat-title">Duracion</p>
+                    <p>{{ teach.duracion_min }} min</p>
+                </div>
+                <div>
+                    <p class="stat-title">Inicio</p>
+                    <p>{{ teach.start_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Precio</p>
+                    <p class="stat-value">${{ teach.price }}</p>
+                </div>
+            </div>
+
+            <div class="home-card-actions">
+                {% if teach.id in reservas_ids %}
+                <span class="home-link-main">&#10003; Ya reservada</span>
+                {% else %}
+                <button
+                    type="button"
+                    class="submit-btn home-btn-primary booking-trigger"
+                    data-id="{{ teach.id }}"
+                    data-title="{{ teach.title|escapejs }}"
+                    data-price="{{ teach.price }}"
+                    data-duration="{{ teach.duracion_min }}"
+                    data-start="{{ teach.start_at|date:'d/m/Y H:i' }}"
+                    data-checkout-url="{% url 'booking_checkout' teach.id %}"
+                    aria-haspopup="dialog"
+                >
+                    Reservar clase
+                </button>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card home-empty-state">
+        <h2>Sin clases activas por ahora</h2>
+        <p>No hay clases disponibles con los filtros seleccionados.</p>
+    </div>
+    {% endif %}
+</section>
+
+{% if user.is_authenticated %}
+<section id="mis-reservas" class="home-listing" aria-label="Mis clases reservadas">
+    <div class="home-filter-head">
+        <h2>Mis clases reservadas</h2>
+    </div>
+    {% if reservas_activas %}
+    <div class="grid home-grid">
+        {% for reserva in reservas_activas %}
+        <article class="card home-card">
+            <div class="home-card-top">
+                <h2>{{ reserva.clase.title }}</h2>
+                <span class="home-status home-status-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span>
+            </div>
+            <p class="home-card-description">{{ reserva.clase.description|truncatechars:160 }}</p>
+            <div class="home-meta-row">
+                <div>
+                    <p class="stat-title">Inicio</p>
+                    <p>{{ reserva.clase.start_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Fin</p>
+                    <p>{{ reserva.clase.end_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Precio</p>
+                    <p class="stat-value">${{ reserva.clase.price }}</p>
+                </div>
+            </div>
+            <div class="home-card-actions">
+                {% if reserva.estado == "pendiente" or reserva.estado == "confirmada" %}
+                <form method="post" action="{% url 'booking_cancel' reserva.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="submit-btn home-btn-danger">Cancelar reserva</button>
+                </form>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card home-empty-state">
+        <h2>Aun no tienes reservas</h2>
+        <p>Reserva una clase para verla en esta seccion.</p>
+    </div>
+    {% endif %}
+</section>
+
+<section class="home-listing" aria-label="Mis clases finalizadas">
+    <div class="home-filter-head">
+        <h2>Mis clases finalizadas</h2>
+    </div>
+    {% if reservas_finalizadas %}
+    <div class="grid home-grid">
+        {% for reserva in reservas_finalizadas %}
+        <article class="card home-card">
+            <div class="home-card-top">
+                <h2>{{ reserva.clase.title }}</h2>
+                <span class="home-status home-status-finalizada">Finalizada</span>
+            </div>
+            <p class="home-card-description">{{ reserva.clase.description|truncatechars:160 }}</p>
+            <div class="home-meta-row">
+                <div>
+                    <p class="stat-title">Inicio</p>
+                    <p>{{ reserva.clase.start_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Fin</p>
+                    <p>{{ reserva.clase.end_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Estado</p>
+                    <p>{{ reserva.get_estado_display }}</p>
+                </div>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card home-empty-state">
+        <h2>Sin clases finalizadas</h2>
+        <p>Cuando completes una clase, aparecera aqui.</p>
+    </div>
+    {% endif %}
+</section>
+
+<section id="mis-compras" class="home-listing" aria-labelledby="mis-compras-title">
+    <div class="home-filter-head">
+        <h2 id="mis-compras-title">Mis Productos Comprados</h2>
+        <p>Descarga los archivos digitales de tus pedidos completados.</p>
+    </div>
+
+    {% if pedidos_completados %}
+    <div class="grid home-grid">
+        {% for pedido in pedidos_completados %}
+        {% for detalle in pedido.detalles.all %}
+        <article class="card home-card purchase-card">
+            <div class="home-card-top">
+                <h2>{{ detalle.producto.titulo }}</h2>
+                <span class="purchase-badge purchase-badge-{{ pedido.estado }}">
+                    {% if pedido.estado == "completado" %}&#10003; Completado{% else %}{{ pedido.get_estado_display }}{% endif %}
+                </span>
+            </div>
+
+            <div class="purchase-type-row">
+                <span class="products-badge">{{ detalle.producto.get_tipo_display }}</span>
+                <span class="purchase-date">{{ pedido.fecha_creacion|date:"d/m/Y" }}</span>
+            </div>
+
+            <p class="home-card-description">{{ detalle.producto.descripcion|truncatechars:140 }}</p>
+
+            <div class="home-meta-row">
+                <div>
+                    <p class="stat-title">Pagado</p>
+                    <p class="stat-value">{{ detalle.precio_unitario }} €</p>
+                </div>
+                <div>
+                    <p class="stat-title">Pedido #</p>
+                    <p>{{ pedido.pk }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Descargas</p>
+                    <p>{{ detalle.descargas.count }}/{{ detalle.producto.max_descargas }}</p>
+                </div>
+            </div>
+
+            <div class="home-card-actions">
+                {% if detalle.producto.archivo_digital %}
+                    {% if detalle.descargas.count < detalle.producto.max_descargas %}
+                    <a href="{% url 'products:download_product' detalle.pk %}" class="submit-btn home-btn-primary purchase-download-btn">
+                        &#8659; Descargar archivo
+                    </a>
+                    {% else %}
+                    <span class="purchase-limit-msg">Limite de descargas alcanzado</span>
+                    {% endif %}
+                {% else %}
+                <span class="purchase-no-file">Archivo no disponible aun</span>
+                {% endif %}
+            </div>
+        </article>
+        {% endfor %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card home-empty-state">
+        <span class="purchase-empty-icon">&#128717;</span>
+        <h2>Aun no tienes compras</h2>
+        <p>Visita el <a href="{% url 'products:showProducts' %}" class="purchase-marketplace-link">Marketplace</a> para adquirir presets, guias y plugins.</p>
+    </div>
+    {% endif %}
+</section>
+
+{% endif %}
+
+{% if is_paginated %}
+<div class="pagination home-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&orden={{ orden }}">
+        Anterior
+    </a>
+    {% endif %}
+
+    <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&orden={{ orden }}">
+        Siguiente
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+
+<div id="booking-modal" class="booking-modal-overlay" role="dialog" aria-modal="true"
+     aria-labelledby="modal-title" hidden>
+  <div class="booking-modal-card">
+
+    {# He separado esta cabecera para que sea semánticamente independiente del formulario #}
+    <div class="booking-modal-header">
+      <span class="booking-modal-eyebrow">Confirmar reserva</span>
+      <button class="booking-modal-close" id="modal-close-btn" aria-label="Cerrar modal">&times;</button>
+    </div>
+
+    <h2 class="booking-modal-title" id="modal-title"></h2>
+
+    <div class="booking-modal-meta">
+      <div class="booking-modal-meta-item">
+        <span class="booking-modal-meta-label">Duracion</span>
+        <span class="booking-modal-meta-value" id="modal-duration"></span>
+      </div>
+      <div class="booking-modal-meta-item">
+        <span class="booking-modal-meta-label">Inicio</span>
+        <span class="booking-modal-meta-value" id="modal-start"></span>
+      </div>
+      <div class="booking-modal-meta-item booking-modal-meta-price">
+        <span class="booking-modal-meta-label">Total a pagar</span>
+        <span class="booking-modal-meta-value" id="modal-price"></span>
+      </div>
+    </div>
+
+    <p class="booking-modal-notice">
+      Seras redirigido a Stripe para completar el pago de forma segura.
+      La reserva se confirma automaticamente tras el cobro.
+    </p>
+
+    <form id="booking-modal-form" method="post" action="">
+      {% csrf_token %}
+      <div class="booking-modal-actions">
+        <button type="button" class="booking-modal-btn-cancel" id="modal-cancel-btn">
+          Cancelar
+        </button>
+        <button type="submit" class="booking-modal-btn-pay" id="modal-pay-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+            <line x1="1" y1="10" x2="23" y2="10"/>
+          </svg>
+          Pagar con Stripe
+        </button>
+      </div>
+    </form>
+
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+{# 
+  Lógica de Front-end para el Modal de Reservas.
+  He empaquetado este script en una IIFE (Immediately Invoked Function Expression) 
+  para no contaminar el scope global de la ventana.
+#}
+<script>
+(function () {
+  'use strict';
+
+  var urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('reserva_ok')) {
+    document.getElementById('stripe-success-banner').style.display = 'flex';
+  }
+  if (urlParams.get('reserva_cancelada')) {
+    document.getElementById('stripe-cancel-banner').style.display = 'flex';
+  }
+
+  var overlay  = document.getElementById('booking-modal');
+  var form     = document.getElementById('booking-modal-form');
+  var titleEl  = document.getElementById('modal-title');
+  var durationEl = document.getElementById('modal-duration');
+  var startEl  = document.getElementById('modal-start');
+  var priceEl  = document.getElementById('modal-price');
+
+  function openModal(btn) {
+    titleEl.textContent    = btn.dataset.title;
+    durationEl.textContent = btn.dataset.duration + ' min';
+    startEl.textContent    = btn.dataset.start;
+    priceEl.textContent    = parseFloat(btn.dataset.price).toFixed(2) + ' \u20ac';
+    form.action            = btn.dataset.checkoutUrl;
+    overlay.hidden         = false;
+    document.body.style.overflow = 'hidden';
+    document.getElementById('modal-close-btn').focus();
+  }
+
+  function closeModal() {
+    overlay.hidden = true;
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.booking-trigger').forEach(function (btn) {
+    btn.addEventListener('click', function () { openModal(btn); });
+  });
+
+  document.getElementById('modal-close-btn').addEventListener('click', closeModal);
+  document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
+
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) closeModal();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !overlay.hidden) closeModal();
+  });
+}());
+</script>
+{% endblock %}

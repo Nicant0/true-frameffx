@@ -1,0 +1,250 @@
+{% extends "portfolio/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}
+    {% if object %}Editar Clase · FrameffX{% else %}Nueva Clase · FrameffX{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── Override crispy/Bootstrap inputs para el tema oscuro ── */
+.tf-page { padding: 60px 20px 80px; }
+
+.tf-wrapper {
+    max-width: 760px;
+    margin: 0 auto;
+    background: rgba(14, 25, 36, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(77, 208, 255, 0.14);
+    border-radius: 22px;
+    padding: 44px 48px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Línea superior de acento */
+.tf-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, #19d3c5, #4dd0ff, #a78bfa);
+}
+
+.tf-header {
+    margin-bottom: 36px;
+}
+
+.tf-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #19d3c5;
+    background: rgba(25, 211, 197, 0.1);
+    border: 1px solid rgba(25, 211, 197, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 14px;
+}
+
+.tf-title {
+    margin: 0;
+    font-size: clamp(1.6rem, 2.5vw, 2.2rem);
+    line-height: 1.1;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+.tf-subtitle {
+    margin: 8px 0 0;
+    color: rgba(234, 241, 245, 0.6);
+    font-size: 0.92rem;
+}
+
+/* ── Override agresivo de Bootstrap/Crispy para inputs dark ── */
+.tf-wrapper .form-control,
+.tf-wrapper select.form-control,
+.tf-wrapper input[type="text"],
+.tf-wrapper input[type="number"],
+.tf-wrapper input[type="datetime-local"],
+.tf-wrapper textarea {
+    background-color: #0a1520 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #EAF1F5 !important;
+    padding: 11px 14px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.tf-wrapper .form-control:focus,
+.tf-wrapper select.form-control:focus,
+.tf-wrapper input[type="text"]:focus,
+.tf-wrapper input[type="number"]:focus,
+.tf-wrapper input[type="datetime-local"]:focus,
+.tf-wrapper textarea:focus {
+    background-color: #0d1d2e !important;
+    border-color: #19d3c5 !important;
+    box-shadow: 0 0 0 3px rgba(25, 211, 197, 0.15) !important;
+    outline: none !important;
+    color: #EAF1F5 !important;
+}
+
+.tf-wrapper label {
+    color: rgba(234, 241, 245, 0.8) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+}
+
+.tf-wrapper .form-group {
+    margin-bottom: 20px !important;
+}
+
+.tf-wrapper .form-text,
+.tf-wrapper .help-block {
+    color: rgba(234, 241, 245, 0.45) !important;
+    font-size: 12px !important;
+}
+
+.tf-wrapper .invalid-feedback,
+.tf-wrapper .errorlist li {
+    color: #ff7b86 !important;
+    font-size: 12px !important;
+}
+
+.tf-wrapper fieldset legend {
+    display: none;
+}
+
+.tf-wrapper select option {
+    background: #0E1924;
+    color: #EAF1F5;
+}
+
+/* ── Botones de acción ── */
+.tf-actions {
+    display: flex;
+    gap: 14px;
+    margin-top: 36px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.tf-btn-save {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: linear-gradient(90deg, #19d3c5, #4dd0ff);
+    color: #041017;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    letter-spacing: 0.2px;
+}
+
+.tf-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 32px rgba(25, 211, 197, 0.3);
+}
+
+.tf-btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(234, 241, 245, 0.75);
+    font-size: 15px;
+    font-weight: 600;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.tf-btn-cancel:hover {
+    background: rgba(230, 57, 70, 0.1);
+    border-color: rgba(230, 57, 70, 0.4);
+    color: #ff7b86;
+}
+
+/* ── Eliminar botón Submit de crispy ── */
+.tf-wrapper [type="submit"] {
+    display: none !important;
+}
+
+@media (max-width: 640px) {
+    .tf-wrapper {
+        padding: 28px 22px;
+    }
+    .tf-actions {
+        flex-direction: column;
+    }
+    .tf-btn-cancel {
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block main_class %}tf-page{% endblock %}
+
+{% block content %}
+<div class="tf-wrapper">
+
+    <div class="tf-header">
+        <span class="tf-eyebrow">
+            {% if object %}Edición de clase{% else %}Nueva clase virtual{% endif %}
+        </span>
+        <h1 class="tf-title">
+            {% if object %}
+                Editar: <em style="font-style:normal; color:#4dd0ff;">{{ object.title }}</em>
+            {% else %}
+                Crear nueva clase
+            {% endif %}
+        </h1>
+        <p class="tf-subtitle">
+            {% if object %}
+                Modifica los datos de la clase y guarda los cambios.
+            {% else %}
+                Completa el formulario para añadir una nueva clase al catálogo.
+            {% endif %}
+        </p>
+    </div>
+
+    <form method="post" id="teaching-form">
+        {% csrf_token %}
+        {{ form|crispy }}
+
+        <div class="tf-actions">
+            <button type="submit" class="tf-btn-save" id="btn-guardar-clase">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                    <polyline points="17 21 17 13 7 13 7 21"/>
+                    <polyline points="7 3 7 8 15 8"/>
+                </svg>
+                {% if object %}Guardar cambios{% else %}Crear clase{% endif %}
+            </button>
+            <a href="{% url 'home' %}" class="tf-btn-cancel" id="btn-cancelar-clase">
+                Cancelar
+            </a>
+        </div>
+    </form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% load static %}
+
+<header class="header">
+    <a href="{% url 'landing' %}" class="logo-link">
+        <img
+            src="{% static 'img/FrameffX LOGO.png' %}"
+            alt="FrameffX"
+            class="logo-img"
+        >
+    </a>
+
+    <nav class="nav">
+        {# Enlaces universales para Catálogo y Clases #}
+        <a href="{% url 'products:showProducts' %}">Marketplace</a>
+        <a href="{% url 'products:showProducts' %}?cat=presets">Presets</a>
+        <a href="{% url 'products:showProducts' %}?cat=plugins">Plugins</a>
+        <a href="{% url 'products:showProducts' %}?cat=project_files">Project Files</a>
+        <a href="{% url 'products:showProducts' %}?cat=guias">Guías</a>
+        <a href="{% url 'home' %}">Clases/Mentorías</a>
+        
+        {% if user.is_authenticated %}
+            {# Usuario autenticado: muestra el área de perfil y logout #}
+            {% if user.is_staff %}
+                <a href="{% url 'admin_dashboard' %}" style="color: #ffb703; font-weight: 600;">Panel Admin</a>
+            {% endif %}
+            <div class="nav-user">
+                <span class="nav-user-email">{{ user.email }}</span>
+                <form action="{% url 'site_logout' %}" method="post" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-btn" id="nav-logout-btn">
+                        Logout
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            {# Invitado: solo muestra el botón de inicio de sesión #}
+            <a href="{% url 'site_login' %}" class="nav-login-btn" id="nav-login-btn">
+                Iniciar Sesión
+            </a>
+        {% endif %}
+    </nav>
+</header>

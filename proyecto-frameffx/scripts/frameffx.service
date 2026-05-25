@@ -1,0 +1,16 @@
+[Unit]
+Description=FrameffX Docker Services
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=simple
+WorkingDirectory=/ruta/al/proyecto
+ExecStart=/usr/local/bin/docker-compose -f docker/docker-compose.prod.yml up
+ExecStop=/usr/local/bin/docker-compose -f docker/docker-compose.prod.yml down
+Restart=always
+RestartSec=10
+User=docker-user
+
+[Install]
+WantedBy=multi-user.target

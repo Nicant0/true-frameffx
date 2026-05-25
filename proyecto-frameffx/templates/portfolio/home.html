@@ -1,0 +1,132 @@
+{% extends "portfolio/base.html" %}
+
+{% block content %}
+<section class="home-hero">
+    <div class="home-hero-copy">
+        <p class="home-eyebrow">FrameffX</p>
+        <h1>Gestión de clases</h1>
+        <p class="home-sub">Comprueba las clases existentes o reserva una nueva.</p>
+        <div class="home-hero-actions">
+            <a href="#clases" class="submit-btn home-btn-primary">Ver clases</a>
+            <a href="{% url 'teaching_create' %}" class="submit-btn home-btn-secondary">Nueva clase</a>
+        </div>
+    </div>
+
+    <aside class="home-summary card">
+        <p class="stat-title">Resumen actual</p>
+        <div class="home-kpis">
+            <div>
+                <p class="home-kpi-label">Total clases</p>
+                <p class="home-kpi-value">{{ page_obj.paginator.count }}</p>
+            </div>
+            <div>
+                <p class="home-kpi-label">Pagina</p>
+                <p class="home-kpi-value">{{ page_obj.number }}/{{ page_obj.paginator.num_pages }}</p>
+            </div>
+        </div>
+        <p class="home-summary-note">Filtra por titulo, estado y orden para encontrar clases de forma mas rapida.</p>
+    </aside>
+</section>
+
+<section class="card home-filter-panel" aria-label="Filtros de clases">
+    <div class="home-filter-head">
+        <h2>Explora clases</h2>
+        <p>Aplica filtros para ajustar resultados al instante.</p>
+    </div>
+
+    <form method="get" class="home-filters">
+        <div class="form-field">
+            <label for="titulo">Nombre de la clase</label>
+            <input type="text" id="titulo" name="titulo" value="{{ titulo }}" placeholder="Ej. Blender para principiantes">
+        </div>
+
+        <div class="form-field">
+            <label for="estado">Estado</label>
+            <select id="estado" name="estado">
+                <option value="">Todos</option>
+                <option value="activa" {% if estado == "activa" %}selected{% endif %}>Activa</option>
+                <option value="cancelada" {% if estado == "cancelada" %}selected{% endif %}>Cancelada</option>
+                <option value="finalizada" {% if estado == "finalizada" %}selected{% endif %}>Finalizada</option>
+            </select>
+        </div>
+
+        <div class="form-field">
+            <label for="orden">Orden</label>
+            <select id="orden" name="orden">
+                <option value="">Mas recientes</option>
+                <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
+                <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
+                <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
+            </select>
+        </div>
+
+        <div class="home-filter-actions">
+            <button type="submit" class="submit-btn home-btn-primary">Buscar</button>
+            <a href="{% url 'home' %}" class="submit-btn home-btn-secondary">Limpiar</a>
+        </div>
+    </form>
+</section>
+
+<section id="clases" class="home-listing" aria-label="Listado de clases">
+    {% if teachings %}
+    <div class="grid home-grid">
+        {% for teach in teachings %}
+        <article class="card home-card">
+            <div class="home-card-top">
+                <h2>{{ teach.title }}</h2>
+                <span class="home-status home-status-{{ teach.estado }}">{{ teach.get_estado_display }}</span>
+            </div>
+
+            <p class="home-card-description">{{ teach.description|truncatechars:180 }}</p>
+
+            <div class="home-meta-row">
+                <div>
+                    <p class="stat-title">Duracion</p>
+                    <p>{{ teach.duracion_min }} min</p>
+                </div>
+                <div>
+                    <p class="stat-title">Inicio</p>
+                    <p>{{ teach.start_at|date:"d/m/Y H:i" }}</p>
+                </div>
+                <div>
+                    <p class="stat-title">Precio</p>
+                    <p class="stat-value">${{ teach.price }}</p>
+                </div>
+            </div>
+
+            <div class="home-card-actions">
+                <a href="{% url 'teaching_detail' teach.pk %}" class="home-link-main">Detalle</a>
+                <a href="{% url 'teaching_update' teach.pk %}">Editar</a>
+                <a href="{% url 'teaching_delete' teach.pk %}" class="home-link-danger">Eliminar</a>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card home-empty-state">
+        <h2>Sin resultados por ahora</h2>
+        <p>No hay clases disponibles con los filtros seleccionados.</p>
+        <a href="{% url 'teaching_create' %}" class="submit-btn home-btn-primary">Crear primera clase</a>
+    </div>
+    {% endif %}
+</section>
+
+{% if is_paginated %}
+<div class="pagination home-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&estado={{ estado }}&orden={{ orden }}">
+        Anterior
+    </a>
+    {% endif %}
+
+    <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&estado={{ estado }}&orden={{ orden }}">
+        Siguiente
+    </a>
+    {% endif %}
+</div>
+{% endif %}
+{% endblock %}
+

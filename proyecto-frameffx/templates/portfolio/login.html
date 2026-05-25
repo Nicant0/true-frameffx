@@ -1,0 +1,77 @@
+{% extends "portfolio/base.html" %}
+{% load static %}
+
+{% block title %}Iniciar Sesión · FrameffX{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login">
+        <div class="login-box" aria-labelledby="login-title">
+
+            <!-- Badge de marca -->
+            <div class="login-brand">
+                <span class="login-brand-badge">
+                    ✦ FrameffX Studio
+                </span>
+                <h1 id="login-title">Bienvenido de vuelta</h1>
+                <p class="login-subtitle">Inicia sesión para acceder a tu espacio creativo.</p>
+            </div>
+
+            <form method="post" novalidate id="login-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="form-errors" role="alert" aria-live="polite">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="form-field">
+                    <label for="id_username">Correo electrónico</label>
+                    <input
+                        id="id_username"
+                        name="username"
+                        type="email"
+                        placeholder="correo@ejemplo.com"
+                        value="{{ form.username.value|default:'' }}"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-field">
+                    <label for="id_password">Contraseña</label>
+                    <input
+                        id="id_password"
+                        name="password"
+                        type="password"
+                        placeholder="Tu contraseña"
+                        required
+                        autocomplete="current-password"
+                    >
+                </div>
+
+                <button type="submit" class="submit-btn" id="login-submit-btn">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         style="display:inline-block; vertical-align:middle; margin-right:6px;" aria-hidden="true">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                        <polyline points="10 17 15 12 10 7"/>
+                        <line x1="15" y1="12" x2="3" y2="12"/>
+                    </svg>
+                    Entrar
+                </button>
+            </form>
+
+            <p class="form-switch-link">
+                ¿No tienes cuenta?
+                <a href="{% url 'signup' %}" id="go-to-signup-link">Regístrate aquí</a>
+            </p>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

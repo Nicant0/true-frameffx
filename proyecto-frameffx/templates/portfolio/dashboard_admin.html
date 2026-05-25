@@ -1,0 +1,226 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}Admin Dashboard - FrameffX{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos específicos para el Dashboard Admin (Grid Layout Premium) */
+    .admin-dashboard-wrapper {
+        margin-top: 2rem;
+    }
+    
+    .admin-hero {
+        margin-bottom: 2rem;
+    }
+    
+    .admin-hero-copy p.home-eyebrow {
+        color: #ffb703; /* Color destacado para admin */
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+    
+    .admin-kpi-card {
+        background: #1e1e1e;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    
+    .admin-kpi-label {
+        font-size: 0.9rem;
+        color: #a0a0a0;
+        margin-bottom: 0.5rem;
+    }
+    
+    .admin-kpi-value {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #ffffff;
+    }
+    
+    /* Layout principal dividido (Pedidos vs Reservas) */
+    .admin-main-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+    
+    @media (max-width: 900px) {
+        .admin-main-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    .admin-section-card {
+        background: #1e1e1e;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 1.5rem;
+    }
+    
+    .admin-section-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Tabla premium minimalista */
+    .admin-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+    }
+    
+    .admin-table th {
+        text-align: left;
+        color: #a0a0a0;
+        font-weight: 500;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .admin-table td {
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        color: #eaeaea;
+    }
+    
+    .admin-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .admin-badge {
+        display: inline-block;
+        padding: 0.25rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+    }
+    
+    .admin-badge.success {
+        background: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+    }
+    
+    .admin-badge.warning {
+        background: rgba(241, 196, 15, 0.15);
+        color: #f1c40f;
+    }
+    
+    .admin-empty-state {
+        color: #888;
+        font-style: italic;
+        padding: 1rem 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="admin-dashboard-wrapper">
+
+    <!-- Header del Dashboard -->
+    <section class="admin-hero">
+        <div class="admin-hero-copy">
+            <p class="home-eyebrow">Back-Office</p>
+            <h1>Dashboard de Administración</h1>
+            <p class="home-sub" style="color:#a0a0a0;">Bienvenido, {{ user.email }}. Aquí tienes el resumen global de tu negocio.</p>
+        </div>
+    </section>
+
+    <!-- KPIs Row -->
+    <section class="admin-kpi-grid">
+        <div class="admin-kpi-card">
+            <p class="admin-kpi-label">Ingresos Totales (€)</p>
+            <p class="admin-kpi-value">{{ total_ingresos }} €</p>
+        </div>
+        <div class="admin-kpi-card">
+            <p class="admin-kpi-label">Usuarios Activos / Totales</p>
+            <p class="admin-kpi-value">{{ usuarios_activos }} / {{ total_usuarios }}</p>
+        </div>
+        <div class="admin-kpi-card">
+            <p class="admin-kpi-label">Reservas Pendientes</p>
+            <p class="admin-kpi-value">{{ reservas_pendientes }}</p>
+        </div>
+    </section>
+
+    <!-- Main Grid: Orders & Bookings -->
+    <section class="admin-main-grid">
+        
+        <!-- Últimos Pedidos -->
+        <div class="admin-section-card">
+            <h2 class="admin-section-title">Últimos Pedidos (Catálogo)</h2>
+            {% if ultimos_pedidos %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Usuario</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in ultimos_pedidos %}
+                        <tr>
+                            <td>{{ pedido.usuario.email }}</td>
+                            <td>{{ pedido.total }} €</td>
+                            <td>
+                                <span class="admin-badge {% if pedido.estado == 'completado' %}success{% else %}warning{% endif %}">
+                                    {{ pedido.get_estado_display }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="admin-empty-state">No hay pedidos registrados todavía.</p>
+            {% endif %}
+        </div>
+
+        <!-- Próximas Clases -->
+        <div class="admin-section-card">
+            <h2 class="admin-section-title">Próximas Clases Virtuales</h2>
+            {% if proximas_clases %}
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha y Hora</th>
+                            <th>Alumno</th>
+                            <th>Clase</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reserva in proximas_clases %}
+                        <tr>
+                            <td>{{ reserva.clase.start_at|date:"d/m/Y H:i" }}</td>
+                            <td>{{ reserva.usuario.email|truncatechars:15 }}</td>
+                            <td style="font-weight:500;">{{ reserva.clase.title|truncatechars:20 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p class="admin-empty-state">No hay clases programadas para el futuro.</p>
+            {% endif %}
+        </div>
+
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+# pyrefly.toml – Pyrefly type-checker configuration for FrameffX
+
+# Treat packages that have no bundled type stubs as `Any` instead of erroring.
+# Packages covered: allauth, crispy_forms/crispy_bootstrap5, djoser, faker.
+# django-stubs and djangorestframework-stubs are installed in the venv so
+# those two are resolved properly without being listed here.
+ignore-missing-imports = [
+    "allauth.*",
+    "crispy_forms.*",
+    "crispy_bootstrap5.*",
+    "djoser.*",
+    "faker.*",
+    "social_django.*",
+    "social_core.*",
+]
+
+[errors]
+# Silence "untyped-import" globally – fires when a package exists but ships
+# no py.typed marker or stub package (e.g. djoser, allauth).
+untyped-import = "ignore"
+
+# Silence "missing-attribute" that originates from untyped third-party code.
+# Attributes on django models / DRF serializers are fully typed via
+# django-stubs + djangorestframework-stubs, so this mainly suppresses false
+# positives coming from allauth/djoser accessors.
+missing-attribute = "ignore"
+
+# Silence "override" / inconsistent-override false positives.
+# djangorestframework-stubs defines ModelSerializer.Meta as a typed inner
+# class, but the standard DRF pattern is `class Meta:` with no parent.
+# Inheriting from ModelSerializer.Meta breaks the _MT generic binding, so
+# we suppress the override warning here instead of changing serializer code.
+bad-override = "ignore"

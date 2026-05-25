@@ -1,0 +1,19 @@
+{% extends "portfolio/base.html" %}
+
+{% block content %}
+<div class="card wide">
+    <h2>{{ teaching.title }}</h2>
+    <p><strong>Descripcion:</strong> {{ teaching.description }}</p>
+    <p><strong>Precio:</strong> {{ teaching.price }}</p>
+    <p><strong>Estado:</strong> {{ teaching.get_estado_display }}</p>
+    <p><strong>Duracion:</strong> {{ teaching.duracion_min }} minutos</p>
+    <p><strong>Inicio:</strong> {{ teaching.start_at }}</p>
+    <p><strong>Fin:</strong> {{ teaching.end_at }}</p>
+
+    <p>
+        <a href="{% url 'teaching_update' teaching.pk %}">Editar</a> |
+        <a href="{% url 'teaching_delete' teaching.pk %}">Eliminar</a> |
+        <a href="{% url 'home' %}">Volver</a>
+    </p>
+</div>
+{% endblock %}

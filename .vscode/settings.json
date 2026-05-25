@@ -1,0 +1,11 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/proyecto-frameffx/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/proyecto-frameffx"
+  ],
+  "python.analysis.djangoSettings": "FrameffX.settings",
+  "mypy-type-checker.args": [
+    "--django-settings-module=FrameffX.settings"
+  ],
+  "python.envFile": "${workspaceFolder}/proyecto-frameffx/.env"
+}

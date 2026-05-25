@@ -1,0 +1,242 @@
+﻿{% extends "portfolio/base.html" %}
+{% load static %}
+
+{% block title %}FrameffX -- The power to create what you imagine{% endblock %}
+{% block meta_description %}Plataforma de presets, recursos y clases virtuales para editores de video y filmmakers profesionales.{% endblock %}
+{% block main_class %}{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="landing-hero" aria-label="Bienvenida a FrameffX">
+
+    <!-- Orbes decorativos animados -->
+    <div class="landing-orb landing-orb-1" aria-hidden="true"></div>
+    <div class="landing-orb landing-orb-2" aria-hidden="true"></div>
+
+    <div class="landing-hero-inner">
+
+        <p class="landing-eyebrow">FrameffX Studio</p>
+
+        <h1>
+            The power to create<br>
+            <span class="landing-gradient-text">what you imagine.</span>
+        </h1>
+
+        <p class="landing-hero-sub">
+            La plataforma definitiva para editores de video y filmmakers.
+            Presets profesionales, guias de edicion y clases virtuales personalizadas,
+            todo en un solo lugar.
+        </p>
+
+        <div class="landing-hero-cta">
+            <a href="{% url 'site_login' %}" class="landing-cta-primary" id="hero-login-btn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2.5"
+                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+                    <polyline points="10 17 15 12 10 7"/>
+                    <line x1="15" y1="12" x2="3" y2="12"/>
+                </svg>
+                Empezar gratis
+            </a>
+            <a href="#servicios" class="landing-cta-secondary" id="hero-services-btn">
+                Ver servicios
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Indicador de scroll -->
+    <div class="landing-scroll-hint" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2"
+             stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"/>
+        </svg>
+        Explorar
+    </div>
+
+</section>
+
+<!-- CARACTERISTICAS CLAVE -->
+<hr class="landing-divider" aria-hidden="true">
+
+<section class="landing-section" aria-labelledby="features-title">
+    <div class="landing-section-header">
+        <p class="landing-section-label">Por que FrameffX</p>
+        <h2 class="landing-section-title" id="features-title">
+            Todo lo que un editor profesional necesita
+        </h2>
+        <p class="landing-section-sub">
+            Desde un preset de color hasta una mentoria personalizada,
+            cada herramienta esta disenada para acelerar tu flujo creativo.
+        </p>
+    </div>
+
+    <div class="landing-features-grid">
+
+        <article class="landing-feature-card" id="feature-presets">
+            <div class="landing-feature-icon" aria-hidden="true">&#127912;</div>
+            <h3>Presets Profesionales</h3>
+            <p>
+                LUTs, efectos y paletas de color creados por editores con anos de experiencia.
+                Aplica el look de tu proximo proyecto en segundos.
+            </p>
+        </article>
+
+        <article class="landing-feature-card" id="feature-clases">
+            <div class="landing-feature-icon" aria-hidden="true">&#127916;</div>
+            <h3>Clases Virtuales</h3>
+            <p>
+                Sesiones 1-a-1 totalmente personalizadas. Dinos que quieres aprender
+                y adaptamos cada clase a tu nivel y software.
+            </p>
+        </article>
+
+        <article class="landing-feature-card" id="feature-guias">
+            <div class="landing-feature-icon" aria-hidden="true">&#128214;</div>
+            <h3>Guias y Recursos</h3>
+            <p>
+                Tutoriales paso a paso, plantillas de proyectos y packs de assets
+                para DaVinci Resolve, Premiere Pro, After Effects y mas.
+            </p>
+        </article>
+
+    </div>
+</section>
+
+<!-- MARKETPLACE -->
+<hr class="landing-divider" aria-hidden="true">
+
+<section id="mercado" class="landing-section" aria-labelledby="market-title">
+    <div class="landing-market-layout">
+
+        <div class="landing-market-copy">
+            <p class="landing-section-label">Marketplace</p>
+            <h2 id="market-title">
+                Recursos premium para<br>
+                <span class="landing-gradient-text">llevar tu edicion al limite.</span>
+            </h2>
+            <p>
+                Accede a nuestro catalogo de presets de color, LUTs cinematograficos,
+                plantillas de motion graphics y packs de sound design.
+                Cada recurso es creado, probado y curado por editores profesionales.
+            </p>
+
+            <div class="landing-tags" aria-label="Categorias disponibles">
+                <span class="landing-tag">LUTs Cinematograficos</span>
+                <span class="landing-tag">Presets de Color</span>
+                <span class="landing-tag">Motion Templates</span>
+                <span class="landing-tag">Sound Design</span>
+                <span class="landing-tag">Assets 4K</span>
+            </div>
+
+            <a href="{% url 'home' %}" class="landing-cta-primary" id="market-cta-btn">
+                Explorar Marketplace
+            </a>
+        </div>
+
+        <!-- Placeholder visual - reemplazar con imagen/video real -->
+        <div class="landing-market-visual" id="market-visual-placeholder" aria-label="Vista previa del marketplace">
+            <div class="landing-placeholder">
+                <span class="landing-placeholder-icon" aria-hidden="true">&#127902;</span>
+                <span>Imagen de producto / video de demostracion</span>
+                <span style="font-size:0.75rem; opacity:0.7;">Reemplaza este bloque con tu asset</span>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- SERVICIOS -->
+<hr class="landing-divider" aria-hidden="true">
+
+<section id="servicios" class="landing-section" aria-labelledby="services-title">
+    <div class="landing-section-header">
+        <p class="landing-section-label">Servicios</p>
+        <h2 class="landing-section-title" id="services-title">
+            Aprende, crea y evoluciona
+        </h2>
+        <p class="landing-section-sub">
+            Nuestros servicios estan disenados para acompanarte en cada fase de tu carrera,
+            desde los primeros cortes hasta el nivel profesional.
+        </p>
+    </div>
+
+    <div class="landing-services-grid">
+
+        <!-- Servicio 1: Clases personalizadas -->
+        <article class="landing-service-card" id="service-custom-class">
+            <span class="landing-service-badge landing-service-badge-teal">
+                &#127909; Clase Personalizada
+            </span>
+            <h3>Mentoria 1-a-1</h3>
+            <p>
+                Solicita una sesion adaptada exactamente a lo que quieres aprender.
+                Escoge el software, el estilo y el ritmo. Nosotros lo construimos para ti.
+            </p>
+            <!-- Placeholder visual -->
+            <div class="landing-placeholder" id="service-card-1-visual" aria-label="Imagen de clase virtual">
+                <span class="landing-placeholder-icon" aria-hidden="true">&#128421;</span>
+                <span>Screenshot de sesion / video de edicion</span>
+            </div>
+        </article>
+
+        <!-- Servicio 2: Clases predefinidas -->
+        <article class="landing-service-card" id="service-preset-class">
+            <span class="landing-service-badge landing-service-badge-blue">
+                &#128218; Clases Predefinidas
+            </span>
+            <h3>Cursos Estructurados</h3>
+            <p>
+                Clases estandar de alta calidad a precio accesible.
+                Temas listos para empezar: colorización, motion graphics, narrativa visual y mas.
+            </p>
+            <!-- Placeholder visual -->
+            <div class="landing-placeholder" id="service-card-2-visual" aria-label="Imagen de curso">
+                <span class="landing-placeholder-icon" aria-hidden="true">&#127901;</span>
+                <span>Captura de pantalla del editor / resultado de edicion</span>
+            </div>
+        </article>
+
+        <!-- Servicio 3: Guias -->
+        <article class="landing-service-card" id="service-guides">
+            <span class="landing-service-badge landing-service-badge-purple">
+                &#128214; Guias Premium
+            </span>
+            <h3>Guias y Tutoriales</h3>
+            <p>
+                Documentacion detallada y workflows completos. Aprende a tu propio ritmo
+                con guias escritas por profesionales del sector audiovisual.
+            </p>
+            <!-- Placeholder visual -->
+            <div class="landing-placeholder" id="service-card-3-visual" aria-label="Imagen de guia">
+                <span class="landing-placeholder-icon" aria-hidden="true">&#9998;</span>
+                <span>Preview de una guia / infografia de flujo de trabajo</span>
+            </div>
+        </article>
+
+    </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="landing-cta-section" aria-labelledby="final-cta-title">
+    <div class="landing-cta-inner">
+        <p class="landing-section-label">Unete ahora</p>
+        <h2 id="final-cta-title">
+            Empieza a crear con<br>
+            <span class="landing-gradient-text">FrameffX hoy mismo.</span>
+        </h2>
+        <p>
+            Accede al marketplace, reserva tu primera clase y descubre
+            por que los mejores editores confian en FrameffX para su carrera.
+        </p>
+        <div class="landing-hero-cta">
+            <a href="{% url 'site_login' %}" class="landing-cta-primary" id="final-login-btn">
+                Iniciar Sesion
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

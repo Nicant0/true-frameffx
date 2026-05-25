@@ -1,0 +1,123 @@
+{% extends "portfolio/base.html" %}
+{% load static %}
+
+{% block title %}Crear cuenta — FrameffX{% endblock %}
+{% block meta_description %}Regístrate en FrameffX y accede a presets, guías y clases virtuales para editores de vídeo.{% endblock %}
+
+{% block content %}
+<div class="login-page">
+
+    <div class="login">
+        <div class="login-box" aria-labelledby="signup-title">
+
+            <!-- Badge de marca -->
+            <div class="login-brand">
+                <span class="login-brand-badge">
+                    ✦ FrameffX Studio
+                </span>
+                <h1 id="signup-title">Crea tu cuenta</h1>
+                <p class="login-subtitle">Únete y empieza a crear con herramientas profesionales.</p>
+            </div>
+
+            <form method="post" novalidate id="signup-form">
+                {% csrf_token %}
+
+                {# ── Errores generales del formulario ── #}
+                {% if form.non_field_errors %}
+                <div class="form-errors" role="alert" aria-live="polite">
+                    {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {# ── Nombre (opcional) ── #}
+                <div class="form-field">
+                    <label for="id_nombre">Nombre o apodo <span class="form-optional">(opcional)</span></label>
+                    <input
+                        id="id_nombre"
+                        name="nombre"
+                        type="text"
+                        placeholder="Tu nombre o apodo"
+                        value="{{ form.nombre.value|default:'' }}"
+                        autocomplete="name"
+                    >
+                    {% if form.nombre.errors %}
+                    <p class="form-field-error">{{ form.nombre.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {# ── Email ── #}
+                <div class="form-field">
+                    <label for="id_email">Correo electrónico</label>
+                    <input
+                        id="id_email"
+                        name="email"
+                        type="email"
+                        placeholder="correo@ejemplo.com"
+                        value="{{ form.email.value|default:'' }}"
+                        required
+                        autocomplete="email"
+                    >
+                    {% if form.email.errors %}
+                    <p class="form-field-error">{{ form.email.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {# ── Contraseña ── #}
+                <div class="form-field">
+                    <label for="id_password1">Contraseña</label>
+                    <input
+                        id="id_password1"
+                        name="password1"
+                        type="password"
+                        placeholder="Mínimo 8 caracteres"
+                        required
+                        autocomplete="new-password"
+                    >
+                    {% if form.password1.errors %}
+                    <p class="form-field-error">{{ form.password1.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                {# ── Confirmar contraseña ── #}
+                <div class="form-field">
+                    <label for="id_password2">Confirmar contraseña</label>
+                    <input
+                        id="id_password2"
+                        name="password2"
+                        type="password"
+                        placeholder="Repite la contraseña"
+                        required
+                        autocomplete="new-password"
+                    >
+                    {% if form.password2.errors %}
+                    <p class="form-field-error">{{ form.password2.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="submit-btn" id="signup-submit-btn">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5"
+                         stroke-linecap="round" stroke-linejoin="round"
+                         style="display:inline-block; vertical-align:middle; margin-right:6px;" aria-hidden="true">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <line x1="19" y1="8" x2="19" y2="14"/>
+                        <line x1="22" y1="11" x2="16" y2="11"/>
+                    </svg>
+                    Crear cuenta
+                </button>
+            </form>
+
+            {# ── Enlace a Login ── #}
+            <p class="form-switch-link">
+                ¿Ya tienes cuenta?
+                <a href="{% url 'site_login' %}" id="go-to-login-link">Inicia sesión aquí</a>
+            </p>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
