@@ -1,12 +1,12 @@
 {% extends "portfolio/base.html" %}
-{# 
+{% comment %}
     Panel Principal del Usuario (Dashboard)
     He diseñado esta vista para que sea el centro neurálgico de la plataforma.
     Aquí utilizo sentencias condicionales de Django `{% if %}` para mostrar dinámicamente:
     1. Las métricas del usuario.
     2. El catálogo de clases disponibles con filtros de búsqueda.
     3. El historial de reservas y compras si el usuario está autenticado.
-#}
+{% endcomment %}
 
 {% block title %}Panel de Clases – FrameffX{% endblock %}
 
@@ -180,11 +180,13 @@
                 </div>
             </div>
             <div class="home-card-actions">
-                {% if reserva.estado == "pendiente" or reserva.estado == "confirmada" %}
+                {% if reserva.clase.is_active_now %}
+                {% if reserva.estado == 'pendiente' or reserva.estado == 'confirmada' %}
                 <form method="post" action="{% url 'booking_cancel' reserva.pk %}">
                     {% csrf_token %}
                     <button type="submit" class="submit-btn home-btn-danger">Cancelar reserva</button>
                 </form>
+                {% endif %}
                 {% endif %}
             </div>
         </article>

@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 
 class Teaching(models.Model):
     """
@@ -32,3 +32,11 @@ class Teaching(models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def is_active_now(self):
+        return self.estado == "activa" and self.start_at > timezone.now()
+
+    @property
+    def is_finished_now(self):
+        return self.estado == "finalizada" or self.end_at < timezone.now()

@@ -1,19 +1,22 @@
 {% load static %}
-{# 
+<!-- {# 
     Plantilla Maestra (base.html)
     He creado este archivo para centralizar el esqueleto HTML de toda la aplicación.
     Aquí defino los bloques (blocks) que el resto de plantillas heredarán y sobrescribirán,
     evitando así duplicar el `<head>`, el navbar (header.html) y el footer.
-#}
+#} -->
+
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     {# SEO #}
     <title>{% block title %}FrameffX — The power to create what you imagine{% endblock %}</title>
-    <meta name="description" content="{% block meta_description %}Plataforma de presets, recursos y clases virtuales para editores de vídeo y filmmakers profesionales.{% endblock %}">
+    <meta name="description"
+        content="{% block meta_description %}Plataforma de presets, recursos y clases virtuales para editores de vídeo y filmmakers profesionales.{% endblock %}">
 
     {# Google Fonts: Inter #}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,6 +26,7 @@
     <link rel="stylesheet" href="{% static 'css/base.css' %}?v=20260525-2">
     {% block extra_css %}{% endblock %}
 </head>
+
 <body class="site-body {% block body_class %}{% endblock %}">
 
     {% include "portfolio/header.html" %}
@@ -36,4 +40,5 @@
     {% block extra_js %}{% endblock %}
 
 </body>
+
 </html>

@@ -98,7 +98,6 @@ def crear_clase(titulo, descripcion, precio, duracion, inicio_offset_days, estad
 
 # ── Script principal ──────────────────────────────────────────────────────────
 
-@transaction.atomic
 def main():
     print("\n" + "="*60)
     print("  FrameFFX — Generador de Datos TFG")
@@ -287,4 +286,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    with transaction.atomic():
+        main()

@@ -2,6 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404, redirect
+from django.utils import timezone
 from django.views import View
 
 from teachings.models import Teaching
@@ -35,11 +36,11 @@ class ReservaCreateView(LoginRequiredMixin, View):
 
         # ── Validación 2: la clase existe y está activa ───────────────────────
         clase = get_object_or_404(Teaching, pk=request.POST.get("clase_id"))
-        if clase.estado != "activa":
+        if not clase.is_active_now:
             messages.warning(
                 request,
                 f"La clase «{clase.title}» ya no está disponible para reservar "
-                f"(estado: {clase.get_estado_display()}).",
+                f"(estado o fecha finalizados).",
             )
             return redirect("home")
 
@@ -107,6 +108,13 @@ class ReservaCancelView(LoginRequiredMixin, View):
                 request,
                 "Esta reserva no puede cancelarse porque ya está "
                 f"en estado «{reserva.get_estado_display()}».",
+            )
+            return redirect("home")
+
+        if not reserva.clase.is_active_now:
+            messages.warning(
+                request,
+                "No puedes cancelar esta reserva porque la clase ya ha comenzado o finalizado."
             )
             return redirect("home")
 

@@ -3,6 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import DatabaseError, IntegrityError
 from django.db.models import Q
 from django.urls import reverse_lazy
+from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from bookings.models import Reserva
@@ -38,7 +39,7 @@ class showTeachings(ListView):
         if user.is_authenticated and user.is_staff:
             queryset = Teaching.objects.all()
         else:
-            queryset = Teaching.objects.filter(estado="activa")
+            queryset = Teaching.objects.filter(estado="activa", start_at__gt=timezone.now())
 
         titulo = self.request.GET.get("titulo")
         if titulo:
@@ -76,10 +77,11 @@ class showTeachings(ListView):
 
             context["reservas_ids"] = set(reservas_ids)
             context["reservas_activas"] = reservas_usuario.filter(
-                ~Q(clase__estado="finalizada")
+                ~Q(clase__estado="finalizada"),
+                clase__end_at__gte=timezone.now()
             ).order_by("clase__start_at")
             context["reservas_finalizadas"] = reservas_usuario.filter(
-                clase__estado="finalizada"
+                Q(clase__estado="finalizada") | Q(clase__end_at__lt=timezone.now())
             ).order_by("-clase__end_at")
 
             # Pedidos completados: inyectamos los pedidos con sus líneas de detalle

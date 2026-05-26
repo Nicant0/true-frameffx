@@ -17,6 +17,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
+from django.utils import timezone
 from django.views import View
 
 from teachings.models import Teaching
@@ -47,11 +48,11 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
 
         # ── 2. La clase existe y está activa ───────────────────────────────
         clase = get_object_or_404(Teaching, pk=pk)
-        if clase.estado != "activa":
+        if not clase.is_active_now:
             messages.warning(
                 request,
                 f"La clase «{clase.title}» ya no está disponible para reservar "
-                f"(estado: {clase.get_estado_display()}).",
+                f"(estado o fecha finalizados).",
             )
             return redirect("home")
 
