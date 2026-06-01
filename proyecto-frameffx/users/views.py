@@ -9,8 +9,12 @@ from django.views.generic import (
     ListView
 )
 
-from .forms import RegistroForm
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
+
+from .forms import RegistroForm, UserProfileForm
 from .models import Usuario
+from products.models import Pedido
 from .mixins import StaffRequiredMixin, SetPasswordMixin
 
 
@@ -79,3 +83,29 @@ class HomeView(TemplateView):
 
 class LoginView(TemplateView):
     template_name = "portfolio/login.html"
+
+class UserProfileView(LoginRequiredMixin, UpdateView):
+    """
+    Vista para que el usuario autenticado edite su perfil.
+    """
+    model = Usuario
+    form_class = UserProfileForm
+    template_name = "users/profile.html"
+    success_url = reverse_lazy("user_profile")
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Tu perfil ha sido actualizado correctamente.")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["pedidos_completados"] = (
+            Pedido.objects
+            .filter(usuario=self.request.user, estado="completado")
+            .prefetch_related("detalles__producto", "detalles__descargas")
+            .order_by("-fecha_creacion")
+        )
+        return context

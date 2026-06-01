@@ -238,71 +238,7 @@
     {% endif %}
 </section>
 
-<section id="mis-compras" class="home-listing" aria-labelledby="mis-compras-title">
-    <div class="home-filter-head">
-        <h2 id="mis-compras-title">Mis Productos Comprados</h2>
-        <p>Descarga los archivos digitales de tus pedidos completados.</p>
-    </div>
 
-    {% if pedidos_completados %}
-    <div class="grid home-grid">
-        {% for pedido in pedidos_completados %}
-        {% for detalle in pedido.detalles.all %}
-        <article class="card home-card purchase-card">
-            <div class="home-card-top">
-                <h2>{{ detalle.producto.titulo }}</h2>
-                <span class="purchase-badge purchase-badge-{{ pedido.estado }}">
-                    {% if pedido.estado == "completado" %}&#10003; Completado{% else %}{{ pedido.get_estado_display }}{% endif %}
-                </span>
-            </div>
-
-            <div class="purchase-type-row">
-                <span class="products-badge">{{ detalle.producto.get_tipo_display }}</span>
-                <span class="purchase-date">{{ pedido.fecha_creacion|date:"d/m/Y" }}</span>
-            </div>
-
-            <p class="home-card-description">{{ detalle.producto.descripcion|truncatechars:140 }}</p>
-
-            <div class="home-meta-row">
-                <div>
-                    <p class="stat-title">Pagado</p>
-                    <p class="stat-value">{{ detalle.precio_unitario }} €</p>
-                </div>
-                <div>
-                    <p class="stat-title">Pedido #</p>
-                    <p>{{ pedido.pk }}</p>
-                </div>
-                <div>
-                    <p class="stat-title">Descargas</p>
-                    <p>{{ detalle.descargas.count }}/{{ detalle.producto.max_descargas }}</p>
-                </div>
-            </div>
-
-            <div class="home-card-actions">
-                {% if detalle.producto.archivo_digital %}
-                    {% if detalle.descargas.count < detalle.producto.max_descargas %}
-                    <a href="{% url 'products:download_product' detalle.pk %}" class="submit-btn home-btn-primary purchase-download-btn">
-                        &#8659; Descargar archivo
-                    </a>
-                    {% else %}
-                    <span class="purchase-limit-msg">Limite de descargas alcanzado</span>
-                    {% endif %}
-                {% else %}
-                <span class="purchase-no-file">Archivo no disponible aun</span>
-                {% endif %}
-            </div>
-        </article>
-        {% endfor %}
-        {% endfor %}
-    </div>
-    {% else %}
-    <div class="card home-empty-state">
-        <span class="purchase-empty-icon">&#128717;</span>
-        <h2>Aun no tienes compras</h2>
-        <p>Visita el <a href="{% url 'products:showProducts' %}" class="purchase-marketplace-link">Marketplace</a> para adquirir presets, guias y plugins.</p>
-    </div>
-    {% endif %}
-</section>
 
 {% endif %}
 
@@ -380,11 +316,11 @@
 {% endblock %}
 
 {% block extra_js %}
-{# 
+{% comment %}
   Lógica de Front-end para el Modal de Reservas.
   He empaquetado este script en una IIFE (Immediately Invoked Function Expression) 
   para no contaminar el scope global de la ventana.
-#}
+{% endcomment %}
 <script>
 (function () {
   'use strict';

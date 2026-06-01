@@ -62,6 +62,7 @@ urlpatterns = [
     path('teachings/<int:pk>/delete/', TeachingDeleteView.as_view(), name='teaching_delete'),
 
     # CRUD Usuarios
+    path('perfil/', views.UserProfileView.as_view(), name='user_profile'),
     path('usuarios/create/', views.UsuariosCreateView.as_view(), name='usuarios_create'),
     path('usuarios/update/<int:pk>/', views.UsuariosUpdateView.as_view(), name='usuarios_update'),
     path('usuarios/delete/<int:pk>/', views.UsuariosDeleteView.as_view(), name='usuarios_delete'),
@@ -92,3 +93,5 @@ if settings.DEBUG:
         urlpatterns += static(settings.STATIC_URL, document_root=_static_dirs[0])
     elif getattr(settings, 'STATIC_ROOT', None):
         urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

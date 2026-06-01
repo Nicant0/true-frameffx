@@ -32,6 +32,19 @@
     {% include "portfolio/header.html" %}
 
     <main class="site-main {% block main_class %}content{% endblock %}">
+        {% if messages %}
+        <div class="global-messages" style="max-width: 800px; margin: 20px auto; padding: 0 20px;">
+            {% for message in messages %}
+            <div class="stripe-banner stripe-banner-{% if message.tags == 'error' %}warn{% elif message.tags == 'success' %}ok{% else %}info{% endif %}" style="display:flex; margin-bottom:10px;">
+                <div class="stripe-banner-body">
+                    <p style="margin:0;">{{ message }}</p>
+                </div>
+                <button class="stripe-banner-close" onclick="this.parentElement.style.display='none'" aria-label="Cerrar">&times;</button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
         {% block content %}{% endblock %}
     </main>
 

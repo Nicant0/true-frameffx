@@ -1,0 +1,145 @@
+{% extends "portfolio/base.html" %}
+{% load static %}
+
+{% block title %}Mi Perfil – FrameffX{% endblock %}
+
+{% block content %}
+<section class="profile-layout">
+    <!-- Left Column: Profile Settings -->
+    <div class="profile-settings-col">
+        <div class="profile-box card" style="margin: 0; max-width: 100%;">
+            <div class="profile-header">
+                {% if user.foto_perfil %}
+                    <img src="{{ user.foto_perfil.url }}" alt="Foto de perfil" class="profile-avatar">
+                {% else %}
+                    <div class="profile-avatar-placeholder">
+                        {{ user.email|make_list|first|upper }}
+                    </div>
+                {% endif %}
+                <div class="profile-title-group">
+                    <h2>Modificar Perfil</h2>
+                    <p>Actualiza tu información personal y datos de contacto.</p>
+                </div>
+            </div>
+
+            <form method="post" enctype="multipart/form-data" class="profile-form">
+                {% csrf_token %}
+                <div class="profile-form-grid">
+                    <div class="form-field">
+                        <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <span class="form-field-error">{{ form.username.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-field">
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                            <span class="form-field-error">{{ form.email.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
+                        {{ form.telefono }}
+                        {% if form.telefono.errors %}
+                            <span class="form-field-error">{{ form.telefono.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-field">
+                        <label for="{{ form.foto_perfil.id_for_label }}">{{ form.foto_perfil.label }}</label>
+                        {{ form.foto_perfil }}
+                        {% if form.foto_perfil.errors %}
+                            <span class="form-field-error">{{ form.foto_perfil.errors.0 }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-field profile-bio-field">
+                    <label for="{{ form.biografia.id_for_label }}">{{ form.biografia.label }}</label>
+                    {{ form.biografia }}
+                    {% if form.biografia.errors %}
+                        <span class="form-field-error">{{ form.biografia.errors.0 }}</span>
+                    {% endif %}
+                </div>
+
+                <div class="profile-actions">
+                    <button type="submit" class="submit-btn home-btn-primary">Guardar Cambios</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Right Column: Purchased Products -->
+    <div class="profile-purchases-col">
+        <section id="mis-compras" class="home-listing" aria-labelledby="mis-compras-title" style="margin-top: 0;">
+            <div class="home-filter-head">
+                <h2 id="mis-compras-title" style="font-size: 1.5rem;">Mis Productos Comprados</h2>
+                <p>Descarga los archivos digitales de tus pedidos completados.</p>
+            </div>
+
+            {% if pedidos_completados %}
+            <div class="grid home-grid">
+                {% for pedido in pedidos_completados %}
+                {% for detalle in pedido.detalles.all %}
+                <article class="card home-card purchase-card">
+                    <div class="home-card-top">
+                        <h2>{{ detalle.producto.titulo }}</h2>
+                        <span class="purchase-badge purchase-badge-{{ pedido.estado }}">
+                            {% if pedido.estado == "completado" %}&#10003; Completado{% else %}{{ pedido.get_estado_display }}{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="purchase-type-row">
+                        <span class="products-badge">{{ detalle.producto.get_tipo_display }}</span>
+                        <span class="purchase-date">{{ pedido.fecha_creacion|date:"d/m/Y" }}</span>
+                    </div>
+
+                    <p class="home-card-description">{{ detalle.producto.descripcion|truncatechars:140 }}</p>
+
+                    <div class="home-meta-row">
+                        <div>
+                            <p class="stat-title">Pagado</p>
+                            <p class="stat-value">{{ detalle.precio_unitario }} €</p>
+                        </div>
+                        <div>
+                            <p class="stat-title">Pedido #</p>
+                            <p>{{ pedido.pk }}</p>
+                        </div>
+                        <div>
+                            <p class="stat-title">Descargas</p>
+                            <p>{{ detalle.descargas.count }}/{{ detalle.producto.max_descargas }}</p>
+                        </div>
+                    </div>
+
+                    <div class="home-card-actions">
+                        {% if detalle.producto.archivo_digital %}
+                            {% if detalle.descargas.count < detalle.producto.max_descargas %}
+                            <a href="{% url 'products:download_product' detalle.pk %}" class="submit-btn home-btn-primary purchase-download-btn">
+                                &#8659; Descargar archivo
+                            </a>
+                            {% else %}
+                            <span class="purchase-limit-msg">Limite de descargas alcanzado</span>
+                            {% endif %}
+                        {% else %}
+                        <span class="purchase-no-file">Archivo no disponible aun</span>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="card home-empty-state">
+                <span class="purchase-empty-icon" style="font-size: 3rem;">&#128717;</span>
+                <h2 style="margin: 10px 0;">Aun no tienes compras</h2>
+                <p style="color: #888;">Visita el <a href="{% url 'products:showProducts' %}" class="purchase-marketplace-link">Marketplace</a> para adquirir presets, guías y plugins.</p>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

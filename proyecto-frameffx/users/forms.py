@@ -104,3 +104,25 @@ class RegistroForm(forms.Form):
         user.set_password(password)   # encripta la contraseña con PBKDF2
         user.save()
         return user
+
+class UserProfileForm(forms.ModelForm):
+    """
+    Formulario para que el usuario autenticado actualice su perfil.
+    """
+    class Meta:
+        model = Usuario
+        fields = ['username', 'email', 'biografia', 'telefono', 'foto_perfil']
+        widgets = {
+            'username': forms.TextInput(attrs={'class': 'form-input', 'placeholder': 'Tu nombre o apodo'}),
+            'email': forms.EmailInput(attrs={'class': 'form-input', 'placeholder': 'correo@ejemplo.com'}),
+            'biografia': forms.Textarea(attrs={'class': 'form-input', 'rows': 4, 'placeholder': 'Cuéntanos un poco sobre ti...'}),
+            'telefono': forms.TextInput(attrs={'class': 'form-input', 'placeholder': '+34 600 000 000'}),
+            'foto_perfil': forms.FileInput(attrs={'class': 'form-input-file'}),
+        }
+        labels = {
+            'username': 'Nombre / Apodo',
+            'email': 'Correo electrónico',
+            'biografia': 'Biografía',
+            'telefono': 'Teléfono',
+            'foto_perfil': 'Foto de perfil'
+        }

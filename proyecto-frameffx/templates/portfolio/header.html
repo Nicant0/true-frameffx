@@ -2,11 +2,7 @@
 
 <header class="header">
     <a href="{% url 'landing' %}" class="logo-link">
-        <img
-            src="{% static 'img/FrameffX LOGO.png' %}"
-            alt="FrameffX"
-            class="logo-img"
-        >
+        <img src="{% static 'img/FrameffX LOGO.png' %}" alt="FrameffX" class="logo-img">
     </a>
 
     <nav class="nav">
@@ -14,29 +10,43 @@
         <a href="{% url 'products:showProducts' %}">Marketplace</a>
         <a href="{% url 'products:showProducts' %}?cat=presets">Presets</a>
         <a href="{% url 'products:showProducts' %}?cat=plugins">Plugins</a>
-        <a href="{% url 'products:showProducts' %}?cat=project_files">Project Files</a>
+        <a href="{% url 'products:showProducts' %}?cat=project_files">Archivos de proyecto</a>
         <a href="{% url 'products:showProducts' %}?cat=guias">Guías</a>
-        <a href="{% url 'home' %}">Clases/Mentorías</a>
-        
+        <a href="{% url 'home' %}">Clases</a>
+
         {% if user.is_authenticated %}
-            {# Usuario autenticado: muestra el área de perfil y logout #}
-            {% if user.is_staff %}
-                <a href="{% url 'admin_dashboard' %}" style="color: #ffb703; font-weight: 600;">Panel Admin</a>
-            {% endif %}
-            <div class="nav-user">
+        {# Usuario autenticado: muestra el área de perfil y logout #}
+        {% if user.is_staff %}
+        <a href="{% url 'admin_dashboard' %}" style="color: #ffb703; font-weight: 600;">Panel Admin</a>
+        {% endif %}
+        <div class="nav-user">
+            <a href="{% url 'user_profile' %}" class="nav-user-profile-link" title="Ir a Mi Perfil">
+                {% if user.foto_perfil %}
+                <img src="{{ user.foto_perfil.url }}" alt="Avatar" class="nav-avatar">
+                {% else %}
+                <div class="nav-avatar-placeholder">{{ user.email|make_list|first|upper }}</div>
+                {% endif %}
                 <span class="nav-user-email">{{ user.email }}</span>
-                <form action="{% url 'site_logout' %}" method="post" class="logout-form">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-btn" id="nav-logout-btn">
-                        Logout
-                    </button>
-                </form>
-            </div>
-        {% else %}
-            {# Invitado: solo muestra el botón de inicio de sesión #}
-            <a href="{% url 'site_login' %}" class="nav-login-btn" id="nav-login-btn">
-                Iniciar Sesión
             </a>
+            <form action="{% url 'site_logout' %}" method="post" class="logout-form">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn" id="nav-logout-btn">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="display:inline-block; vertical-align:middle; margin-right:5px;" aria-hidden="true">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                        <polyline points="16 17 21 12 16 7" />
+                        <line x1="21" y1="12" x2="9" y2="12" />
+                    </svg>
+                    Cerrar sesión
+                </button>
+            </form>
+        </div>
+        {% else %}
+        {# Invitado: solo muestra el botón de inicio de sesión #}
+        <a href="{% url 'site_login' %}" class="nav-login-btn" id="nav-login-btn">
+            Iniciar Sesión
+        </a>
         {% endif %}
     </nav>
 </header>

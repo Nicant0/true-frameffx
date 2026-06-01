@@ -50,6 +50,23 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         unique=True
     )
 
+    # Campos de Perfil de Usuario
+    foto_perfil = models.ImageField(
+        upload_to='perfiles/',
+        null=True,
+        blank=True
+    )
+    biografia = models.TextField(
+        max_length=500,
+        null=True,
+        blank=True
+    )
+    telefono = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True
+    )
+
     activo = models.BooleanField(default=True)
 
     create_date = models.DateTimeField(

@@ -144,6 +144,13 @@
         </div>
     </section>
 
+    <!-- Quick Actions -->
+    <section class="admin-quick-actions" style="display: flex; gap: 15px; margin-bottom: 2.5rem; flex-wrap: wrap;">
+        <a href="{% url 'usuarios_list' %}" class="submit-btn home-btn-primary" style="text-decoration: none; text-align: center; max-width: 200px;">Gestionar Usuarios</a>
+        <a href="{% url 'teaching_create' %}" class="submit-btn home-btn-secondary" style="text-decoration: none; text-align: center; max-width: 200px;">Crear Nueva Clase</a>
+        <a href="/admin/" class="submit-btn home-btn-secondary" style="text-decoration: none; text-align: center; max-width: 250px;" target="_blank">Django Admin Avanzado</a>
+    </section>
+
     <!-- KPIs Row -->
     <section class="admin-kpi-grid">
         <div class="admin-kpi-card">
