@@ -1,49 +1,114 @@
 {% extends "portfolio/base.html" %}
 
-{% block content %}
-<div class="products-page-inner">
+{% block title %}Marketplace · FrameffX{% endblock %}
 
-    <section class="home-hero products-hero" aria-labelledby="products-title">
-        <div class="home-hero-copy">
-            <p class="home-eyebrow">Marketplace</p>
-            <h1 id="products-title">Catálogo de Productos</h1>
-            <p class="home-sub">Explora nuestros Presets, Plugins, Project Files y Guías exclusivas.</p>
+{% block content %}
+<div class="mkt-page">
+
+    {# ── HERO ── #}
+    <section class="mkt-hero" aria-labelledby="mkt-title">
+        <div class="mkt-hero-inner">
+            <span class="mkt-eyebrow">✦ Marketplace</span>
+            <h1 id="mkt-title" class="mkt-hero-title">
+                Activos digitales para<br>
+                <span class="mkt-gradient-text">creadores exigentes</span>
+            </h1>
+            <p class="mkt-hero-sub">Presets, Plugins, Project Files y Guías exclusivas. Herramientas para elevar tu
+                flujo de trabajo al siguiente nivel.</p>
+
+            {# Chips de categoría #}
+            <nav class="mkt-cat-nav" aria-label="Filtrar por categoría">
+                <a href="?cat=" class="mkt-cat-chip {% if not request.GET.cat %}mkt-cat-chip--active{% endif %}">
+                    Todos
+                </a>
+                <a href="?cat=presets"
+                    class="mkt-cat-chip {% if request.GET.cat == 'presets' %}mkt-cat-chip--active{% endif %}">
+                    Presets
+                </a>
+                <a href="?cat=plugins"
+                    class="mkt-cat-chip {% if request.GET.cat == 'plugins' %}mkt-cat-chip--active{% endif %}">
+                    Plugins
+                </a>
+                <a href="?cat=project_files"
+                    class="mkt-cat-chip {% if request.GET.cat == 'project_files' %}mkt-cat-chip--active{% endif %}">
+                    Project Files
+                </a>
+                <a href="?cat=guias"
+                    class="mkt-cat-chip {% if request.GET.cat == 'guias' %}mkt-cat-chip--active{% endif %}">
+                    Guías
+                </a>
+            </nav>
         </div>
+
+        {# Orbe decorativo #}
+        <div class="mkt-hero-orb mkt-hero-orb--1" aria-hidden="true"></div>
+        <div class="mkt-hero-orb mkt-hero-orb--2" aria-hidden="true"></div>
     </section>
 
-    <section class="products-grid-section" aria-label="Productos">
-        <div class="products-grid">
+    {# ── CUADRÍCULA DE PRODUCTOS ── #}
+    <section class="mkt-grid-section" aria-label="Productos">
+        {% if productos %}
+        <div class="mkt-count-bar">
+            <span class="mkt-count-label">{{ productos|length }} resultado{{ productos|length|pluralize }}</span>
+        </div>
+        <div class="mkt-grid">
             {% for producto in productos %}
-            <div class="custom-card products-custom-card">
-                {% if producto.imagen_portada %}
-                <img src="{{ producto.imagen_portada.url }}" class="card-img-top" alt="{{ producto.titulo }}" style="height: 220px; object-fit: cover; border-radius: 15px 15px 0 0; opacity:0.9;">
-                {% else %}
-                <div class="products-no-cover">
-                    <span>📦</span>
-                    <span>Sin Portada</span>
+            <article class="mkt-card" data-tipo="{{ producto.get_tipo_display|lower }}">
+
+                {# Imagen / Portada #}
+                <div class="mkt-card-media">
+                    {% if producto.imagen_portada %}
+                    <img src="{{ producto.imagen_portada.url }}" alt="{{ producto.titulo }}" class="mkt-card-img">
+                    {% else %}
+                    <div class="mkt-card-no-img">
+                        <span class="mkt-card-no-img-icon">📦</span>
+                        <span>Sin portada</span>
+                    </div>
+                    {% endif %}
+
+                    {# Badge de tipo flotante #}
+                    <span class="mkt-card-badge mkt-badge-{{ producto.tipo }}">
+                        {{ producto.get_tipo_display }}
+                    </span>
                 </div>
-                {% endif %}
-                <div class="products-card-body">
-                    <h5 class="card-title">{{ producto.titulo }}</h5>
-                    <span class="products-badge">{{ producto.get_tipo_display }}</span>
-                    <p class="products-card-desc">{{ producto.descripcion|truncatewords:20 }}</p>
-                    <p class="products-price">{{ producto.precio }} €</p>
-                    <form action="{% url 'products:checkout_session' producto.id %}" method="POST">
-                        {% csrf_token %}
-                        <button type="submit" class="landing-cta-primary products-buy-btn">
-                            Comprar Ahora
-                        </button>
-                    </form>
+
+                {# Cuerpo #}
+                <div class="mkt-card-body">
+                    <h2 class="mkt-card-title">{{ producto.titulo }}</h2>
+                    <p class="mkt-card-desc">{{ producto.descripcion|truncatewords:18 }}</p>
+
+                    <div class="mkt-card-footer">
+                        <span class="mkt-card-price">{{ producto.precio }}<small
+                                class="mkt-price-currency">€</small></span>
+                        <form action="{% url 'products:checkout_session' producto.id %}" method="POST"
+                            class="mkt-buy-form">
+                            {% csrf_token %}
+                            <button type="submit" class="mkt-buy-btn" id="mkt-buy-{{ producto.id }}">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+                                    aria-hidden="true">
+                                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                                    <line x1="3" y1="6" x2="21" y2="6" />
+                                    <path d="M16 10a4 4 0 0 1-8 0" />
+                                </svg>
+                                Comprar
+                            </button>
+                        </form>
+                    </div>
                 </div>
-            </div>
-            {% empty %}
-            <div class="products-empty">
-                <span class="products-empty-icon">🚀</span>
-                <h3>Próximamente</h3>
-                <p>El Marketplace estará disponible muy pronto. Mantente al tanto de las novedades.</p>
-            </div>
+            </article>
             {% endfor %}
         </div>
+
+        {% else %}
+        {# Estado vacío #}
+        <div class="mkt-empty">
+            <div class="mkt-empty-icon">🚀</div>
+            <h3>Próximamente</h3>
+            <p>El Marketplace estará disponible muy pronto. Mantente al tanto de las novedades.</p>
+            <a href="{% url 'landing' %}" class="mkt-empty-cta">Volver al inicio</a>
+        </div>
+        {% endif %}
     </section>
 
 </div>

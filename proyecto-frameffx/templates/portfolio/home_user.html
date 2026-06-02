@@ -1,17 +1,9 @@
 {% extends "portfolio/base.html" %}
-{% comment %}
-    Panel Principal del Usuario (Dashboard)
-    He diseñado esta vista para que sea el centro neurálgico de la plataforma.
-    Aquí utilizo sentencias condicionales de Django `{% if %}` para mostrar dinámicamente:
-    1. Las métricas del usuario.
-    2. El catálogo de clases disponibles con filtros de búsqueda.
-    3. El historial de reservas y compras si el usuario está autenticado.
-{% endcomment %}
-
-{% block title %}Panel de Clases – FrameffX{% endblock %}
+{% block title %}Clases &amp; Mentorías – FrameffX{% endblock %}
 
 {% block content %}
 
+<!-- Banners de estado Stripe -->
 <div id="stripe-success-banner" class="stripe-banner stripe-banner-ok" role="alert" style="display:none">
   <span class="stripe-banner-icon">&#10003;</span>
   <div class="stripe-banner-body">
@@ -29,105 +21,130 @@
   <button class="stripe-banner-close" onclick="this.parentElement.style.display='none'" aria-label="Cerrar">&times;</button>
 </div>
 
-<section class="home-hero">
-    <div class="home-hero-copy">
-        <p class="home-eyebrow">FrameffX</p>
-        <h1>Catálogo de clases</h1>
-        <p class="home-sub">Explora el marketplace de clases y asegura tu lugar.</p>
-        <div class="home-hero-actions">
-            <a href="#clases-disponibles" class="submit-btn home-btn-primary">Ver clases disponibles</a>
-            {% if user.is_authenticated %}
-            <a href="#mis-reservas" class="submit-btn home-btn-secondary">Mis reservas</a>
-            <a href="#mis-compras" class="submit-btn home-btn-secondary">Mis compras</a>
-            {% endif %}
-        </div>
-    </div>
+<!-- HERO -->
+<section class="cls-hero" aria-label="Catálogo de clases">
+    <div class="cls-hero-orb cls-hero-orb--1" aria-hidden="true"></div>
+    <div class="cls-hero-orb cls-hero-orb--2" aria-hidden="true"></div>
 
-    {% if user.is_authenticated %}
-    <aside class="home-summary card">
-        <p class="stat-title">Mi resumen</p>
-        <div class="home-kpis">
-            <div>
-                <p class="home-kpi-label">Reservadas</p>
-                <p class="home-kpi-value">{{ reservas_activas|length }}</p>
+    <div class="cls-hero-inner">
+        <span class="cls-eyebrow">✦ Clases &amp; Mentorías</span>
+        <h1 class="cls-hero-title">
+            Aprende de los mejores,<br>
+            <span class="cls-gradient-text">a tu ritmo y nivel.</span>
+        </h1>
+        <p class="cls-hero-sub">
+            Explora el catálogo de clases y mentorías personalizadas.
+            Reserva tu plaza, paga de forma segura y empieza a crear.
+        </p>
+
+        {% if user.is_authenticated %}
+        <div class="cls-kpi-strip">
+            <div class="cls-kpi">
+                <span class="cls-kpi-value">{{ reservas_activas|length }}</span>
+                <span class="cls-kpi-label">Reservas activas</span>
             </div>
-            <div>
-                <p class="home-kpi-label">Finalizadas</p>
-                <p class="home-kpi-value">{{ reservas_finalizadas|length }}</p>
+            <div class="cls-kpi-divider"></div>
+            <div class="cls-kpi">
+                <span class="cls-kpi-value">{{ reservas_finalizadas|length }}</span>
+                <span class="cls-kpi-label">Clases completadas</span>
             </div>
-            <div>
-                <p class="home-kpi-label">Compras</p>
-                <p class="home-kpi-value">{{ pedidos_completados|length }}</p>
+            <div class="cls-kpi-divider"></div>
+            <div class="cls-kpi">
+                <span class="cls-kpi-value">{{ pedidos_completados|length }}</span>
+                <span class="cls-kpi-label">Compras realizadas</span>
             </div>
         </div>
-        <p class="home-summary-note">Solo se muestran clases activas para nuevas reservas.</p>
-    </aside>
-    {% endif %}
+        {% endif %}
+    </div>
 </section>
 
-<section class="card home-filter-panel" aria-label="Filtros de clases disponibles">
-    <div class="home-filter-head">
-        <h2>Clases disponibles</h2>
-        <p>Filtra por nombre y orden para encontrar la clase que necesitas.</p>
-    </div>
+<!-- CATÁLOGO -->
+<section id="clases-disponibles" class="cls-catalog-section" aria-label="Catálogo de clases disponibles">
 
-    <form method="get" class="home-filters">
-        <div class="form-field">
-            <label for="titulo">Nombre de la clase</label>
-            <input type="text" id="titulo" name="titulo" value="{{ titulo }}" placeholder="Ej. Blender para principiantes">
+    <div class="cls-catalog-header">
+        <div class="cls-catalog-header-text">
+            <h2>Clases disponibles</h2>
+            <p>Filtra por nombre u orden para encontrar la clase que necesitas.</p>
         </div>
 
-        <div class="form-field">
-            <label for="orden">Orden</label>
-            <select id="orden" name="orden">
-                <option value="">Mas recientes</option>
-                <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
-                <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
-                <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
+        <form method="get" class="cls-search-form" role="search">
+            <div class="cls-search-field">
+                <svg class="cls-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input type="text" id="titulo" name="titulo" value="{{ titulo }}"
+                       placeholder="Buscar clase…" class="cls-search-input">
+            </div>
+            <select id="orden" name="orden" class="cls-select" onchange="this.form.submit()">
+                <option value="">Más recientes</option>
+                <option value="titulo" {% if orden == 'titulo' %}selected{% endif %}>Título</option>
+                <option value="precio" {% if orden == 'precio' %}selected{% endif %}>Precio</option>
+                <option value="fecha" {% if orden == 'fecha' %}selected{% endif %}>Fecha de inicio</option>
             </select>
-        </div>
+            {% if titulo or orden %}
+            <a href="{% url 'home' %}" class="cls-clear-btn" title="Limpiar filtros" aria-label="Limpiar filtros">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </a>
+            {% endif %}
+            <button type="submit" style="display:none;"></button>
+        </form>
+    </div>
 
-        <div class="home-filter-actions">
-            <button type="submit" class="submit-btn home-btn-primary">Buscar</button>
-            <a href="{% url 'home' %}" class="submit-btn home-btn-secondary">Limpiar</a>
-        </div>
-    </form>
-</section>
-
-<section id="clases-disponibles" class="home-listing" aria-label="Listado de clases disponibles">
     {% if teachings %}
-    <div class="grid home-grid">
+    <div class="cls-count-bar">
+        <span class="cls-count-label">{{ teachings|length }} clase{% if teachings|length != 1 %}s{% endif %} disponible{% if teachings|length != 1 %}s{% endif %}</span>
+    </div>
+    <div class="cls-grid">
         {% for teach in teachings %}
-        <article class="card home-card">
-            <div class="home-card-top">
-                <h2>{{ teach.title }}</h2>
-                <span class="home-status home-status-{{ teach.estado }}">{{ teach.get_estado_display }}</span>
+        <article class="cls-card" id="cls-card-{{ teach.id }}">
+
+            <div class="cls-card-header cls-card-header--{{ teach.estado }}">
+                <span class="cls-status cls-status--{{ teach.estado }}">{{ teach.get_estado_display }}</span>
+                <span class="cls-card-price">{{ teach.price }}<small>€</small></span>
             </div>
 
-            <p class="home-card-description">{{ teach.description|truncatechars:180 }}</p>
+            <div class="cls-card-body">
+                <h3 class="cls-card-title">{{ teach.title }}</h3>
+                <p class="cls-card-desc">{{ teach.description|truncatechars:150 }}</p>
 
-            <div class="home-meta-row">
-                <div>
-                    <p class="stat-title">Duracion</p>
-                    <p>{{ teach.duracion_min }} min</p>
-                </div>
-                <div>
-                    <p class="stat-title">Inicio</p>
-                    <p>{{ teach.start_at|date:"d/m/Y H:i" }}</p>
-                </div>
-                <div>
-                    <p class="stat-title">Precio</p>
-                    <p class="stat-value">${{ teach.price }}</p>
+                <div class="cls-card-meta">
+                    <div class="cls-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        {{ teach.start_at|date:"d M, H:i" }}
+                    </div>
+                    <div class="cls-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <circle cx="12" cy="12" r="10"/>
+                            <polyline points="12 6 12 12 16 14"/>
+                        </svg>
+                        {{ teach.duracion_min }} min
+                    </div>
                 </div>
             </div>
 
-            <div class="home-card-actions">
+            <div class="cls-card-footer">
                 {% if teach.id in reservas_ids %}
-                <span class="home-link-main">&#10003; Ya reservada</span>
+                <span class="cls-reserved-badge">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Ya reservada
+                </span>
                 {% else %}
                 <button
                     type="button"
-                    class="submit-btn home-btn-primary booking-trigger"
+                    class="cls-book-btn booking-trigger"
                     data-id="{{ teach.id }}"
                     data-title="{{ teach.title|escapejs }}"
                     data-price="{{ teach.price }}"
@@ -136,6 +153,12 @@
                     data-checkout-url="{% url 'booking_checkout' teach.id %}"
                     aria-haspopup="dialog"
                 >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                         stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
+                        <path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                    </svg>
                     Reservar clase
                 </button>
                 {% endif %}
@@ -143,48 +166,90 @@
         </article>
         {% endfor %}
     </div>
+
     {% else %}
-    <div class="card home-empty-state">
-        <h2>Sin clases activas por ahora</h2>
-        <p>No hay clases disponibles con los filtros seleccionados.</p>
+    <div class="cls-empty">
+        <div class="cls-empty-icon">🎬</div>
+        <h3>No hay clases disponibles</h3>
+        <p>No hay clases activas con los filtros seleccionados. Prueba a limpiar los filtros.</p>
+        <a href="{% url 'home' %}" class="cls-btn-primary">Ver todas las clases</a>
     </div>
     {% endif %}
 </section>
 
+{% if is_paginated %}
+<div class="pagination home-pagination">
+    {% if page_obj.has_previous %}
+    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&orden={{ orden }}">Anterior</a>
+    {% endif %}
+    <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+    {% if page_obj.has_next %}
+    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&orden={{ orden }}">Siguiente</a>
+    {% endif %}
+</div>
+{% endif %}
+
 {% if user.is_authenticated %}
-<section id="mis-reservas" class="home-listing" aria-label="Mis clases reservadas">
-    <div class="home-filter-head">
-        <h2>Mis clases reservadas</h2>
+
+<!-- MIS RESERVAS ACTIVAS -->
+<section id="mis-reservas" class="cls-my-section" aria-labelledby="mis-reservas-title">
+    <div class="cls-section-header">
+        <div class="cls-section-header-badge cls-section-header-badge--active">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                <polyline points="22 4 12 14.01 9 11.01"/>
+            </svg>
+            Activas
+        </div>
+        <h2 id="mis-reservas-title">Mis clases reservadas</h2>
+        <p>Clases que tienes confirmadas o pendientes de inicio.</p>
     </div>
+
     {% if reservas_activas %}
-    <div class="grid home-grid">
+    <div class="cls-grid">
         {% for reserva in reservas_activas %}
-        <article class="card home-card">
-            <div class="home-card-top">
-                <h2>{{ reserva.clase.title }}</h2>
-                <span class="home-status home-status-{{ reserva.estado }}">{{ reserva.get_estado_display }}</span>
+        <article class="cls-card cls-card--reserved">
+            <div class="cls-card-header cls-card-header--{{ reserva.estado }}">
+                <span class="cls-status cls-status--{{ reserva.estado }}">{{ reserva.get_estado_display }}</span>
+                <span class="cls-card-price">{{ reserva.clase.price }}<small>€</small></span>
             </div>
-            <p class="home-card-description">{{ reserva.clase.description|truncatechars:160 }}</p>
-            <div class="home-meta-row">
-                <div>
-                    <p class="stat-title">Inicio</p>
-                    <p>{{ reserva.clase.start_at|date:"d/m/Y H:i" }}</p>
-                </div>
-                <div>
-                    <p class="stat-title">Fin</p>
-                    <p>{{ reserva.clase.end_at|date:"d/m/Y H:i" }}</p>
-                </div>
-                <div>
-                    <p class="stat-title">Precio</p>
-                    <p class="stat-value">${{ reserva.clase.price }}</p>
+            <div class="cls-card-body">
+                <h3 class="cls-card-title">{{ reserva.clase.title }}</h3>
+                <p class="cls-card-desc">{{ reserva.clase.description|truncatechars:130 }}</p>
+                <div class="cls-card-meta">
+                    <div class="cls-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        {{ reserva.clase.start_at|date:"d M, H:i" }}
+                    </div>
+                    <div class="cls-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Fin: {{ reserva.clase.end_at|date:"d M, H:i" }}
+                    </div>
                 </div>
             </div>
-            <div class="home-card-actions">
+            <div class="cls-card-footer">
                 {% if reserva.clase.is_active_now %}
                 {% if reserva.estado == 'pendiente' or reserva.estado == 'confirmada' %}
                 <form method="post" action="{% url 'booking_cancel' reserva.pk %}">
                     {% csrf_token %}
-                    <button type="submit" class="submit-btn home-btn-danger">Cancelar reserva</button>
+                    <button type="submit" class="cls-cancel-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                        </svg>
+                        Cancelar reserva
+                    </button>
                 </form>
                 {% endif %}
                 {% endif %}
@@ -193,88 +258,78 @@
         {% endfor %}
     </div>
     {% else %}
-    <div class="card home-empty-state">
-        <h2>Aun no tienes reservas</h2>
-        <p>Reserva una clase para verla en esta seccion.</p>
+    <div class="cls-empty cls-empty--small">
+        <div class="cls-empty-icon">📅</div>
+        <h3>Aún no tienes reservas activas</h3>
+        <p>Reserva una clase del catálogo de arriba para verla aquí.</p>
     </div>
     {% endif %}
 </section>
 
-<section class="home-listing" aria-label="Mis clases finalizadas">
-    <div class="home-filter-head">
-        <h2>Mis clases finalizadas</h2>
+<!-- CLASES FINALIZADAS -->
+<section class="cls-my-section cls-my-section--faded" aria-labelledby="finalizadas-title">
+    <div class="cls-section-header">
+        <div class="cls-section-header-badge cls-section-header-badge--done">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10"/>
+                <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            Historial
+        </div>
+        <h2 id="finalizadas-title">Clases finalizadas</h2>
+        <p>Registro de todas las clases que has completado.</p>
     </div>
+
     {% if reservas_finalizadas %}
-    <div class="grid home-grid">
+    <div class="cls-grid cls-grid--compact">
         {% for reserva in reservas_finalizadas %}
-        <article class="card home-card">
-            <div class="home-card-top">
-                <h2>{{ reserva.clase.title }}</h2>
-                <span class="home-status home-status-finalizada">Finalizada</span>
+        <article class="cls-card cls-card--done">
+            <div class="cls-card-header cls-card-header--finalizada">
+                <span class="cls-status cls-status--finalizada">Finalizada</span>
+                <span class="cls-card-price cls-card-price--muted">{{ reserva.clase.price }}<small>€</small></span>
             </div>
-            <p class="home-card-description">{{ reserva.clase.description|truncatechars:160 }}</p>
-            <div class="home-meta-row">
-                <div>
-                    <p class="stat-title">Inicio</p>
-                    <p>{{ reserva.clase.start_at|date:"d/m/Y H:i" }}</p>
-                </div>
-                <div>
-                    <p class="stat-title">Fin</p>
-                    <p>{{ reserva.clase.end_at|date:"d/m/Y H:i" }}</p>
-                </div>
-                <div>
-                    <p class="stat-title">Estado</p>
-                    <p>{{ reserva.get_estado_display }}</p>
+            <div class="cls-card-body">
+                <h3 class="cls-card-title">{{ reserva.clase.title }}</h3>
+                <div class="cls-card-meta">
+                    <div class="cls-meta-item">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        {{ reserva.clase.start_at|date:"d M Y" }}
+                    </div>
+                    <div class="cls-meta-item">{{ reserva.get_estado_display }}</div>
                 </div>
             </div>
         </article>
         {% endfor %}
     </div>
     {% else %}
-    <div class="card home-empty-state">
-        <h2>Sin clases finalizadas</h2>
-        <p>Cuando completes una clase, aparecera aqui.</p>
+    <div class="cls-empty cls-empty--small">
+        <div class="cls-empty-icon">🏁</div>
+        <h3>Sin clases finalizadas</h3>
+        <p>Cuando completes una clase, aparecerá aquí.</p>
     </div>
     {% endif %}
 </section>
 
-
-
 {% endif %}
 
-{% if is_paginated %}
-<div class="pagination home-pagination">
-    {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&orden={{ orden }}">
-        Anterior
-    </a>
-    {% endif %}
-
-    <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-
-    {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&orden={{ orden }}">
-        Siguiente
-    </a>
-    {% endif %}
-</div>
-{% endif %}
-
+<!-- MODAL DE RESERVA -->
 <div id="booking-modal" class="booking-modal-overlay" role="dialog" aria-modal="true"
      aria-labelledby="modal-title" hidden>
   <div class="booking-modal-card">
-
-    {# He separado esta cabecera para que sea semánticamente independiente del formulario #}
     <div class="booking-modal-header">
       <span class="booking-modal-eyebrow">Confirmar reserva</span>
       <button class="booking-modal-close" id="modal-close-btn" aria-label="Cerrar modal">&times;</button>
     </div>
-
     <h2 class="booking-modal-title" id="modal-title"></h2>
-
     <div class="booking-modal-meta">
       <div class="booking-modal-meta-item">
-        <span class="booking-modal-meta-label">Duracion</span>
+        <span class="booking-modal-meta-label">Duración</span>
         <span class="booking-modal-meta-value" id="modal-duration"></span>
       </div>
       <div class="booking-modal-meta-item">
@@ -286,18 +341,14 @@
         <span class="booking-modal-meta-value" id="modal-price"></span>
       </div>
     </div>
-
     <p class="booking-modal-notice">
-      Seras redirigido a Stripe para completar el pago de forma segura.
-      La reserva se confirma automaticamente tras el cobro.
+      Serás redirigido a Stripe para completar el pago de forma segura.
+      La reserva se confirma automáticamente tras el cobro.
     </p>
-
     <form id="booking-modal-form" method="post" action="">
       {% csrf_token %}
       <div class="booking-modal-actions">
-        <button type="button" class="booking-modal-btn-cancel" id="modal-cancel-btn">
-          Cancelar
-        </button>
+        <button type="button" class="booking-modal-btn-cancel" id="modal-cancel-btn">Cancelar</button>
         <button type="submit" class="booking-modal-btn-pay" id="modal-pay-btn">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                stroke="currentColor" stroke-width="2.5" stroke-linecap="round"
@@ -309,36 +360,25 @@
         </button>
       </div>
     </form>
-
   </div>
 </div>
 
 {% endblock %}
 
 {% block extra_js %}
-{% comment %}
-  Lógica de Front-end para el Modal de Reservas.
-  He empaquetado este script en una IIFE (Immediately Invoked Function Expression) 
-  para no contaminar el scope global de la ventana.
-{% endcomment %}
 <script>
 (function () {
   'use strict';
-
   var urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('reserva_ok')) {
-    document.getElementById('stripe-success-banner').style.display = 'flex';
-  }
-  if (urlParams.get('reserva_cancelada')) {
-    document.getElementById('stripe-cancel-banner').style.display = 'flex';
-  }
+  if (urlParams.get('reserva_ok'))        document.getElementById('stripe-success-banner').style.display = 'flex';
+  if (urlParams.get('reserva_cancelada')) document.getElementById('stripe-cancel-banner').style.display = 'flex';
 
-  var overlay  = document.getElementById('booking-modal');
-  var form     = document.getElementById('booking-modal-form');
-  var titleEl  = document.getElementById('modal-title');
+  var overlay    = document.getElementById('booking-modal');
+  var form       = document.getElementById('booking-modal-form');
+  var titleEl    = document.getElementById('modal-title');
   var durationEl = document.getElementById('modal-duration');
-  var startEl  = document.getElementById('modal-start');
-  var priceEl  = document.getElementById('modal-price');
+  var startEl    = document.getElementById('modal-start');
+  var priceEl    = document.getElementById('modal-price');
 
   function openModal(btn) {
     titleEl.textContent    = btn.dataset.title;
@@ -362,14 +402,8 @@
 
   document.getElementById('modal-close-btn').addEventListener('click', closeModal);
   document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
-
-  overlay.addEventListener('click', function (e) {
-    if (e.target === overlay) closeModal();
-  });
-
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !overlay.hidden) closeModal();
-  });
+  overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
 }());
 </script>
 {% endblock %}

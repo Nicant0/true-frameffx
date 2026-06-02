@@ -126,3 +126,7 @@ class UserProfileForm(forms.ModelForm):
             'telefono': 'Teléfono',
             'foto_perfil': 'Foto de perfil'
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['email'].disabled = True

@@ -2,144 +2,357 @@
 {% load static %}
 
 {% block title %}Mi Perfil – FrameffX{% endblock %}
+{% block main_class %}prf-site-main{% endblock %}
 
 {% block content %}
-<section class="profile-layout">
-    <!-- Left Column: Profile Settings -->
-    <div class="profile-settings-col">
-        <div class="profile-box card" style="margin: 0; max-width: 100%;">
-            <div class="profile-header">
-                {% if user.foto_perfil %}
-                    <img src="{{ user.foto_perfil.url }}" alt="Foto de perfil" class="profile-avatar">
-                {% else %}
-                    <div class="profile-avatar-placeholder">
-                        {{ user.email|make_list|first|upper }}
-                    </div>
-                {% endif %}
-                <div class="profile-title-group">
-                    <h2>Modificar Perfil</h2>
-                    <p>Actualiza tu información personal y datos de contacto.</p>
-                </div>
-            </div>
+<div class="prf-page">
 
-            <form method="post" enctype="multipart/form-data" class="profile-form">
-                {% csrf_token %}
-                <div class="profile-form-grid">
-                    <div class="form-field">
-                        <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <span class="form-field-error">{{ form.username.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-field">
-                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <span class="form-field-error">{{ form.email.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+  <!-- Orbes decorativos -->
+  <div class="prf-orb prf-orb--1" aria-hidden="true"></div>
+  <div class="prf-orb prf-orb--2" aria-hidden="true"></div>
 
-                    <div class="form-field">
-                        <label for="{{ form.telefono.id_for_label }}">{{ form.telefono.label }}</label>
-                        {{ form.telefono }}
-                        {% if form.telefono.errors %}
-                            <span class="form-field-error">{{ form.telefono.errors.0 }}</span>
-                        {% endif %}
-                    </div>
+  <!-- ══════════════════════════════════
+       LAYOUT PRINCIPAL 2 COLUMNAS
+  ══════════════════════════════════ -->
+  <div class="prf-layout">
 
-                    <div class="form-field">
-                        <label for="{{ form.foto_perfil.id_for_label }}">{{ form.foto_perfil.label }}</label>
-                        {{ form.foto_perfil }}
-                        {% if form.foto_perfil.errors %}
-                            <span class="form-field-error">{{ form.foto_perfil.errors.0 }}</span>
-                        {% endif %}
-                    </div>
-                </div>
+    <!-- ── COLUMNA IZQUIERDA: PERFIL + FORMULARIO ── -->
+    <aside class="prf-sidebar">
+      <div class="prf-card">
 
-                <div class="form-field profile-bio-field">
-                    <label for="{{ form.biografia.id_for_label }}">{{ form.biografia.label }}</label>
-                    {{ form.biografia }}
-                    {% if form.biografia.errors %}
-                        <span class="form-field-error">{{ form.biografia.errors.0 }}</span>
-                    {% endif %}
-                </div>
+        <!-- CABECERA: avatar + identidad + stats -->
+        <div class="prf-card-identity">
 
-                <div class="profile-actions">
-                    <button type="submit" class="submit-btn home-btn-primary">Guardar Cambios</button>
-                </div>
-            </form>
-        </div>
-    </div>
-    
-    <!-- Right Column: Purchased Products -->
-    <div class="profile-purchases-col">
-        <section id="mis-compras" class="home-listing" aria-labelledby="mis-compras-title" style="margin-top: 0;">
-            <div class="home-filter-head">
-                <h2 id="mis-compras-title" style="font-size: 1.5rem;">Mis Productos Comprados</h2>
-                <p>Descarga los archivos digitales de tus pedidos completados.</p>
-            </div>
-
-            {% if pedidos_completados %}
-            <div class="grid home-grid">
-                {% for pedido in pedidos_completados %}
-                {% for detalle in pedido.detalles.all %}
-                <article class="card home-card purchase-card">
-                    <div class="home-card-top">
-                        <h2>{{ detalle.producto.titulo }}</h2>
-                        <span class="purchase-badge purchase-badge-{{ pedido.estado }}">
-                            {% if pedido.estado == "completado" %}&#10003; Completado{% else %}{{ pedido.get_estado_display }}{% endif %}
-                        </span>
-                    </div>
-
-                    <div class="purchase-type-row">
-                        <span class="products-badge">{{ detalle.producto.get_tipo_display }}</span>
-                        <span class="purchase-date">{{ pedido.fecha_creacion|date:"d/m/Y" }}</span>
-                    </div>
-
-                    <p class="home-card-description">{{ detalle.producto.descripcion|truncatechars:140 }}</p>
-
-                    <div class="home-meta-row">
-                        <div>
-                            <p class="stat-title">Pagado</p>
-                            <p class="stat-value">{{ detalle.precio_unitario }} €</p>
-                        </div>
-                        <div>
-                            <p class="stat-title">Pedido #</p>
-                            <p>{{ pedido.pk }}</p>
-                        </div>
-                        <div>
-                            <p class="stat-title">Descargas</p>
-                            <p>{{ detalle.descargas.count }}/{{ detalle.producto.max_descargas }}</p>
-                        </div>
-                    </div>
-
-                    <div class="home-card-actions">
-                        {% if detalle.producto.archivo_digital %}
-                            {% if detalle.descargas.count < detalle.producto.max_descargas %}
-                            <a href="{% url 'products:download_product' detalle.pk %}" class="submit-btn home-btn-primary purchase-download-btn">
-                                &#8659; Descargar archivo
-                            </a>
-                            {% else %}
-                            <span class="purchase-limit-msg">Limite de descargas alcanzado</span>
-                            {% endif %}
-                        {% else %}
-                        <span class="purchase-no-file">Archivo no disponible aun</span>
-                        {% endif %}
-                    </div>
-                </article>
-                {% endfor %}
-                {% endfor %}
-            </div>
+          <!-- Avatar con botón de cambio encima -->
+          <div class="prf-identity-avatar-wrap" id="prf-avatar-wrap">
+            {% if user.foto_perfil %}
+              <img src="{{ user.foto_perfil.url }}" alt="Foto de perfil"
+                   class="prf-identity-avatar" id="prf-avatar-img">
             {% else %}
-            <div class="card home-empty-state">
-                <span class="purchase-empty-icon" style="font-size: 3rem;">&#128717;</span>
-                <h2 style="margin: 10px 0;">Aun no tienes compras</h2>
-                <p style="color: #888;">Visita el <a href="{% url 'products:showProducts' %}" class="purchase-marketplace-link">Marketplace</a> para adquirir presets, guías y plugins.</p>
-            </div>
+              <div class="prf-identity-avatar-placeholder" id="prf-avatar-img">
+                {{ user.email|make_list|first|upper }}
+              </div>
             {% endif %}
-        </section>
-    </div>
-</section>
+            <span class="prf-identity-ring" aria-hidden="true"></span>
+            <!-- Overlay de "cambiar foto" al hacer hover -->
+            <label class="prf-identity-avatar-overlay" for="id_foto_perfil"
+                   title="Cambiar foto" aria-label="Cambiar foto de perfil">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+            </label>
+          </div>
+
+          <!-- Nombre + email -->
+          <div class="prf-identity-info">
+            <h1 class="prf-identity-name">
+              {% if user.username %}{{ user.username }}{% else %}{{ user.email|make_list|first|upper }}{% endif %}
+            </h1>
+            <p class="prf-identity-email">{{ user.email }}</p>
+          </div>
+
+          <!-- Stats compactas -->
+          <div class="prf-identity-stats">
+            <div class="prf-stat">
+              <span class="prf-stat-value">{{ pedidos_completados|length }}</span>
+              <span class="prf-stat-label">Compras</span>
+            </div>
+            <div class="prf-stat-sep"></div>
+            <div class="prf-stat">
+              <span class="prf-stat-value">{{ user.create_date|date:"Y" }}</span>
+              <span class="prf-stat-label">Miembro</span>
+            </div>
+            <div class="prf-stat-sep"></div>
+            <div class="prf-stat">
+              <span class="prf-stat-value prf-stat-value--active">
+                <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+                  <circle cx="4" cy="4" r="4" fill="currentColor"/>
+                </svg>
+                Activo
+              </span>
+              <span class="prf-stat-label">Estado</span>
+            </div>
+          </div>
+
+        </div><!-- /prf-card-identity -->
+
+        <!-- Línea separadora con label -->
+        <div class="prf-card-divider">
+          <span>Información personal</span>
+        </div>
+
+        <!-- FORMULARIO -->
+        <form method="post" enctype="multipart/form-data" class="prf-form" id="profile-form">
+          {% csrf_token %}
+
+          <!-- Input file oculto (el label del avatar lo activa) -->
+          <div class="prf-file-hidden-wrap">
+            {{ form.foto_perfil }}
+          </div>
+
+          <!-- Grid: nombre + email -->
+          <div class="prf-grid">
+            <div class="prf-field-group">
+              <label class="prf-label" for="{{ form.username.id_for_label }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+                </svg>
+                {{ form.username.label }}
+              </label>
+              <div class="prf-input-wrap">{{ form.username }}</div>
+              {% if form.username.errors %}
+                <span class="prf-field-error">{{ form.username.errors.0 }}</span>
+              {% endif %}
+            </div>
+
+            <div class="prf-field-group">
+              <label class="prf-label" for="{{ form.email.id_for_label }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+                {{ form.email.label }}
+              </label>
+              <div class="prf-input-wrap">{{ form.email }}</div>
+              {% if form.email.errors %}
+                <span class="prf-field-error">{{ form.email.errors.0 }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <!-- Teléfono -->
+          <div class="prf-field-group">
+            <label class="prf-label" for="{{ form.telefono.id_for_label }}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13 19.79 19.79 0 0 1 1.61 4.4 2 2 0 0 1 3.58 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.27-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              </svg>
+              {{ form.telefono.label }}
+              <span class="prf-label-opt">Opcional</span>
+            </label>
+            <div class="prf-input-wrap">{{ form.telefono }}</div>
+            {% if form.telefono.errors %}
+              <span class="prf-field-error">{{ form.telefono.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Biografía -->
+          <div class="prf-field-group">
+            <label class="prf-label" for="{{ form.biografia.id_for_label }}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="17" y1="10" x2="3" y2="10"/>
+                <line x1="21" y1="6" x2="3" y2="6"/>
+                <line x1="21" y1="14" x2="3" y2="14"/>
+                <line x1="17" y1="18" x2="3" y2="18"/>
+              </svg>
+              {{ form.biografia.label }}
+              <span class="prf-label-opt">Opcional</span>
+            </label>
+            <div class="prf-input-wrap">{{ form.biografia }}</div>
+            {% if form.biografia.errors %}
+              <span class="prf-field-error">{{ form.biografia.errors.0 }}</span>
+            {% endif %}
+          </div>
+
+          <!-- Guardar -->
+          <div class="prf-actions">
+            <button type="submit" class="prf-save-btn" id="prf-save-btn">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                <polyline points="17 21 17 13 7 13 7 21"/>
+                <polyline points="7 3 7 8 15 8"/>
+              </svg>
+              Guardar cambios
+            </button>
+          </div>
+
+        </form>
+      </div><!-- /prf-card -->
+    </aside>
+
+
+    <!-- ── COLUMNA DERECHA: MIS COMPRAS ── -->
+    <main class="prf-main">
+
+      <div class="prf-section-header">
+        <div class="prf-section-badge">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+          Mis Compras
+          {% if pedidos_completados %}
+            <span class="prf-section-badge-count">{{ pedidos_completados|length }}</span>
+          {% endif %}
+        </div>
+        <h2 class="prf-section-title">Productos adquiridos</h2>
+        <p class="prf-section-sub">Descarga los archivos digitales de tus pedidos completados.</p>
+      </div>
+
+      {% if pedidos_completados %}
+      <div class="prf-purchases-grid">
+        {% for pedido in pedidos_completados %}
+        {% for detalle in pedido.detalles.all %}
+
+        <article class="prf-purchase-card" id="purchase-{{ pedido.pk }}-{{ detalle.pk }}">
+
+          <div class="prf-purchase-header">
+            <span class="prf-purchase-badge prf-purchase-badge--{{ pedido.estado }}">
+              {% if pedido.estado == "completado" %}
+                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
+              {% endif %}
+              {{ pedido.get_estado_display }}
+            </span>
+            <span class="prf-purchase-type">{{ detalle.producto.get_tipo_display }}</span>
+          </div>
+
+          <div class="prf-purchase-body">
+            <h3 class="prf-purchase-title">{{ detalle.producto.titulo }}</h3>
+            <p class="prf-purchase-desc">{{ detalle.producto.descripcion|truncatechars:110 }}</p>
+          </div>
+
+          <div class="prf-purchase-meta">
+            <div class="prf-purchase-meta-item">
+              <span class="prf-purchase-meta-label">Pagado</span>
+              <span class="prf-purchase-meta-value prf-purchase-meta-value--price">{{ detalle.precio_unitario }} €</span>
+            </div>
+            <div class="prf-purchase-meta-item">
+              <span class="prf-purchase-meta-label">Pedido #</span>
+              <span class="prf-purchase-meta-value">{{ pedido.pk }}</span>
+            </div>
+            <div class="prf-purchase-meta-item">
+              <span class="prf-purchase-meta-label">Fecha</span>
+              <span class="prf-purchase-meta-value">{{ pedido.fecha_creacion|date:"d/m/Y" }}</span>
+            </div>
+            <div class="prf-purchase-meta-item">
+              <span class="prf-purchase-meta-label">Descargas</span>
+              <span class="prf-purchase-meta-value">{{ detalle.descargas.count }}/{{ detalle.producto.max_descargas }}</span>
+            </div>
+          </div>
+
+          <div class="prf-purchase-footer">
+            {% if detalle.producto.archivo_digital %}
+              {% if detalle.descargas.count < detalle.producto.max_descargas %}
+                <a href="{% url 'products:download_product' detalle.pk %}"
+                   class="prf-download-btn" id="download-{{ detalle.pk }}">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7 10 12 15 17 10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                  </svg>
+                  Descargar archivo
+                  <span class="prf-download-remaining">{{ detalle.descargas.count }}/{{ detalle.producto.max_descargas }}</span>
+                </a>
+              {% else %}
+                <div class="prf-download-limit">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                       stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  Límite de descargas alcanzado
+                </div>
+              {% endif %}
+            {% else %}
+              <div class="prf-download-unavailable">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                     stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="10"/>
+                  <polyline points="12 8 12 12 14 14"/>
+                </svg>
+                Archivo no disponible aún
+              </div>
+            {% endif %}
+          </div>
+
+        </article>
+        {% endfor %}
+        {% endfor %}
+      </div>
+
+      {% else %}
+      <div class="prf-empty-state">
+        <div class="prf-empty-icon" aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <path d="M16 10a4 4 0 01-8 0"/>
+          </svg>
+        </div>
+        <h3 class="prf-empty-title">Aún no tienes compras</h3>
+        <p class="prf-empty-desc">Visita el marketplace y descubre recursos creados por profesionales.</p>
+        <a href="{% url 'products:showProducts' %}" class="prf-empty-cta" id="prf-go-marketplace">
+          Ir al Marketplace →
+        </a>
+      </div>
+      {% endif %}
+
+    </main>
+  </div><!-- /prf-layout -->
+</div><!-- /prf-page -->
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function () {
+  'use strict';
+
+  /* Preview avatar en tiempo real */
+  var fileInput = document.querySelector('#id_foto_perfil');
+  var avatarEl  = document.getElementById('prf-avatar-img');
+
+  if (fileInput && avatarEl) {
+    fileInput.addEventListener('change', function () {
+      var file = this.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        if (avatarEl.tagName === 'IMG') {
+          avatarEl.src = e.target.result;
+        } else {
+          var img = document.createElement('img');
+          img.src       = e.target.result;
+          img.alt       = 'Foto de perfil';
+          img.className = 'prf-identity-avatar';
+          img.id        = 'prf-avatar-img';
+          avatarEl.replaceWith(img);
+          avatarEl = img;
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  /* Animación de entrada de purchase cards */
+  var cards = document.querySelectorAll('.prf-purchase-card');
+  if ('IntersectionObserver' in window) {
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('prf-purchase-card--visible');
+          obs.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.06 });
+    cards.forEach(function (c) { obs.observe(c); });
+  } else {
+    cards.forEach(function (c) { c.classList.add('prf-purchase-card--visible'); });
+  }
+
+}());
+</script>
 {% endblock %}
