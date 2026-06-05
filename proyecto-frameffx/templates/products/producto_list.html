@@ -1,0 +1,304 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}Gestión de Productos · FrameffX{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══ Productos Admin List — misma estética que usuarios_list ══ */
+.pl-page {
+    padding: 52px 20px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.pl-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+}
+
+.pl-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffb703;
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px solid rgba(255, 183, 3, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 12px;
+}
+
+.pl-title { margin: 0 0 6px; font-size: clamp(1.4rem, 2.5vw, 1.9rem); font-weight: 800; }
+.pl-subtitle { margin: 0; color: rgba(234,241,245,0.5); font-size: 0.9rem; }
+
+.pl-create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, #ffb703, #ffd166);
+    color: #1a0f00;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    flex-shrink: 0;
+}
+.pl-create-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(255,183,3,0.3); }
+
+/* Tabla */
+.pl-table-wrap {
+    background: rgba(14, 25, 36, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 183, 3, 0.1);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+
+.pl-table-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.pl-table-header-label { font-size: 0.8rem; color: rgba(234,241,245,0.4); font-weight: 500; }
+
+.pl-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,183,3,0.1);
+    color: #ffb703;
+    border: 1px solid rgba(255,183,3,0.25);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+}
+
+.pl-table { width: 100%; border-collapse: collapse; }
+
+.pl-table thead tr { background: rgba(255,255,255,0.02); }
+
+.pl-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(234,241,245,0.35);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.pl-table td {
+    padding: 16px 20px;
+    font-size: 0.88rem;
+    color: rgba(234,241,245,0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+}
+
+.pl-table tbody tr { transition: background 0.15s; }
+.pl-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+.pl-table tbody tr:last-child td { border-bottom: none; }
+
+/* Badges tipo / publicado */
+.pl-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.73rem;
+    font-weight: 600;
+}
+.pl-badge--type {
+    background: rgba(77,208,255,0.08);
+    color: #4dd0ff;
+    border: 1px solid rgba(77,208,255,0.2);
+}
+.pl-badge--pub {
+    background: rgba(25,211,197,0.1);
+    color: #19d3c5;
+    border: 1px solid rgba(25,211,197,0.25);
+}
+.pl-badge--draft {
+    background: rgba(255,123,134,0.1);
+    color: #ff7b86;
+    border: 1px solid rgba(255,123,134,0.25);
+}
+.pl-badge-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* Precio */
+.pl-price { font-weight: 700; color: #ffb703; font-size: 0.9rem; }
+
+/* Acciones */
+.pl-actions { display: flex; gap: 8px; align-items: center; }
+
+.pl-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s, transform 0.15s;
+    white-space: nowrap;
+}
+.pl-action-btn:hover { transform: translateY(-1px); }
+
+.pl-action-btn--edit {
+    background: rgba(77,208,255,0.08);
+    color: #4dd0ff;
+    border: 1px solid rgba(77,208,255,0.2);
+}
+.pl-action-btn--edit:hover { background: rgba(77,208,255,0.14); }
+
+.pl-action-btn--delete {
+    background: rgba(230,57,70,0.08);
+    color: #ff7b86;
+    border: 1px solid rgba(230,57,70,0.2);
+}
+.pl-action-btn--delete:hover { background: rgba(230,57,70,0.14); }
+
+/* Empty */
+.pl-empty { padding: 60px 24px; text-align: center; color: rgba(234,241,245,0.4); }
+.pl-empty svg { margin-bottom: 14px; opacity: 0.35; }
+.pl-empty h3 { font-size: 1rem; font-weight: 600; margin: 0 0 6px; color: rgba(234,241,245,0.7); }
+.pl-empty p { font-size: 0.85rem; margin: 0; }
+
+/* Volver */
+.pl-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 28px;
+    font-size: 0.85rem;
+    color: rgba(234,241,245,0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.pl-back-link:hover { color: #4dd0ff; }
+
+@media (max-width: 700px) {
+    .pl-table th:nth-child(4),
+    .pl-table td:nth-child(4) { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block main_class %}tf-page{% endblock %}
+
+{% block content %}
+<div class="pl-page">
+
+    <div class="pl-header">
+        <div>
+            <span class="pl-eyebrow">Back-Office · Marketplace</span>
+            <h1 class="pl-title">Gestión de Productos</h1>
+            <p class="pl-subtitle">Administra los productos del marketplace.</p>
+        </div>
+        <a href="{% url 'products:product_create' %}" class="pl-create-btn" id="btn-crear-producto">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Añadir producto
+        </a>
+    </div>
+
+    <div class="pl-table-wrap">
+        <div class="pl-table-header">
+            <span class="pl-table-header-label">Productos registrados</span>
+            <span class="pl-count-badge">{{ productos|length }}</span>
+        </div>
+
+        {% if productos %}
+        <table class="pl-table" aria-label="Listado de productos">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Tipo</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Descargas máx.</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for producto in productos %}
+                <tr>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:10px;">
+                            {% if producto.imagen_portada %}
+                                <img src="{{ producto.imagen_portada.url }}" alt="{{ producto.titulo }}"
+                                     style="width:36px;height:36px;border-radius:8px;object-fit:cover;border:1px solid rgba(255,255,255,0.08);">
+                            {% else %}
+                                <div style="width:36px;height:36px;border-radius:8px;background:rgba(77,208,255,0.07);border:1px solid rgba(77,208,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(77,208,255,0.5)" stroke-width="2" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+                                </div>
+                            {% endif %}
+                            <div>
+                                <div style="font-weight:600;color:#EAF1F5;font-size:0.88rem;">{{ producto.titulo }}</div>
+                                <div style="font-size:0.74rem;color:rgba(234,241,245,0.35);margin-top:2px;">ID #{{ producto.pk }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td><span class="pl-badge pl-badge--type">{{ producto.get_tipo_display }}</span></td>
+                    <td><span class="pl-price">{{ producto.precio }} €</span></td>
+                    <td>
+                        {% if producto.publicado %}
+                            <span class="pl-badge pl-badge--pub">
+                                <span class="pl-badge-dot" aria-hidden="true"></span>
+                                Publicado
+                            </span>
+                        {% else %}
+                            <span class="pl-badge pl-badge--draft">
+                                <span class="pl-badge-dot" aria-hidden="true"></span>
+                                Borrador
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td style="text-align:center;">{{ producto.max_descargas }}</td>
+                    <td>
+                        <div class="pl-actions">
+                            <a href="{% url 'products:product_update' producto.pk %}" class="pl-action-btn pl-action-btn--edit" id="btn-editar-producto-{{ producto.pk }}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Editar
+                            </a>
+                            <a href="{% url 'products:product_delete' producto.pk %}" class="pl-action-btn pl-action-btn--delete" id="btn-eliminar-producto-{{ producto.pk }}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                Eliminar
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="pl-empty">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <h3>Sin productos aún</h3>
+            <p>Crea el primer producto usando el botón de arriba.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'admin_dashboard' %}" class="pl-back-link" id="btn-volver-dashboard-productos">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Volver al Dashboard
+    </a>
+
+</div>
+{% endblock %}

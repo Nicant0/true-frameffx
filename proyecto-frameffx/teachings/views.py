@@ -1,5 +1,4 @@
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import DatabaseError, IntegrityError
 from django.db.models import Q
 from django.urls import reverse_lazy
@@ -7,8 +6,9 @@ from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
 from bookings.models import Reserva
-from products.models import Pedido
 from users.mixins import StaffRequiredMixin
+from common.utils import get_pedidos_completados_para_usuario
+from products.models import Pedido
 
 from .form import TeachingForm
 from .models import Teaching
@@ -85,12 +85,7 @@ class showTeachings(ListView):
             ).order_by("-clase__end_at")
 
             # Pedidos completados: inyectamos los pedidos con sus líneas de detalle
-            context["pedidos_completados"] = (
-                Pedido.objects
-                .filter(usuario=user, estado="completado")
-                .prefetch_related("detalles__producto", "detalles__descargas")
-                .order_by("-fecha_creacion")
-            )
+            context["pedidos_completados"] = get_pedidos_completados_para_usuario(user)
         else:
             # Garantizamos que el template siempre reciba estas variables seguras
             context["reservas_ids"] = set()

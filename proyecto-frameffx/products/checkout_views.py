@@ -38,8 +38,6 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
             cantidad=1
         )
         
-        domain_url = request.build_absolute_uri('/')[:-1]
-        
         try:
             checkout_session = stripe.checkout.Session.create(
                 client_reference_id=pedido.id,
@@ -57,8 +55,8 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
                     },
                 ],
                 mode='payment',
-                success_url=domain_url + reverse('home') + '?success=true',
-                cancel_url=domain_url + reverse('home') + '?canceled=true',
+                success_url=request.build_absolute_uri(reverse('home') + '?success=true'),
+                cancel_url=request.build_absolute_uri(reverse('home') + '?canceled=true'),
             )
             return redirect(checkout_session.url, code=303)
         except Exception as e:

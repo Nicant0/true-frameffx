@@ -55,6 +55,30 @@
 
           <!-- Stats compactas -->
           <div class="prf-identity-stats">
+            {% if user.is_staff %}
+            <div class="prf-stat">
+              <span class="prf-stat-value" style="color: #ffb703;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="display:inline-block;vertical-align:middle;margin-right:3px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Admin
+              </span>
+              <span class="prf-stat-label">Rol</span>
+            </div>
+            <div class="prf-stat-sep"></div>
+            <div class="prf-stat">
+              <span class="prf-stat-value">{{ user.create_date|date:"Y" }}</span>
+              <span class="prf-stat-label">Miembro</span>
+            </div>
+            <div class="prf-stat-sep"></div>
+            <div class="prf-stat">
+              <span class="prf-stat-value prf-stat-value--active">
+                <svg width="8" height="8" viewBox="0 0 8 8" aria-hidden="true">
+                  <circle cx="4" cy="4" r="4" fill="currentColor"/>
+                </svg>
+                Staff
+              </span>
+              <span class="prf-stat-label">Estado</span>
+            </div>
+            {% else %}
             <div class="prf-stat">
               <span class="prf-stat-value">{{ pedidos_completados|length }}</span>
               <span class="prf-stat-label">Compras</span>
@@ -74,6 +98,7 @@
               </span>
               <span class="prf-stat-label">Estado</span>
             </div>
+            {% endif %}
           </div>
 
         </div><!-- /prf-card-identity -->
@@ -177,9 +202,187 @@
     </aside>
 
 
-    <!-- ── COLUMNA DERECHA: MIS COMPRAS ── -->
+    <!-- ── COLUMNA DERECHA: Admin Panel o Mis Compras ── -->
     <main class="prf-main">
 
+      {% if user.is_staff %}
+      <!-- ══ PANEL DE ADMINISTRADOR ══ -->
+      <div class="prf-section-header">
+        <div class="prf-section-badge" style="background: rgba(255,183,3,0.12); border-color: rgba(255,183,3,0.3); color: #ffb703;">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Panel Admin
+        </div>
+        <h2 class="prf-section-title">Accesos rápidos de administración</h2>
+        <p class="prf-section-sub">Gestiona clases, usuarios y configuración del sistema desde aquí.</p>
+      </div>
+
+      <style>
+        .adm-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+        .adm-card {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          padding: 24px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px;
+          text-decoration: none;
+          color: #EAF1F5;
+          transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+          position: relative;
+          overflow: hidden;
+        }
+        .adm-card:hover {
+          background: rgba(255,255,255,0.06);
+          transform: translateY(-3px);
+        }
+        .adm-card--gold { border-color: rgba(255,183,3,0.2); }
+        .adm-card--gold:hover { border-color: rgba(255,183,3,0.4); box-shadow: 0 8px 24px rgba(255,183,3,0.1); }
+        .adm-card--teal { border-color: rgba(25,211,197,0.2); }
+        .adm-card--teal:hover { border-color: rgba(25,211,197,0.4); box-shadow: 0 8px 24px rgba(25,211,197,0.1); }
+        .adm-card--blue { border-color: rgba(77,208,255,0.2); }
+        .adm-card--blue:hover { border-color: rgba(77,208,255,0.4); box-shadow: 0 8px 24px rgba(77,208,255,0.1); }
+        .adm-card--purple { border-color: rgba(167,139,250,0.2); }
+        .adm-card--purple:hover { border-color: rgba(167,139,250,0.4); box-shadow: 0 8px 24px rgba(167,139,250,0.1); }
+        .adm-icon {
+          width: 44px; height: 44px;
+          border-radius: 12px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .adm-icon--gold { background: rgba(255,183,3,0.12); color: #ffb703; }
+        .adm-icon--teal { background: rgba(25,211,197,0.12); color: #19d3c5; }
+        .adm-icon--blue { background: rgba(77,208,255,0.12); color: #4dd0ff; }
+        .adm-icon--purple { background: rgba(167,139,250,0.12); color: #a78bfa; }
+        .adm-card-title {
+          font-weight: 700;
+          font-size: 0.95rem;
+          margin: 0;
+        }
+        .adm-card-desc {
+          font-size: 0.8rem;
+          color: rgba(234,241,245,0.5);
+          margin: 0;
+          line-height: 1.5;
+        }
+        .adm-arrow {
+          position: absolute; right: 20px; top: 50%;
+          transform: translateY(-50%);
+          color: rgba(234,241,245,0.2);
+          transition: color 0.2s, right 0.2s;
+        }
+        .adm-card:hover .adm-arrow { color: rgba(234,241,245,0.5); right: 16px; }
+
+        .adm-divider {
+          margin: 28px 0 24px;
+          border: none;
+          border-top: 1px solid rgba(255,255,255,0.07);
+        }
+        .adm-info-section h3 {
+          font-size: 0.82rem;
+          font-weight: 600;
+          letter-spacing: 1.5px;
+          text-transform: uppercase;
+          color: rgba(234,241,245,0.35);
+          margin: 0 0 14px;
+        }
+        .adm-info-row {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 11px 0;
+          border-bottom: 1px solid rgba(255,255,255,0.05);
+          font-size: 0.88rem;
+        }
+        .adm-info-row:last-child { border-bottom: none; }
+        .adm-info-label { color: rgba(234,241,245,0.5); }
+        .adm-info-value { font-weight: 600; }
+        .adm-info-value--gold { color: #ffb703; }
+        .adm-info-value--teal { color: #19d3c5; }
+      </style>
+
+      <div class="adm-grid">
+        <a href="{% url 'admin_dashboard' %}" class="adm-card adm-card--gold" id="adm-link-dashboard">
+          <div class="adm-icon adm-icon--gold" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          </div>
+          <p class="adm-card-title">Dashboard</p>
+          <p class="adm-card-desc">Resumen global de ingresos, reservas y usuarios.</p>
+          <svg class="adm-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="{% url 'usuarios_list' %}" class="adm-card adm-card--teal" id="adm-link-usuarios">
+          <div class="adm-icon adm-icon--teal" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <p class="adm-card-title">Gestionar Usuarios</p>
+          <p class="adm-card-desc">Listar, editar y eliminar cuentas de usuario.</p>
+          <svg class="adm-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="{% url 'teaching_create' %}" class="adm-card adm-card--blue" id="adm-link-nueva-clase">
+          <div class="adm-icon adm-icon--blue" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          </div>
+          <p class="adm-card-title">Crear Clase</p>
+          <p class="adm-card-desc">Añadir una nueva clase virtual al catálogo.</p>
+          <svg class="adm-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="{% url 'products:product_list_admin' %}" class="adm-card adm-card--blue" id="adm-link-productos">
+          <div class="adm-icon adm-icon--blue" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          </div>
+          <p class="adm-card-title">Gestionar Productos</p>
+          <p class="adm-card-desc">Crear, editar y eliminar productos del marketplace.</p>
+          <svg class="adm-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+        <a href="/admin/" target="_blank" rel="noopener noreferrer" class="adm-card adm-card--purple" id="adm-link-django-admin">
+          <div class="adm-icon adm-icon--purple" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <p class="adm-card-title">Django Admin</p>
+          <p class="adm-card-desc">Panel de administración avanzado del sistema.</p>
+          <svg class="adm-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+      </div>
+
+      <hr class="adm-divider">
+
+      <div class="adm-info-section">
+        <h3>Información de cuenta</h3>
+        <div class="adm-info-row">
+          <span class="adm-info-label">Email</span>
+          <span class="adm-info-value">{{ user.email }}</span>
+        </div>
+        <div class="adm-info-row">
+          <span class="adm-info-label">Username</span>
+          <span class="adm-info-value">{{ user.username|default:"—" }}</span>
+        </div>
+        <div class="adm-info-row">
+          <span class="adm-info-label">Rol</span>
+          <span class="adm-info-value adm-info-value--gold">Administrador</span>
+        </div>
+        <div class="adm-info-row">
+          <span class="adm-info-label">Superusuario</span>
+          <span class="adm-info-value {% if user.is_superuser %}adm-info-value--teal{% endif %}">
+            {% if user.is_superuser %}Sí{% else %}No{% endif %}
+          </span>
+        </div>
+        <div class="adm-info-row">
+          <span class="adm-info-label">Miembro desde</span>
+          <span class="adm-info-value">{{ user.create_date|date:"d/m/Y" }}</span>
+        </div>
+      </div>
+
+      {% else %}
+      <!-- ══ COMPRAS USUARIO NORMAL ══ -->
       <div class="prf-section-header">
         <div class="prf-section-badge">
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -300,6 +503,8 @@
         </a>
       </div>
       {% endif %}
+
+      {% endif %}{# end is_staff #}
 
     </main>
   </div><!-- /prf-layout -->

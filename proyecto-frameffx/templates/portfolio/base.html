@@ -29,6 +29,10 @@
 
 <body class="site-body {% block body_class %}{% endblock %}">
 
+    <!-- ── Capas de textura: grid sutil + film grain ── -->
+    <div class="bg-grid" aria-hidden="true"></div>
+    <div class="bg-grain" aria-hidden="true"></div>
+
     {% include "portfolio/header.html" %}
 
     <main class="site-main {% block main_class %}content{% endblock %}">

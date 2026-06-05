@@ -1,0 +1,374 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}
+    {% if object %}Editar Producto · FrameffX{% else %}Nuevo Producto · FrameffX{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══ Producto Form — acento dorado (admin marketplace) ══ */
+.pf-page { padding: 60px 20px 80px; }
+
+.pf-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    background: rgba(14, 25, 36, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 183, 3, 0.14);
+    border-radius: 22px;
+    padding: 44px 48px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+.pf-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, #ffb703, #ffd166, #ffb703);
+}
+
+.pf-header { margin-bottom: 32px; }
+
+.pf-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffb703;
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px solid rgba(255, 183, 3, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 14px;
+}
+
+.pf-title { margin: 0; font-size: clamp(1.4rem, 2.5vw, 1.9rem); font-weight: 800; }
+.pf-subtitle { margin: 8px 0 0; color: rgba(234,241,245,0.55); font-size: 0.9rem; }
+
+/* Grid 2 columnas */
+.pf-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+.pf-full { grid-column: 1 / -1; }
+
+/* Campos */
+.pf-field { display: flex; flex-direction: column; gap: 6px; }
+
+.pf-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(234,241,245,0.8);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.pf-req { color: #ff7b86; font-size: 11px; }
+
+.pf-input,
+.pf-textarea,
+.pf-select {
+    background-color: #0a1520;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #EAF1F5;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+    box-sizing: border-box;
+}
+.pf-input:focus, .pf-textarea:focus, .pf-select:focus {
+    background-color: #0d1d2e;
+    border-color: #ffb703;
+    box-shadow: 0 0 0 3px rgba(255,183,3,0.12);
+    outline: none;
+}
+
+.pf-textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+
+.pf-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(234,241,245,0.4)' stroke-width='2.5'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+.pf-select option { background: #0E1924; color: #EAF1F5; }
+
+/* Input file */
+.pf-input-file {
+    padding: 9px 14px;
+    background: rgba(255,183,3,0.04);
+    border: 1px dashed rgba(255,183,3,0.3);
+    border-radius: 10px;
+    color: rgba(234,241,245,0.7);
+    font-size: 13px;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+.pf-input-file:hover { border-color: rgba(255,183,3,0.6); }
+
+/* Checkbox publicado */
+.pf-checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,183,3,0.05);
+    border: 1px solid rgba(255,183,3,0.12);
+    border-radius: 10px;
+    padding: 12px 16px;
+    cursor: pointer;
+}
+.pf-checkbox {
+    width: 18px; height: 18px;
+    accent-color: #ffb703;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.pf-checkbox-label { font-size: 14px; font-weight: 600; color: rgba(234,241,245,0.85); cursor: pointer; margin: 0; }
+
+/* Error */
+.pf-error { font-size: 12px; color: #ff7b86; }
+
+/* Separador */
+.pf-divider-label {
+    grid-column: 1 / -1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(234,241,245,0.28);
+    margin: 4px 0 0;
+}
+.pf-divider {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin: 0;
+}
+
+/* Acciones */
+.pf-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    flex-wrap: wrap;
+}
+
+.pf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    font-family: 'Inter', sans-serif;
+}
+.pf-btn:hover { transform: translateY(-2px); }
+
+.pf-btn--save {
+    flex: 1;
+    background: linear-gradient(90deg, #ffb703, #ffd166);
+    color: #1a0f00;
+}
+.pf-btn--save:hover { box-shadow: 0 10px 28px rgba(255,183,3,0.3); }
+
+.pf-btn--back {
+    background: rgba(255,255,255,0.04);
+    color: rgba(234,241,245,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.pf-btn--back:hover { background: rgba(255,255,255,0.08); color: #EAF1F5; }
+
+@media (max-width: 600px) {
+    .pf-wrapper { padding: 28px 22px; }
+    .pf-grid { grid-template-columns: 1fr; }
+    .pf-full, .pf-divider-label, .pf-divider { grid-column: 1; }
+    .pf-actions { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block main_class %}tf-page{% endblock %}
+
+{% block content %}
+<div class="pf-page">
+<div class="pf-wrapper">
+
+    <div class="pf-header">
+        <span class="pf-eyebrow">
+            {% if object %}Edición de producto{% else %}Nuevo producto{% endif %}
+        </span>
+        <h1 class="pf-title">
+            {% if object %}
+                Editar: <em style="font-style:normal;color:#ffb703;">{{ object.titulo }}</em>
+            {% else %}
+                Añadir producto al marketplace
+            {% endif %}
+        </h1>
+        <p class="pf-subtitle">
+            {% if object %}Modifica los datos del producto y guarda los cambios.
+            {% else %}Completa el formulario para publicar un nuevo producto.{% endif %}
+        </p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" id="producto-form">
+        {% csrf_token %}
+
+        <div class="pf-grid">
+
+            {# ── Título ── #}
+            <div class="pf-field pf-full">
+                <label class="pf-label" for="{{ form.titulo.id_for_label }}">
+                    Título <span class="pf-req">*</span>
+                </label>
+                <input type="text" id="{{ form.titulo.id_for_label }}" name="{{ form.titulo.html_name }}"
+                       value="{{ form.titulo.value|default:'' }}"
+                       class="pf-input" placeholder="Ej. Pack LUTs Cinematográficos Vol.1"
+                       {% if form.titulo.field.required %}required{% endif %}>
+                {% if form.titulo.errors %}<span class="pf-error">{{ form.titulo.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# ── Descripción ── #}
+            <div class="pf-field pf-full">
+                <label class="pf-label" for="{{ form.descripcion.id_for_label }}">
+                    Descripción <span class="pf-req">*</span>
+                </label>
+                <textarea id="{{ form.descripcion.id_for_label }}" name="{{ form.descripcion.html_name }}"
+                          class="pf-textarea"
+                          placeholder="Describe qué incluye el producto, compatibilidad, etc."
+                          {% if form.descripcion.field.required %}required{% endif %}>{{ form.descripcion.value|default:'' }}</textarea>
+                {% if form.descripcion.errors %}<span class="pf-error">{{ form.descripcion.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# ── Separador Precio / Tipo ── #}
+            <p class="pf-divider-label">Configuración del producto</p>
+            <hr class="pf-divider">
+
+            {# ── Tipo ── #}
+            <div class="pf-field">
+                <label class="pf-label" for="{{ form.tipo.id_for_label }}">
+                    Tipo <span class="pf-req">*</span>
+                </label>
+                <select id="{{ form.tipo.id_for_label }}" name="{{ form.tipo.html_name }}" class="pf-select"
+                        {% if form.tipo.field.required %}required{% endif %}>
+                    {% for value, label in form.tipo.field.choices %}
+                        <option value="{{ value }}" {% if form.tipo.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.tipo.errors %}<span class="pf-error">{{ form.tipo.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# ── Precio ── #}
+            <div class="pf-field">
+                <label class="pf-label" for="{{ form.precio.id_for_label }}">
+                    Precio (€) <span class="pf-req">*</span>
+                </label>
+                <input type="number" id="{{ form.precio.id_for_label }}" name="{{ form.precio.html_name }}"
+                       value="{{ form.precio.value|default:'' }}"
+                       class="pf-input" step="0.01" min="0" placeholder="0.00"
+                       {% if form.precio.field.required %}required{% endif %}>
+                {% if form.precio.errors %}<span class="pf-error">{{ form.precio.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# ── Descargas máx. ── #}
+            <div class="pf-field">
+                <label class="pf-label" for="{{ form.max_descargas.id_for_label }}">
+                    Descargas permitidas
+                </label>
+                <input type="number" id="{{ form.max_descargas.id_for_label }}" name="{{ form.max_descargas.html_name }}"
+                       value="{{ form.max_descargas.value|default:'3' }}"
+                       class="pf-input" min="1" placeholder="3">
+                {% if form.max_descargas.errors %}<span class="pf-error">{{ form.max_descargas.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# ── Publicado ── #}
+            <div class="pf-field" style="justify-content: flex-end;">
+                <label class="pf-label" style="margin-bottom:6px;">Visibilidad</label>
+                <label class="pf-checkbox-row" for="{{ form.publicado.id_for_label }}">
+                    <input type="checkbox" id="{{ form.publicado.id_for_label }}" name="{{ form.publicado.html_name }}"
+                           class="pf-checkbox"
+                           {% if form.publicado.value %}checked{% endif %}>
+                    <span class="pf-checkbox-label">Publicado en el marketplace</span>
+                </label>
+            </div>
+
+            {# ── Separador Archivos ── #}
+            <p class="pf-divider-label">Archivos multimedia</p>
+            <hr class="pf-divider">
+
+            {# ── Imagen de portada ── #}
+            <div class="pf-field">
+                <label class="pf-label" for="{{ form.imagen_portada.id_for_label }}">
+                    Imagen de portada
+                </label>
+                <input type="file" id="{{ form.imagen_portada.id_for_label }}" name="{{ form.imagen_portada.html_name }}"
+                       class="pf-input-file" accept="image/*">
+                {% if object and object.imagen_portada %}
+                    <p style="font-size:12px;color:rgba(234,241,245,0.4);margin:4px 0 0;">
+                        Actual: <a href="{{ object.imagen_portada.url }}" target="_blank" style="color:#ffb703;">ver imagen</a>
+                    </p>
+                {% endif %}
+                {% if form.imagen_portada.errors %}<span class="pf-error">{{ form.imagen_portada.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# ── Archivo digital ── #}
+            <div class="pf-field">
+                <label class="pf-label" for="{{ form.archivo_digital.id_for_label }}">
+                    Archivo digital (ZIP, LUT…)
+                </label>
+                <input type="file" id="{{ form.archivo_digital.id_for_label }}" name="{{ form.archivo_digital.html_name }}"
+                       class="pf-input-file">
+                {% if object and object.archivo_digital %}
+                    <p style="font-size:12px;color:rgba(234,241,245,0.4);margin:4px 0 0;">
+                        Archivo actual cargado
+                    </p>
+                {% endif %}
+                {% if form.archivo_digital.errors %}<span class="pf-error">{{ form.archivo_digital.errors.0 }}</span>{% endif %}
+            </div>
+
+            {# Errores globales #}
+            {% if form.non_field_errors %}
+            <div class="pf-full" style="background:rgba(230,57,70,0.08);border:1px solid rgba(230,57,70,0.25);border-radius:10px;padding:12px 16px;">
+                {% for error in form.non_field_errors %}
+                    <p style="margin:0;color:#ff7b86;font-size:13px;">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>{# /pf-grid #}
+
+        <div class="pf-actions">
+            <button type="submit" class="pf-btn pf-btn--save" id="btn-guardar-producto">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                {% if object %}Guardar cambios{% else %}Publicar producto{% endif %}
+            </button>
+            <a href="{% url 'products:product_list_admin' %}" class="pf-btn pf-btn--back" id="btn-cancelar-producto">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Cancelar
+            </a>
+        </div>
+    </form>
+
+</div>
+</div>
+{% endblock %}

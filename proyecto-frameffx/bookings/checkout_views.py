@@ -101,8 +101,6 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
             return redirect("home")
 
         # ── 5. Crear sesión de Stripe ──────────────────────────────────────
-        domain_url = request.build_absolute_uri("/")[:-1]
-
         try:
             # Prefijamos con "reserva:" para que el webhook sepa que es una clase
             checkout_session = stripe.checkout.Session.create(
@@ -125,17 +123,8 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
                     }
                 ],
                 mode="payment",
-                success_url=(
-                    domain_url
-                    + reverse("home")
-                    + "?reserva_ok=1&clase="
-                    + str(clase.pk)
-                ),
-                cancel_url=(
-                    domain_url
-                    + reverse("home")
-                    + "?reserva_cancelada=1"
-                ),
+                success_url=request.build_absolute_uri(reverse("home") + f"?reserva_ok=1&clase={clase.pk}"),
+                cancel_url=request.build_absolute_uri(reverse("home") + "?reserva_cancelada=1"),
             )
             return redirect(checkout_session.url, code=303)
 

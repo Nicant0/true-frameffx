@@ -1,233 +1,386 @@
 {% extends "portfolio/base.html" %}
 
-{% block title %}Admin Dashboard - FrameffX{% endblock %}
+{% block title %}Dashboard Admin · FrameffX{% endblock %}
 
 {% block extra_css %}
 <style>
-    /* Estilos específicos para el Dashboard Admin (Grid Layout Premium) */
-    .admin-dashboard-wrapper {
-        margin-top: 2rem;
-    }
-    
-    .admin-hero {
-        margin-bottom: 2rem;
-    }
-    
-    .admin-hero-copy p.home-eyebrow {
-        color: #ffb703; /* Color destacado para admin */
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .admin-kpi-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 3rem;
-    }
-    
-    .admin-kpi-card {
-        background: #1e1e1e;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        padding: 1.5rem;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-    }
-    
-    .admin-kpi-label {
-        font-size: 0.9rem;
-        color: #a0a0a0;
-        margin-bottom: 0.5rem;
-    }
-    
-    .admin-kpi-value {
-        font-size: 2rem;
-        font-weight: 800;
-        color: #ffffff;
-    }
-    
-    /* Layout principal dividido (Pedidos vs Reservas) */
-    .admin-main-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 2rem;
-    }
-    
-    @media (max-width: 900px) {
-        .admin-main-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-    
-    .admin-section-card {
-        background: #1e1e1e;
-        border: 1px solid rgba(255, 255, 255, 0.05);
-        border-radius: 12px;
-        padding: 1.5rem;
-    }
-    
-    .admin-section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: #ffffff;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    /* Tabla premium minimalista */
-    .admin-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.95rem;
-    }
-    
-    .admin-table th {
-        text-align: left;
-        color: #a0a0a0;
-        font-weight: 500;
-        padding-bottom: 1rem;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .admin-table td {
-        padding: 1rem 0;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        color: #eaeaea;
-    }
-    
-    .admin-table tr:last-child td {
-        border-bottom: none;
-    }
-    
-    .admin-badge {
-        display: inline-block;
-        padding: 0.25rem 0.6rem;
-        border-radius: 4px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-    }
-    
-    .admin-badge.success {
-        background: rgba(46, 204, 113, 0.15);
-        color: #2ecc71;
-    }
-    
-    .admin-badge.warning {
-        background: rgba(241, 196, 15, 0.15);
-        color: #f1c40f;
-    }
-    
-    .admin-empty-state {
-        color: #888;
-        font-style: italic;
-        padding: 1rem 0;
-    }
+/* ══ Admin Dashboard Premium ══ */
+.adm-page {
+    padding: 48px 28px 80px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* ── Cabecera ── */
+.adm-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 40px;
+}
+
+.adm-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffb703;
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px solid rgba(255, 183, 3, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 12px;
+}
+
+.adm-title {
+    margin: 0 0 6px;
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    font-weight: 800;
+}
+
+.adm-subtitle {
+    margin: 0;
+    color: rgba(234, 241, 245, 0.5);
+    font-size: 0.9rem;
+}
+
+/* ── Quick Actions ── */
+.adm-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.adm-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    white-space: nowrap;
+}
+.adm-action-btn:hover { transform: translateY(-2px); }
+
+.adm-action-btn--primary {
+    background: linear-gradient(90deg, #19d3c5, #4dd0ff);
+    color: #041017;
+}
+.adm-action-btn--primary:hover { box-shadow: 0 10px 28px rgba(25,211,197,0.3); }
+
+.adm-action-btn--gold {
+    background: linear-gradient(90deg, #ffb703, #ffd166);
+    color: #1a0f00;
+}
+.adm-action-btn--gold:hover { box-shadow: 0 10px 28px rgba(255,183,3,0.3); }
+
+.adm-action-btn--ghost {
+    background: rgba(255,255,255,0.04);
+    color: rgba(234,241,245,0.75);
+    border: 1px solid rgba(255,255,255,0.1);
+}
+.adm-action-btn--ghost:hover {
+    background: rgba(255,255,255,0.08);
+    color: #EAF1F5;
+}
+
+/* ── KPIs ── */
+.adm-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 36px;
+}
+
+.adm-kpi-card {
+    background: rgba(14, 25, 36, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 16px;
+    padding: 22px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+.adm-kpi-card:hover { border-color: rgba(255, 183, 3, 0.2); }
+
+/* línea de acento superior */
+.adm-kpi-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, #ffb703, #ffd166);
+    opacity: 0.7;
+}
+
+.adm-kpi-icon {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px solid rgba(255, 183, 3, 0.2);
+    display: flex; align-items: center; justify-content: center;
+    color: #ffb703;
+    margin-bottom: 16px;
+}
+
+.adm-kpi-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: rgba(234, 241, 245, 0.4);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.adm-kpi-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #EAF1F5;
+    line-height: 1;
+}
+
+/* ── Grid de secciones (tablas) ── */
+.adm-main-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 900px) {
+    .adm-main-grid { grid-template-columns: 1fr; }
+}
+
+.adm-section-card {
+    background: rgba(14, 25, 36, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+}
+
+.adm-section-head {
+    padding: 20px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.adm-section-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0;
+    color: #EAF1F5;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.adm-section-title svg { color: #ffb703; flex-shrink: 0; }
+
+.adm-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.adm-table th {
+    padding: 12px 20px;
+    text-align: left;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(234,241,245,0.3);
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.adm-table td {
+    padding: 14px 20px;
+    font-size: 0.85rem;
+    color: rgba(234,241,245,0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+}
+
+.adm-table tbody tr { transition: background 0.15s; }
+.adm-table tbody tr:hover { background: rgba(255,255,255,0.025); }
+.adm-table tbody tr:last-child td { border-bottom: none; }
+
+.adm-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    font-size: 0.73rem;
+    font-weight: 700;
+}
+
+.adm-badge--success {
+    background: rgba(25,211,197,0.1);
+    color: #19d3c5;
+    border: 1px solid rgba(25,211,197,0.25);
+}
+
+.adm-badge--warning {
+    background: rgba(255,183,3,0.1);
+    color: #ffb703;
+    border: 1px solid rgba(255,183,3,0.25);
+}
+
+.adm-empty {
+    padding: 32px 24px;
+    text-align: center;
+    color: rgba(234,241,245,0.3);
+    font-size: 0.88rem;
+    font-style: italic;
+}
+
+@media (max-width: 600px) {
+    .adm-page { padding: 28px 14px 60px; }
+    .adm-header { flex-direction: column; align-items: flex-start; }
+}
 </style>
 {% endblock %}
 
+{% block main_class %}tf-page{% endblock %}
+
 {% block content %}
-<div class="admin-dashboard-wrapper">
+<div class="adm-page">
 
-    <!-- Header del Dashboard -->
-    <section class="admin-hero">
-        <div class="admin-hero-copy">
-            <p class="home-eyebrow">Back-Office</p>
-            <h1>Dashboard de Administración</h1>
-            <p class="home-sub" style="color:#a0a0a0;">Bienvenido, {{ user.email }}. Aquí tienes el resumen global de tu negocio.</p>
+    <!-- ── Cabecera ── -->
+    <div class="adm-header">
+        <div>
+            <span class="adm-eyebrow">Back-Office · Administración</span>
+            <h1 class="adm-title">Dashboard de Administración</h1>
+            <p class="adm-subtitle">Bienvenido, <strong>{{ user.email }}</strong> · Resumen global de la plataforma.</p>
         </div>
-    </section>
+        <div class="adm-actions">
+            <a href="{% url 'usuarios_list' %}" class="adm-action-btn adm-action-btn--ghost" id="btn-dashboard-usuarios">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Usuarios
+            </a>
+            <a href="{% url 'products:product_list_admin' %}" class="adm-action-btn adm-action-btn--ghost" id="btn-dashboard-productos">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                Productos
+            </a>
+            <a href="{% url 'teaching_create' %}" class="adm-action-btn adm-action-btn--primary" id="btn-dashboard-nueva-clase">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Nueva Clase
+            </a>
+            <a href="/admin/" class="adm-action-btn adm-action-btn--gold" id="btn-dashboard-django-admin" target="_blank">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+                Django Admin
+            </a>
+        </div>
+    </div>
 
-    <!-- Quick Actions -->
-    <section class="admin-quick-actions" style="display: flex; gap: 15px; margin-bottom: 2.5rem; flex-wrap: wrap;">
-        <a href="{% url 'usuarios_list' %}" class="submit-btn home-btn-primary" style="text-decoration: none; text-align: center; max-width: 200px;">Gestionar Usuarios</a>
-        <a href="{% url 'teaching_create' %}" class="submit-btn home-btn-secondary" style="text-decoration: none; text-align: center; max-width: 200px;">Crear Nueva Clase</a>
-        <a href="/admin/" class="submit-btn home-btn-secondary" style="text-decoration: none; text-align: center; max-width: 250px;" target="_blank">Django Admin Avanzado</a>
-    </section>
+    <!-- ── KPIs ── -->
+    <div class="adm-kpi-grid">
+        <div class="adm-kpi-card">
+            <div class="adm-kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <p class="adm-kpi-label">Ingresos Totales</p>
+            <p class="adm-kpi-value">{{ total_ingresos|floatformat:2 }} €</p>
+        </div>
+        <div class="adm-kpi-card">
+            <div class="adm-kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            </div>
+            <p class="adm-kpi-label">Usuarios Activos / Total</p>
+            <p class="adm-kpi-value">{{ usuarios_activos }} <span style="font-size:1.1rem;opacity:0.35;">/ {{ total_usuarios }}</span></p>
+        </div>
+        <div class="adm-kpi-card">
+            <div class="adm-kpi-icon">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <p class="adm-kpi-label">Reservas Pendientes</p>
+            <p class="adm-kpi-value">{{ reservas_pendientes }}</p>
+        </div>
+    </div>
 
-    <!-- KPIs Row -->
-    <section class="admin-kpi-grid">
-        <div class="admin-kpi-card">
-            <p class="admin-kpi-label">Ingresos Totales (€)</p>
-            <p class="admin-kpi-value">{{ total_ingresos }} €</p>
-        </div>
-        <div class="admin-kpi-card">
-            <p class="admin-kpi-label">Usuarios Activos / Totales</p>
-            <p class="admin-kpi-value">{{ usuarios_activos }} / {{ total_usuarios }}</p>
-        </div>
-        <div class="admin-kpi-card">
-            <p class="admin-kpi-label">Reservas Pendientes</p>
-            <p class="admin-kpi-value">{{ reservas_pendientes }}</p>
-        </div>
-    </section>
+    <!-- ── Tablas principales ── -->
+    <div class="adm-main-grid">
 
-    <!-- Main Grid: Orders & Bookings -->
-    <section class="admin-main-grid">
-        
         <!-- Últimos Pedidos -->
-        <div class="admin-section-card">
-            <h2 class="admin-section-title">Últimos Pedidos (Catálogo)</h2>
+        <div class="adm-section-card">
+            <div class="adm-section-head">
+                <h2 class="adm-section-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                    Últimos Pedidos
+                </h2>
+            </div>
             {% if ultimos_pedidos %}
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Usuario</th>
-                            <th>Total</th>
-                            <th>Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for pedido in ultimos_pedidos %}
-                        <tr>
-                            <td>{{ pedido.usuario.email }}</td>
-                            <td>{{ pedido.total }} €</td>
-                            <td>
-                                <span class="admin-badge {% if pedido.estado == 'completado' %}success{% else %}warning{% endif %}">
-                                    {{ pedido.get_estado_display }}
-                                </span>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <table class="adm-table" aria-label="Últimos pedidos">
+                <thead>
+                    <tr>
+                        <th>Usuario</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pedido in ultimos_pedidos %}
+                    <tr>
+                        <td>{{ pedido.usuario.email|truncatechars:22 }}</td>
+                        <td><strong>{{ pedido.total }} €</strong></td>
+                        <td>
+                            <span class="adm-badge {% if pedido.estado == 'completado' %}adm-badge--success{% else %}adm-badge--warning{% endif %}">
+                                {{ pedido.get_estado_display }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             {% else %}
-                <p class="admin-empty-state">No hay pedidos registrados todavía.</p>
+            <p class="adm-empty">No hay pedidos registrados todavía.</p>
             {% endif %}
         </div>
 
         <!-- Próximas Clases -->
-        <div class="admin-section-card">
-            <h2 class="admin-section-title">Próximas Clases Virtuales</h2>
+        <div class="adm-section-card">
+            <div class="adm-section-head">
+                <h2 class="adm-section-title">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    Próximas Clases
+                </h2>
+            </div>
             {% if proximas_clases %}
-                <table class="admin-table">
-                    <thead>
-                        <tr>
-                            <th>Fecha y Hora</th>
-                            <th>Alumno</th>
-                            <th>Clase</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for reserva in proximas_clases %}
-                        <tr>
-                            <td>{{ reserva.clase.start_at|date:"d/m/Y H:i" }}</td>
-                            <td>{{ reserva.usuario.email|truncatechars:15 }}</td>
-                            <td style="font-weight:500;">{{ reserva.clase.title|truncatechars:20 }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+            <table class="adm-table" aria-label="Próximas clases">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Alumno</th>
+                        <th>Clase</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reserva in proximas_clases %}
+                    <tr>
+                        <td>{{ reserva.clase.start_at|date:"d/m H:i" }}</td>
+                        <td>{{ reserva.usuario.email|truncatechars:14 }}</td>
+                        <td style="font-weight:600;">{{ reserva.clase.title|truncatechars:20 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
             {% else %}
-                <p class="admin-empty-state">No hay clases programadas para el futuro.</p>
+            <p class="adm-empty">No hay clases programadas próximamente.</p>
             {% endif %}
         </div>
 
-    </section>
+    </div>
+
 </div>
 {% endblock %}

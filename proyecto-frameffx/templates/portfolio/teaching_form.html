@@ -1,5 +1,4 @@
 {% extends "portfolio/base.html" %}
-{% load crispy_forms_tags %}
 
 {% block title %}
     {% if object %}Editar Clase · FrameffX{% else %}Nueva Clase · FrameffX{% endif %}
@@ -7,7 +6,7 @@
 
 {% block extra_css %}
 <style>
-/* ── Override crispy/Bootstrap inputs para el tema oscuro ── */
+/* ══ Teaching Form Premium ══ */
 .tf-page { padding: 60px 20px 80px; }
 
 .tf-wrapper {
@@ -32,9 +31,7 @@
     background: linear-gradient(90deg, #19d3c5, #4dd0ff, #a78bfa);
 }
 
-.tf-header {
-    margin-bottom: 36px;
-}
+.tf-header { margin-bottom: 36px; }
 
 .tf-eyebrow {
     display: inline-block;
@@ -64,66 +61,109 @@
     font-size: 0.92rem;
 }
 
-/* ── Override agresivo de Bootstrap/Crispy para inputs dark ── */
-.tf-wrapper .form-control,
-.tf-wrapper select.form-control,
-.tf-wrapper input[type="text"],
-.tf-wrapper input[type="number"],
-.tf-wrapper input[type="datetime-local"],
-.tf-wrapper textarea {
-    background-color: #0a1520 !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 10px !important;
-    color: #EAF1F5 !important;
-    padding: 11px 14px !important;
-    font-size: 14px !important;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
-    font-family: 'Inter', sans-serif !important;
+/* ── Campos del formulario ── */
+.tf-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
 }
 
-.tf-wrapper .form-control:focus,
-.tf-wrapper select.form-control:focus,
-.tf-wrapper input[type="text"]:focus,
-.tf-wrapper input[type="number"]:focus,
-.tf-wrapper input[type="datetime-local"]:focus,
-.tf-wrapper textarea:focus {
-    background-color: #0d1d2e !important;
-    border-color: #19d3c5 !important;
-    box-shadow: 0 0 0 3px rgba(25, 211, 197, 0.15) !important;
-    outline: none !important;
-    color: #EAF1F5 !important;
+.tf-form-grid--full {
+    grid-column: 1 / -1;
 }
 
-.tf-wrapper label {
-    color: rgba(234, 241, 245, 0.8) !important;
-    font-size: 13px !important;
-    font-weight: 600 !important;
-    margin-bottom: 6px !important;
+.tf-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
-.tf-wrapper .form-group {
-    margin-bottom: 20px !important;
+.tf-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(234, 241, 245, 0.8);
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
-.tf-wrapper .form-text,
-.tf-wrapper .help-block {
-    color: rgba(234, 241, 245, 0.45) !important;
-    font-size: 12px !important;
+.tf-label-req {
+    color: #ff7b86;
+    font-size: 11px;
 }
 
-.tf-wrapper .invalid-feedback,
-.tf-wrapper .errorlist li {
-    color: #ff7b86 !important;
-    font-size: 12px !important;
+.tf-input,
+.tf-textarea,
+.tf-select {
+    background-color: #0a1520;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #EAF1F5;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.tf-wrapper fieldset legend {
-    display: none;
+.tf-input:focus,
+.tf-textarea:focus,
+.tf-select:focus {
+    background-color: #0d1d2e;
+    border-color: #19d3c5;
+    box-shadow: 0 0 0 3px rgba(25, 211, 197, 0.15);
+    outline: none;
+    color: #EAF1F5;
 }
 
-.tf-wrapper select option {
+.tf-textarea {
+    resize: vertical;
+    min-height: 120px;
+    line-height: 1.6;
+}
+
+.tf-select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='rgba(234,241,245,0.4)' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 36px;
+    cursor: pointer;
+}
+
+.tf-select option {
     background: #0E1924;
     color: #EAF1F5;
+}
+
+/* Error de campo */
+.tf-field-error {
+    font-size: 12px;
+    color: #ff7b86;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Separador de sección */
+.tf-section-divider {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin: 4px 0;
+}
+
+.tf-section-label {
+    grid-column: 1 / -1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(234, 241, 245, 0.3);
+    margin: 0;
+    padding-top: 4px;
 }
 
 /* ── Botones de acción ── */
@@ -152,6 +192,7 @@
     text-decoration: none;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     letter-spacing: 0.2px;
+    font-family: 'Inter', sans-serif;
 }
 
 .tf-btn-save:hover {
@@ -181,21 +222,13 @@
     color: #ff7b86;
 }
 
-/* ── Eliminar botón Submit de crispy ── */
-.tf-wrapper [type="submit"] {
-    display: none !important;
-}
-
 @media (max-width: 640px) {
-    .tf-wrapper {
-        padding: 28px 22px;
-    }
-    .tf-actions {
-        flex-direction: column;
-    }
-    .tf-btn-cancel {
-        text-align: center;
-    }
+    .tf-wrapper { padding: 28px 22px; }
+    .tf-form-grid { grid-template-columns: 1fr; }
+    .tf-form-grid--full { grid-column: 1; }
+    .tf-section-label { grid-column: 1; }
+    .tf-section-divider { grid-column: 1; }
+    .tf-actions { flex-direction: column; }
 }
 </style>
 {% endblock %}
@@ -227,7 +260,153 @@
 
     <form method="post" id="teaching-form">
         {% csrf_token %}
-        {{ form|crispy }}
+
+        <div class="tf-form-grid">
+
+            {# ── Título ── #}
+            <div class="tf-field tf-form-grid--full">
+                <label class="tf-label" for="{{ form.title.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    {{ form.title.label }} <span class="tf-label-req">*</span>
+                </label>
+                <input type="text"
+                       id="{{ form.title.id_for_label }}"
+                       name="{{ form.title.html_name }}"
+                       value="{{ form.title.value|default:'' }}"
+                       class="tf-input"
+                       placeholder="Ej. Blender para principiantes"
+                       {% if form.title.field.required %}required{% endif %}>
+                {% if form.title.errors %}
+                    <span class="tf-field-error">{{ form.title.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Descripción ── #}
+            <div class="tf-field tf-form-grid--full">
+                <label class="tf-label" for="{{ form.description.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+                    {{ form.description.label }} <span class="tf-label-req">*</span>
+                </label>
+                <textarea id="{{ form.description.id_for_label }}"
+                          name="{{ form.description.html_name }}"
+                          class="tf-textarea"
+                          placeholder="Describe el contenido, objetivos y nivel de la clase..."
+                          {% if form.description.field.required %}required{% endif %}>{{ form.description.value|default:'' }}</textarea>
+                {% if form.description.errors %}
+                    <span class="tf-field-error">{{ form.description.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Separador: Precio y Duración ── #}
+            <p class="tf-section-label">Precio y configuración</p>
+            <hr class="tf-section-divider">
+
+            {# ── Precio ── #}
+            <div class="tf-field">
+                <label class="tf-label" for="{{ form.price.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    {{ form.price.label }} <span class="tf-label-req">*</span>
+                </label>
+                <input type="number"
+                       id="{{ form.price.id_for_label }}"
+                       name="{{ form.price.html_name }}"
+                       value="{{ form.price.value|default:'' }}"
+                       class="tf-input"
+                       step="0.01"
+                       min="0"
+                       placeholder="0.00"
+                       {% if form.price.field.required %}required{% endif %}>
+                {% if form.price.errors %}
+                    <span class="tf-field-error">{{ form.price.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Duración ── #}
+            <div class="tf-field">
+                <label class="tf-label" for="{{ form.duracion_min.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ form.duracion_min.label }} <span class="tf-label-req">*</span>
+                </label>
+                <input type="number"
+                       id="{{ form.duracion_min.id_for_label }}"
+                       name="{{ form.duracion_min.html_name }}"
+                       value="{{ form.duracion_min.value|default:'' }}"
+                       class="tf-input"
+                       min="1"
+                       placeholder="Ej. 60"
+                       {% if form.duracion_min.field.required %}required{% endif %}>
+                {% if form.duracion_min.errors %}
+                    <span class="tf-field-error">{{ form.duracion_min.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Estado ── #}
+            <div class="tf-field tf-form-grid--full">
+                <label class="tf-label" for="{{ form.estado.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    {{ form.estado.label }} <span class="tf-label-req">*</span>
+                </label>
+                <select id="{{ form.estado.id_for_label }}"
+                        name="{{ form.estado.html_name }}"
+                        class="tf-select"
+                        {% if form.estado.field.required %}required{% endif %}>
+                    {% for value, label in form.estado.field.choices %}
+                        <option value="{{ value }}" {% if form.estado.value == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+                {% if form.estado.errors %}
+                    <span class="tf-field-error">{{ form.estado.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Separador: Fechas ── #}
+            <p class="tf-section-label">Horario de la clase</p>
+            <hr class="tf-section-divider">
+
+            {# ── Inicio ── #}
+            <div class="tf-field">
+                <label class="tf-label" for="{{ form.start_at.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ form.start_at.label }} <span class="tf-label-req">*</span>
+                </label>
+                <input type="datetime-local"
+                       id="{{ form.start_at.id_for_label }}"
+                       name="{{ form.start_at.html_name }}"
+                       value="{{ form.start_at.value|default:'' }}"
+                       class="tf-input"
+                       {% if form.start_at.field.required %}required{% endif %}>
+                {% if form.start_at.errors %}
+                    <span class="tf-field-error">{{ form.start_at.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Fin ── #}
+            <div class="tf-field">
+                <label class="tf-label" for="{{ form.end_at.id_for_label }}">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    {{ form.end_at.label }} <span class="tf-label-req">*</span>
+                </label>
+                <input type="datetime-local"
+                       id="{{ form.end_at.id_for_label }}"
+                       name="{{ form.end_at.html_name }}"
+                       value="{{ form.end_at.value|default:'' }}"
+                       class="tf-input"
+                       {% if form.end_at.field.required %}required{% endif %}>
+                {% if form.end_at.errors %}
+                    <span class="tf-field-error">{{ form.end_at.errors.0 }}</span>
+                {% endif %}
+            </div>
+
+            {# ── Errores globales del formulario ── #}
+            {% if form.non_field_errors %}
+            <div class="tf-form-grid--full" style="background: rgba(230,57,70,0.08); border: 1px solid rgba(230,57,70,0.25); border-radius: 10px; padding: 12px 16px;">
+                {% for error in form.non_field_errors %}
+                    <p style="margin:0; color:#ff7b86; font-size:13px;">{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+        </div>{# /tf-form-grid #}
 
         <div class="tf-actions">
             <button type="submit" class="tf-btn-save" id="btn-guardar-clase">

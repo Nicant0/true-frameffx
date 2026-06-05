@@ -1,19 +1,311 @@
 {% extends "portfolio/base.html" %}
 
-{% block content %}
-<div class="card wide">
-    <h2>{{ teaching.title }}</h2>
-    <p><strong>Descripcion:</strong> {{ teaching.description }}</p>
-    <p><strong>Precio:</strong> {{ teaching.price }}</p>
-    <p><strong>Estado:</strong> {{ teaching.get_estado_display }}</p>
-    <p><strong>Duracion:</strong> {{ teaching.duracion_min }} minutos</p>
-    <p><strong>Inicio:</strong> {{ teaching.start_at }}</p>
-    <p><strong>Fin:</strong> {{ teaching.end_at }}</p>
+{% block title %}{{ teaching.title }} · Detalle · FrameffX{% endblock %}
 
-    <p>
-        <a href="{% url 'teaching_update' teaching.pk %}">Editar</a> |
-        <a href="{% url 'teaching_delete' teaching.pk %}">Eliminar</a> |
-        <a href="{% url 'home' %}">Volver</a>
-    </p>
+{% block extra_css %}
+<style>
+/* ══ Teaching Detail Premium ══ */
+.td-page {
+    padding: 60px 20px 80px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+/* Breadcrumb */
+.td-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 32px;
+    font-size: 0.82rem;
+    color: rgba(234, 241, 245, 0.45);
+}
+.td-breadcrumb a {
+    color: rgba(234, 241, 245, 0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.td-breadcrumb a:hover { color: #4dd0ff; }
+.td-breadcrumb svg { flex-shrink: 0; }
+
+/* Card principal */
+.td-card {
+    background: rgba(14, 25, 36, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(77, 208, 255, 0.14);
+    border-radius: 22px;
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    position: relative;
+}
+
+/* Franja superior de acento por estado */
+.td-card-accent {
+    height: 4px;
+    width: 100%;
+}
+.td-card-accent--activa  { background: linear-gradient(90deg, #19d3c5, #4dd0ff); }
+.td-card-accent--cancelada { background: linear-gradient(90deg, #ff7b86, #e63946); }
+.td-card-accent--finalizada { background: linear-gradient(90deg, #a78bfa, #7c3aed); }
+.td-card-accent--default { background: linear-gradient(90deg, #4dd0ff, #a78bfa); }
+
+/* Cabecera de la tarjeta */
+.td-header {
+    padding: 36px 44px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.td-header-left { flex: 1; min-width: 0; }
+
+.td-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #19d3c5;
+    background: rgba(25, 211, 197, 0.1);
+    border: 1px solid rgba(25, 211, 197, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 14px;
+}
+
+.td-title {
+    margin: 0 0 12px;
+    font-size: clamp(1.5rem, 2.8vw, 2rem);
+    font-weight: 800;
+    line-height: 1.2;
+    letter-spacing: -0.3px;
+}
+
+.td-description {
+    margin: 0;
+    color: rgba(234, 241, 245, 0.65);
+    font-size: 0.95rem;
+    line-height: 1.65;
+    max-width: 600px;
+}
+
+/* Badge de estado (derecha) */
+.td-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+.td-status-badge--activa {
+    background: rgba(25, 211, 197, 0.12);
+    color: #19d3c5;
+    border: 1px solid rgba(25, 211, 197, 0.3);
+}
+.td-status-badge--cancelada {
+    background: rgba(230, 57, 70, 0.12);
+    color: #ff7b86;
+    border: 1px solid rgba(230, 57, 70, 0.3);
+}
+.td-status-badge--finalizada {
+    background: rgba(167, 139, 250, 0.12);
+    color: #a78bfa;
+    border: 1px solid rgba(167, 139, 250, 0.3);
+}
+.td-status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Grid de metadatos */
+.td-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.td-meta-item {
+    padding: 24px 44px;
+    border-right: 1px solid rgba(255,255,255,0.07);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.td-meta-item:last-child { border-right: none; }
+
+.td-meta-icon {
+    color: rgba(234,241,245,0.35);
+    margin-bottom: 4px;
+}
+.td-meta-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(234, 241, 245, 0.4);
+}
+.td-meta-value {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #EAF1F5;
+}
+.td-meta-value--price {
+    color: #4dd0ff;
+    font-size: 1.25rem;
+}
+
+/* Footer de acciones */
+.td-actions {
+    padding: 28px 44px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.td-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    letter-spacing: 0.2px;
+}
+.td-btn:hover { transform: translateY(-2px); }
+
+.td-btn--edit {
+    background: linear-gradient(90deg, #19d3c5, #4dd0ff);
+    color: #041017;
+}
+.td-btn--edit:hover { box-shadow: 0 10px 28px rgba(25, 211, 197, 0.3); }
+
+.td-btn--danger {
+    background: rgba(230, 57, 70, 0.1);
+    color: #ff7b86;
+    border: 1px solid rgba(230, 57, 70, 0.3);
+}
+.td-btn--danger:hover {
+    background: rgba(230, 57, 70, 0.2);
+    box-shadow: 0 8px 20px rgba(230, 57, 70, 0.2);
+}
+
+.td-btn--back {
+    background: rgba(255,255,255,0.04);
+    color: rgba(234, 241, 245, 0.65);
+    border: 1px solid rgba(255,255,255,0.1);
+    margin-left: auto;
+}
+.td-btn--back:hover { background: rgba(255,255,255,0.08); color: #EAF1F5; }
+
+@media (max-width: 640px) {
+    .td-header { padding: 24px 22px 20px; }
+    .td-meta-item { padding: 18px 22px; }
+    .td-actions { padding: 20px 22px; }
+    .td-btn--back { margin-left: 0; }
+}
+</style>
+{% endblock %}
+
+{% block main_class %}tf-page{% endblock %}
+
+{% block content %}
+<div class="td-page">
+
+    <!-- Breadcrumb -->
+    <nav class="td-breadcrumb" aria-label="Migas de pan">
+        <a href="{% url 'home' %}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            Clases
+        </a>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+        <span>{{ teaching.title|truncatechars:40 }}</span>
+    </nav>
+
+    <!-- Tarjeta principal -->
+    <div class="td-card">
+
+        <!-- Franja de acento -->
+        <div class="td-card-accent td-card-accent--{{ teaching.estado|default:'default' }}"></div>
+
+        <!-- Cabecera -->
+        <div class="td-header">
+            <div class="td-header-left">
+                <span class="td-eyebrow">Clase Virtual · ID #{{ teaching.pk }}</span>
+                <h1 class="td-title">{{ teaching.title }}</h1>
+                <p class="td-description">{{ teaching.description }}</p>
+            </div>
+            <span class="td-status-badge td-status-badge--{{ teaching.estado|default:'default' }}">
+                <span class="td-status-dot" aria-hidden="true"></span>
+                {{ teaching.get_estado_display }}
+            </span>
+        </div>
+
+        <!-- Grid de metadatos -->
+        <div class="td-meta-grid" role="list" aria-label="Detalles de la clase">
+
+            <div class="td-meta-item" role="listitem">
+                <svg class="td-meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                <span class="td-meta-label">Precio</span>
+                <span class="td-meta-value td-meta-value--price">${{ teaching.price }}</span>
+            </div>
+
+            <div class="td-meta-item" role="listitem">
+                <svg class="td-meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="td-meta-label">Duración</span>
+                <span class="td-meta-value">{{ teaching.duracion_min }} min</span>
+            </div>
+
+            <div class="td-meta-item" role="listitem">
+                <svg class="td-meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span class="td-meta-label">Inicio</span>
+                <span class="td-meta-value">{{ teaching.start_at|date:"d/m/Y" }}</span>
+            </div>
+
+            <div class="td-meta-item" role="listitem">
+                <svg class="td-meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <span class="td-meta-label">Hora inicio</span>
+                <span class="td-meta-value">{{ teaching.start_at|date:"H:i" }}</span>
+            </div>
+
+            <div class="td-meta-item" role="listitem">
+                <svg class="td-meta-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <span class="td-meta-label">Fin</span>
+                <span class="td-meta-value">{{ teaching.end_at|date:"d/m/Y H:i" }}</span>
+            </div>
+
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="td-actions">
+            <a href="{% url 'teaching_update' teaching.pk %}" class="td-btn td-btn--edit" id="btn-editar-clase-{{ teaching.pk }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Editar clase
+            </a>
+            <a href="{% url 'teaching_delete' teaching.pk %}" class="td-btn td-btn--danger" id="btn-eliminar-clase-{{ teaching.pk }}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                Eliminar clase
+            </a>
+            <a href="{% url 'home' %}" class="td-btn td-btn--back" id="btn-volver-detalle">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Volver al listado
+            </a>
+        </div>
+
+    </div>
 </div>
 {% endblock %}

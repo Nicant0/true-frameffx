@@ -1,71 +1,380 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <title>Listado de usuarios</title>
-    <style>
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            border: 1px solid #ccc;
-            padding: 8px;
-            text-align: left;
-        }
-        th {
-            background-color: #f4f4f4;
-        }
-        a {
-            margin-right: 5px;
-        }
-    </style>
-</head>
-<body>
+{% extends "portfolio/base.html" %}
 
-<h1>Listado de usuarios</h1>
+{% block title %}Gestión de Usuarios · FrameffX{% endblock %}
 
-<a href="{% url 'usuarios_create' %}">➕ Crear nuevo usuario</a>
+{% block extra_css %}
+<style>
+/* ══ Usuarios List Premium ══ */
+.ul-page {
+    padding: 52px 20px 80px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
 
-<br><br>
+/* Header */
+.ul-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+}
 
-<table>
-    <thead>
-        <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Username</th>
-            <th>Activo</th>
-            <th>Fecha creación</th>
-            <th>Acciones</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for usuario in usuarios %}
-            <tr>
-                <td>{{ usuario.id }}</td>
-                <td>{{ usuario.email }}</td>
-                <td>{{ usuario.username|default:"—" }}</td>
-                <td>
-                    {% if usuario.activo %}
-                        ✅
-                    {% else %}
-                        ❌
-                    {% endif %}
-                </td>
-                <td>{{ usuario.create_date|date:"d/m/Y H:i" }}</td>
-                <td>
-                    <a href="{% url 'usuarios_update' usuario.id %}">✏️ Editar</a>
-                    <a href="{% url 'usuarios_delete' usuario.id %}">🗑️ Eliminar</a>
-                </td>
-            </tr>
-        {% empty %}
-            <tr>
-                <td colspan="6">No hay usuarios registrados.</td>
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
+.ul-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffb703;
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px solid rgba(255, 183, 3, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 12px;
+}
 
-</body>
-</html>
+.ul-title {
+    margin: 0 0 6px;
+    font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+    font-weight: 800;
+}
+
+.ul-subtitle {
+    margin: 0;
+    color: rgba(234, 241, 245, 0.5);
+    font-size: 0.9rem;
+}
+
+.ul-create-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(90deg, #19d3c5, #4dd0ff);
+    color: #041017;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    flex-shrink: 0;
+}
+.ul-create-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(25, 211, 197, 0.3);
+}
+
+/* Tabla premium */
+.ul-table-wrap {
+    background: rgba(14, 25, 36, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(77, 208, 255, 0.12);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+}
+
+.ul-table-header {
+    padding: 20px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.ul-table-header-label {
+    font-size: 0.8rem;
+    color: rgba(234,241,245,0.4);
+    font-weight: 500;
+}
+
+.ul-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(25,211,197,0.1);
+    color: #19d3c5;
+    border: 1px solid rgba(25,211,197,0.25);
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 3px 10px;
+}
+
+.ul-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.ul-table thead tr {
+    background: rgba(255,255,255,0.02);
+}
+
+.ul-table th {
+    padding: 14px 20px;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(234,241,245,0.35);
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    white-space: nowrap;
+}
+
+.ul-table td {
+    padding: 16px 20px;
+    font-size: 0.88rem;
+    color: rgba(234, 241, 245, 0.85);
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    vertical-align: middle;
+}
+
+.ul-table tbody tr {
+    transition: background 0.15s ease;
+}
+.ul-table tbody tr:hover {
+    background: rgba(255,255,255,0.025);
+}
+.ul-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Avatar inicial */
+.ul-user-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.ul-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #19d3c5, #4dd0ff);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #041017;
+    flex-shrink: 0;
+}
+
+.ul-user-email {
+    font-weight: 600;
+    color: #EAF1F5;
+    font-size: 0.88rem;
+}
+.ul-user-username {
+    font-size: 0.76rem;
+    color: rgba(234,241,245,0.4);
+    margin-top: 2px;
+}
+
+/* Badge activo/inactivo */
+.ul-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+.ul-badge--active {
+    background: rgba(25,211,197,0.1);
+    color: #19d3c5;
+    border: 1px solid rgba(25,211,197,0.25);
+}
+.ul-badge--inactive {
+    background: rgba(255,123,134,0.1);
+    color: #ff7b86;
+    border: 1px solid rgba(255,123,134,0.25);
+}
+.ul-badge-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* ID cell */
+.ul-id {
+    font-family: 'Courier New', monospace;
+    font-size: 0.8rem;
+    color: rgba(234,241,245,0.35);
+    background: rgba(255,255,255,0.04);
+    padding: 3px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* Acciones */
+.ul-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ul-action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease, transform 0.15s ease;
+    white-space: nowrap;
+}
+.ul-action-btn:hover { transform: translateY(-1px); }
+
+.ul-action-btn--edit {
+    background: rgba(77,208,255,0.08);
+    color: #4dd0ff;
+    border: 1px solid rgba(77,208,255,0.2);
+}
+.ul-action-btn--edit:hover { background: rgba(77,208,255,0.14); }
+
+.ul-action-btn--delete {
+    background: rgba(230,57,70,0.08);
+    color: #ff7b86;
+    border: 1px solid rgba(230,57,70,0.2);
+}
+.ul-action-btn--delete:hover { background: rgba(230,57,70,0.14); }
+
+/* Estado vacío */
+.ul-empty {
+    padding: 60px 24px;
+    text-align: center;
+    color: rgba(234,241,245,0.4);
+}
+.ul-empty svg { margin-bottom: 14px; opacity: 0.4; }
+.ul-empty h3 {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 6px;
+    color: rgba(234,241,245,0.7);
+}
+.ul-empty p { font-size: 0.85rem; margin: 0; }
+
+/* Volver */
+.ul-back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 28px;
+    font-size: 0.85rem;
+    color: rgba(234,241,245,0.45);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.ul-back-link:hover { color: #4dd0ff; }
+
+@media (max-width: 700px) {
+    .ul-table th:nth-child(1),
+    .ul-table td:nth-child(1),
+    .ul-table th:nth-child(4),
+    .ul-table td:nth-child(4) { display: none; }
+}
+</style>
+{% endblock %}
+
+{% block main_class %}tf-page{% endblock %}
+
+{% block content %}
+<div class="ul-page">
+
+    <!-- Header -->
+    <div class="ul-header">
+        <div class="ul-header-left">
+            <span class="ul-eyebrow">Back-Office · Administración</span>
+            <h1 class="ul-title">Gestión de Usuarios</h1>
+            <p class="ul-subtitle">Administra las cuentas registradas en la plataforma.</p>
+        </div>
+        <a href="{% url 'usuarios_create' %}" class="ul-create-btn" id="btn-crear-usuario">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Crear usuario
+        </a>
+    </div>
+
+    <!-- Tabla -->
+    <div class="ul-table-wrap">
+        <div class="ul-table-header">
+            <span class="ul-table-header-label">Usuarios registrados</span>
+            <span class="ul-count-badge">{{ usuarios|length }}</span>
+        </div>
+
+        {% if usuarios %}
+        <table class="ul-table" aria-label="Listado de usuarios">
+            <thead>
+                <tr>
+                    <th scope="col">ID</th>
+                    <th scope="col">Usuario</th>
+                    <th scope="col">Estado</th>
+                    <th scope="col">Creado</th>
+                    <th scope="col">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td><span class="ul-id">#{{ usuario.id }}</span></td>
+                    <td>
+                        <div class="ul-user-cell">
+                            <div class="ul-avatar" aria-hidden="true">
+                                {{ usuario.email|make_list|first|upper }}
+                            </div>
+                            <div class="ul-user-info">
+                                <div class="ul-user-email">{{ usuario.email }}</div>
+                                <div class="ul-user-username">{{ usuario.username|default:"Sin username" }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        {% if usuario.activo %}
+                            <span class="ul-badge ul-badge--active">
+                                <span class="ul-badge-dot" aria-hidden="true"></span>
+                                Activo
+                            </span>
+                        {% else %}
+                            <span class="ul-badge ul-badge--inactive">
+                                <span class="ul-badge-dot" aria-hidden="true"></span>
+                                Inactivo
+                            </span>
+                        {% endif %}
+                    </td>
+                    <td>{{ usuario.create_date|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <div class="ul-actions">
+                            <a href="{% url 'usuarios_update' usuario.id %}" class="ul-action-btn ul-action-btn--edit" id="btn-editar-usuario-{{ usuario.id }}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Editar
+                            </a>
+                            <a href="{% url 'usuarios_delete' usuario.id %}" class="ul-action-btn ul-action-btn--delete" id="btn-eliminar-usuario-{{ usuario.id }}">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                Eliminar
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="ul-empty">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <h3>No hay usuarios registrados</h3>
+            <p>Crea el primer usuario usando el botón de arriba.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <a href="{% url 'admin_dashboard' %}" class="ul-back-link" id="btn-volver-dashboard">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        Volver al Dashboard
+    </a>
+
+</div>
+{% endblock %}

@@ -14,8 +14,8 @@ from django.contrib import messages
 
 from .forms import RegistroForm, UserProfileForm
 from .models import Usuario
-from products.models import Pedido
 from .mixins import StaffRequiredMixin, SetPasswordMixin
+from common.utils import get_pedidos_completados_para_usuario
 
 
 # ── Registro público ──────────────────────────────────────────────────────────
@@ -102,10 +102,5 @@ class UserProfileView(LoginRequiredMixin, UpdateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["pedidos_completados"] = (
-            Pedido.objects
-            .filter(usuario=self.request.user, estado="completado")
-            .prefetch_related("detalles__producto", "detalles__descargas")
-            .order_by("-fecha_creacion")
-        )
+        context["pedidos_completados"] = get_pedidos_completados_para_usuario(self.request.user)
         return context

@@ -1,46 +1,269 @@
 {% extends 'portfolio/base.html' %}
 {% load crispy_forms_tags %}
 
+{% block title %}
+    {% if object %}Editar Usuario · FrameffX{% else %}Crear Usuario · FrameffX{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ══ Usuario Form Premium ══ */
+.uf-page { padding: 60px 20px 80px; }
+
+.uf-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+    background: rgba(14, 25, 36, 0.92);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255, 183, 3, 0.14);
+    border-radius: 22px;
+    padding: 44px 48px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Línea superior de acento dorada (admin) */
+.uf-wrapper::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 3px;
+    background: linear-gradient(90deg, #ffb703, #ffd166, #ffb703);
+}
+
+.uf-header { margin-bottom: 32px; }
+
+.uf-eyebrow {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: #ffb703;
+    background: rgba(255, 183, 3, 0.1);
+    border: 1px solid rgba(255, 183, 3, 0.28);
+    border-radius: 999px;
+    padding: 4px 14px;
+    margin-bottom: 14px;
+}
+
+.uf-title {
+    margin: 0;
+    font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+    font-weight: 800;
+    line-height: 1.2;
+}
+
+.uf-subtitle {
+    margin: 8px 0 0;
+    color: rgba(234, 241, 245, 0.55);
+    font-size: 0.9rem;
+}
+
+/* Inputs dark override */
+.uf-wrapper .form-control,
+.uf-wrapper input[type="text"],
+.uf-wrapper input[type="email"],
+.uf-wrapper input[type="password"],
+.uf-wrapper input[type="number"],
+.uf-wrapper select,
+.uf-wrapper textarea {
+    background-color: #0a1520 !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 10px !important;
+    color: #EAF1F5 !important;
+    padding: 11px 14px !important;
+    font-size: 14px !important;
+    transition: border-color 0.2s, box-shadow 0.2s !important;
+    font-family: 'Inter', sans-serif !important;
+}
+
+.uf-wrapper .form-control:focus,
+.uf-wrapper input[type="text"]:focus,
+.uf-wrapper input[type="email"]:focus,
+.uf-wrapper input[type="password"]:focus {
+    background-color: #0d1d2e !important;
+    border-color: #ffb703 !important;
+    box-shadow: 0 0 0 3px rgba(255, 183, 3, 0.12) !important;
+    outline: none !important;
+}
+
+.uf-wrapper label {
+    color: rgba(234, 241, 245, 0.8) !important;
+    font-size: 13px !important;
+    font-weight: 600 !important;
+    margin-bottom: 6px !important;
+}
+
+.uf-wrapper .form-group { margin-bottom: 20px !important; }
+
+.uf-wrapper .invalid-feedback,
+.uf-wrapper .errorlist li {
+    color: #ff7b86 !important;
+    font-size: 12px !important;
+}
+
+/* Password field */
+.uf-password-group {
+    margin-bottom: 20px;
+}
+
+.uf-password-label {
+    display: block;
+    color: rgba(234, 241, 245, 0.8);
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+.uf-password-input {
+    width: 100%;
+    box-sizing: border-box;
+    background-color: #0a1520;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    color: #EAF1F5;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.uf-password-input:focus {
+    background-color: #0d1d2e;
+    border-color: #ffb703;
+    box-shadow: 0 0 0 3px rgba(255, 183, 3, 0.12);
+    outline: none;
+}
+
+/* Acciones */
+.uf-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+    flex-wrap: wrap;
+}
+
+.uf-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 13px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    border: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    letter-spacing: 0.2px;
+}
+.uf-btn:hover { transform: translateY(-2px); }
+
+.uf-btn--save {
+    flex: 1;
+    background: linear-gradient(90deg, #ffb703, #ffd166);
+    color: #1a0f00;
+}
+.uf-btn--save:hover { box-shadow: 0 10px 28px rgba(255,183,3,0.3); }
+
+.uf-btn--danger {
+    background: rgba(230, 57, 70, 0.1);
+    color: #ff7b86;
+    border: 1px solid rgba(230, 57, 70, 0.3);
+}
+.uf-btn--danger:hover {
+    background: rgba(230, 57, 70, 0.18);
+    box-shadow: 0 8px 20px rgba(230, 57, 70, 0.15);
+}
+
+.uf-btn--back {
+    background: rgba(255, 255, 255, 0.04);
+    color: rgba(234, 241, 245, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.uf-btn--back:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #EAF1F5;
+}
+
+/* Ocultar el submit de crispy */
+.uf-wrapper [type="submit"].btn { display: none !important; }
+
+@media (max-width: 600px) {
+    .uf-wrapper { padding: 28px 22px; }
+    .uf-actions { flex-direction: column; }
+}
+</style>
+{% endblock %}
+
+{% block main_class %}tf-page{% endblock %}
+
 {% block content %}
-<div class="container">
-    <h2>
-        {{ object|yesno:"Actualizar usuario,Crear nuevo usuario" }}
-    </h2>
+<div class="uf-page">
+<div class="uf-wrapper">
 
-    <form method="post" novalidate>
+    <div class="uf-header">
+        <span class="uf-eyebrow">
+            {% if object %}Edición de usuario{% else %}Nuevo usuario{% endif %}
+        </span>
+        <h1 class="uf-title">
+            {% if object %}
+                Editar: <em style="font-style:normal; color:#ffb703;">{{ object.email }}</em>
+            {% else %}
+                Crear nuevo usuario
+            {% endif %}
+        </h1>
+        <p class="uf-subtitle">
+            {% if object %}
+                Modifica los datos del usuario y guarda los cambios.
+            {% else %}
+                Completa el formulario para registrar un nuevo usuario en la plataforma.
+            {% endif %}
+        </p>
+    </div>
+
+    <form method="post" novalidate id="usuario-form">
         {% csrf_token %}
-
         {% crispy form %}
 
         {% if not object %}
-            <div class="mb-3">
-                <label for="password">Contraseña</label>
-                <input
-                    type="password"
-                    name="password"
-                    class="form-control"
-                    required
-                >
-            </div>
-        {% endif %}
-
-        <input
-            type="submit"
-            class="btn btn-success"
-            value="{{ object|yesno:'Actualizar,Crear' }}"
-        >
-
-        {% if object %}
-            <a
-                class="btn btn-danger"
-                href="{% url 'usuarios_delete' object.id %}"
+        <div class="uf-password-group">
+            <label class="uf-password-label" for="id_password">Contraseña</label>
+            <input
+                type="password"
+                name="password"
+                id="id_password"
+                class="uf-password-input"
+                placeholder="Introduce una contraseña segura"
+                required
             >
-                Eliminar
-            </a>
+        </div>
         {% endif %}
+
+        <div class="uf-actions">
+            <button type="submit" class="uf-btn uf-btn--save" id="btn-guardar-usuario">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                {% if object %}Guardar cambios{% else %}Crear usuario{% endif %}
+            </button>
+
+            {% if object %}
+            <a href="{% url 'usuarios_delete' object.id %}" class="uf-btn uf-btn--danger" id="btn-eliminar-usuario-form">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                Eliminar usuario
+            </a>
+            {% endif %}
+
+            <a href="{% url 'usuarios_list' %}" class="uf-btn uf-btn--back" id="btn-volver-lista-usuarios">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+                Volver al listado
+            </a>
+        </div>
     </form>
 
-    <br>
-    <a href="{% url 'usuarios_list' %}">⬅️ Volver al listado</a>
+</div>
 </div>
 {% endblock %}
