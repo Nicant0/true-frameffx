@@ -43,9 +43,12 @@ class AdminDashboardView(StaffRequiredMixin, TemplateView):
         
         # Métricas de Reservas
         now = timezone.now()
-        context["reservas_pendientes"] = Reserva.objects.filter(estado="pendiente").count()
+        context["reservas_pendientes"] = Reserva.objects.filter(
+            estado__in=["pendiente", "pendiente_pago"]
+        ).count()
         context["proximas_clases"] = Reserva.objects.filter(
-            clase__start_at__gte=now
+            clase__start_at__gte=now,
+            estado__in=["pendiente", "pendiente_pago", "confirmada"],
         ).select_related("clase", "usuario").order_by("clase__start_at")[:5]
         
         return context
