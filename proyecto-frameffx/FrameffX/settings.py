@@ -248,14 +248,19 @@ SOCIALACCOUNT_PROVIDERS = {
         },
         # Las credenciales se gestionan desde el Admin de Django (método seguro)
         # o se pueden definir aqui para entornos de desarrollo:
-        'APP': {
-            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
-            'secret':    os.getenv('GOOGLE_CLIENT_SECRET', ''),
-            'key':       '',
-        },
+        'APPS': [
+            {
+                'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+                'secret':    os.getenv('GOOGLE_CLIENT_SECRET', ''),
+                'key':       '',
+            }
+        ],
         'OAUTH_PKCE_ENABLED': True,    # Habilita PKCE para mayor seguridad
     }
 }
+
+# Permite iniciar sesión directamente al hacer clic en el enlace GET sin la pantalla de confirmación intermedia
+SOCIALACCOUNT_LOGIN_ON_GET = True
 
 # Evita crear cuentas duplicadas si el email ya existe en la BD local
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
