@@ -7,7 +7,9 @@ He programado el siguiente flujo de vida de la reserva:
   2. Compruebo que la clase esté activa y que el usuario no la tenga ya reservada.
   3. Creo un registro en la BD con estado='pendiente_pago'.
   4. Levanto una sesión de Stripe Checkout y redirijo al usuario allí.
-  5. Si el pago es exitoso, el webhook asíncrono actualiza la Reserva a 'confirmada'.
+  5a. (Producción) El webhook asíncrono actualiza la Reserva a 'confirmada'.
+  5b. (Desarrollo/Demo) ReservaSuccessView verifica la sesión directamente con la API
+      de Stripe y confirma la reserva — no requiere webhook local.
 """
 
 import stripe
@@ -17,7 +19,6 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import DatabaseError, IntegrityError
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse
-from django.utils import timezone
 from django.views import View
 
 from teachings.models import Teaching
@@ -102,7 +103,14 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
 
         # ── 5. Crear sesión de Stripe ──────────────────────────────────────
         try:
-            # Prefijamos con "reserva:" para que el webhook sepa que es una clase
+            # Incluimos reserva.pk en el success_url para confirmar sin webhook
+            success_url = request.build_absolute_uri(
+                reverse("booking_success") + f"?reserva_id={reserva.pk}&session_id={{CHECKOUT_SESSION_ID}}"
+            )
+            cancel_url = request.build_absolute_uri(
+                reverse("home") + "?reserva_cancelada=1"
+            )
+
             checkout_session = stripe.checkout.Session.create(
                 client_reference_id=f"reserva:{reserva.pk}",
                 payment_method_types=["card"],
@@ -123,8 +131,8 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
                     }
                 ],
                 mode="payment",
-                success_url=request.build_absolute_uri(reverse("home") + f"?reserva_ok=1&clase={clase.pk}"),
-                cancel_url=request.build_absolute_uri(reverse("home") + "?reserva_cancelada=1"),
+                success_url=success_url,
+                cancel_url=cancel_url,
             )
             return redirect(checkout_session.url, code=303)
 
@@ -135,4 +143,59 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
                 request,
                 f"No se pudo iniciar el pago: {e}. Inténtalo de nuevo más tarde.",
             )
+            return redirect("home")
+
+
+class ReservaSuccessView(LoginRequiredMixin, View):
+    """
+    Vista de retorno tras un pago exitoso en Stripe.
+
+    Stripe redirige aquí con ?reserva_id=X&session_id=cs_test_...
+    Verificamos directamente con la API de Stripe que el pago está 'paid'
+    y confirmamos la reserva en base de datos.
+
+    Esto hace el flujo funcional en desarrollo local sin necesidad de webhook.
+    En producción, el webhook también confirma (doble seguridad).
+    """
+
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        reserva_id = request.GET.get("reserva_id")
+        session_id = request.GET.get("session_id")
+
+        if not reserva_id or not session_id:
+            messages.warning(request, "Parámetros de pago incompletos.")
+            return redirect("home")
+
+        try:
+            reserva = Reserva.objects.get(pk=reserva_id, usuario=request.user)
+        except Reserva.DoesNotExist:
+            messages.error(request, "Reserva no encontrada.")
+            return redirect("home")
+
+        # Ya confirmada (p.ej. llegó el webhook antes que esta vista)
+        if reserva.estado == "confirmada":
+            messages.success(request, f"¡Tu reserva para «{reserva.clase.title}» ya está confirmada!")
+            return redirect(reverse("home") + "?reserva_ok=1")
+
+        # Verificar con Stripe que el pago está realmente completado
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            if session.payment_status == "paid":
+                reserva.estado = "confirmada"
+                reserva.save(update_fields=["estado"])
+                messages.success(
+                    request,
+                    f"¡Reserva confirmada! «{reserva.clase.title}» está en tu lista de clases.",
+                )
+                return redirect(reverse("home") + "?reserva_ok=1")
+            else:
+                messages.warning(
+                    request,
+                    "El pago aún no está procesado. Espera unos segundos y recarga.",
+                )
+                return redirect("home")
+        except Exception as e:
+            messages.error(request, f"Error al verificar el pago: {e}")
             return redirect("home")

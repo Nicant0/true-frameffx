@@ -9,7 +9,7 @@ from django.conf.urls.static import static
 
 from users import views
 from bookings.views import ReservaCreateView, ReservaCancelView
-from bookings.checkout_views import ReservaCheckoutView
+from bookings.checkout_views import ReservaCheckoutView, ReservaSuccessView
 from teachings.api.views import (
     TeachingViewSet,
     TeachingAuthenticatedListViewSet,
@@ -72,6 +72,7 @@ urlpatterns = [
     path('bookings/create/', ReservaCreateView.as_view(), name='booking_create'),
     path('bookings/<int:pk>/cancel/', ReservaCancelView.as_view(), name='booking_cancel'),
     path('bookings/<int:pk>/checkout/', ReservaCheckoutView.as_view(), name='booking_checkout'),
+    path('bookings/success/', ReservaSuccessView.as_view(), name='booking_success'),
 
     # ── Sistema de Autenticación de Terceros (Opcional) ───────────────────────
     path('accounts/', include('allauth.urls')),
