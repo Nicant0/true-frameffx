@@ -19,6 +19,7 @@ try:
     load_dotenv()
 except ImportError:
     pass
+    pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -247,11 +248,11 @@ SOCIALACCOUNT_PROVIDERS = {
         },
         # Las credenciales se gestionan desde el Admin de Django (método seguro)
         # o se pueden definir aqui para entornos de desarrollo:
-        # 'APP': {
-        #     'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
-        #     'secret':    os.getenv('GOOGLE_CLIENT_SECRET', ''),
-        #     'key':       '',
-        # },
+        'APP': {
+            'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
+            'secret':    os.getenv('GOOGLE_CLIENT_SECRET', ''),
+            'key':       '',
+        },
         'OAUTH_PKCE_ENABLED': True,    # Habilita PKCE para mayor seguridad
     }
 }
