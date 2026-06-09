@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
-
 # staticfiles se genera con collectstatic, no hace falta versionar
 staticfiles/
 

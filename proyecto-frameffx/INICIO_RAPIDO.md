@@ -82,17 +82,18 @@ python manage.py migrate
 
 ---
 
-## 6. Cargar productos y clases de demostración
+## 6. Cargar la base de datos completa de demostración
+
+Hemos guardado el estado exacto de la plataforma (catálogo de productos, clases, usuarios y configuración) en un archivo prefabricado (`demo_data.json`) que se encuentra en el repositorio junto a la carpeta de imágenes (`media/`).
+Para cargar toda esta información en tu nueva base de datos local de golpe, ejecuta:
 
 ```bash
-python manage.py seed_products
-python manage.py seed_teachings
+python manage.py loaddata demo_data.json
 ```
 
-Deberías ver:
+Deberías ver un mensaje de confirmación parecido a:
 ```
-[OK] 5 producto(s) disponibles en la BD.
-[OK] 502 clase(s) disponibles en la BD.
+Installed 200 object(s) from 1 fixture(s)
 ```
 
 ---
