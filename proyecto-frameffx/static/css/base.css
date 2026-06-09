@@ -28,60 +28,73 @@ html {
     overflow-x: hidden;
 }
 
-/* ─── Keyframe grano de película ───────────────────────── */
-@keyframes grain-shift {
-    0%   { transform: translate(0, 0); }
-    10%  { transform: translate(-2%, -3%); }
-    20%  { transform: translate(3%, 1%); }
-    30%  { transform: translate(-1%, 4%); }
-    40%  { transform: translate(4%, -2%); }
-    50%  { transform: translate(-3%, 2%); }
-    60%  { transform: translate(2%, -4%); }
-    70%  { transform: translate(-4%, 1%); }
-    80%  { transform: translate(1%, 3%); }
-    90%  { transform: translate(3%, -1%); }
-    100% { transform: translate(0, 0); }
-}
+/* ─── Fondo de gradiente de alta calidad ─────────────────────────────────
+   Reemplaza la imagen PNG de baja resolución y los orbes borrosos por un
+   sistema de gradientes puramente CSS: sin texturas, sin ruido, sin imágenes.
+   El resultado es un fondo limpio, profundo y de aspecto cinematográfico.
+   ─────────────────────────────────────────────────────────────────────────── */
 
 body {
     margin: 0;
     padding: 0;
     overflow-x: hidden;
-    background-color: #020b12;
-    background-image: url("/static/img/bg_main.png");
-    background-repeat: no-repeat;
-    background-position: top center;
-    background-size: cover;
+
+    /* Color base: azul marino muy oscuro */
+    background-color: #02080f;
+
+    /* Gradiente en capas — se evalúa de arriba a abajo:
+       1. Luz suave desde arriba-izquierda (teal/cian), muy difuminada
+       2. Luz profunda central (azul eléctrico), a baja opacidad
+       3. Acento violeta en la esquina inferior derecha
+       4. Base sólida degradada desde #02080f hasta #060d18 */
+    background-image:
+        radial-gradient(
+            ellipse 100% 55% at 10% 0%,
+            hsla(178, 80%, 40%, 0.13) 0%,
+            transparent 70%
+        ),
+        radial-gradient(
+            ellipse 70% 50% at 85% 15%,
+            hsla(205, 90%, 55%, 0.08) 0%,
+            transparent 65%
+        ),
+        radial-gradient(
+            ellipse 60% 40% at 92% 95%,
+            hsla(258, 70%, 60%, 0.07) 0%,
+            transparent 65%
+        ),
+        linear-gradient(
+            170deg,
+            #02080f 0%,
+            #030c16 40%,
+            #040e1a 70%,
+            #060d18 100%
+        );
+
     background-attachment: fixed;
+    background-size: cover;
 }
 
 /* ─── Grid sutil superpuesto ─────────────────────────────── */
+/* Se mantiene pero con líneas aún más tenues para no competir con el gradiente */
 .bg-grid {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
     background-image:
-        linear-gradient(rgba(77, 208, 255, 0.020) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(77, 208, 255, 0.020) 1px, transparent 1px);
-    background-size: 72px 72px;
-    mask-image: radial-gradient(ellipse 85% 65% at 50% 35%, black 15%, transparent 100%);
-    -webkit-mask-image: radial-gradient(ellipse 85% 65% at 50% 35%, black 15%, transparent 100%);
+        linear-gradient(rgba(77, 208, 255, 0.013) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(77, 208, 255, 0.013) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 10%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 90% 70% at 50% 30%, black 10%, transparent 100%);
 }
 
-/* ─── Film grain (SVG como data URI) ─────────────────────── */
+/* ─── .bg-grain eliminado: ya no se usa grano ────────────── */
+/* El elemento HTML .bg-grain, si existe en templates, no renderiza nada
+   al quitarle todos sus estilos. Se deja vacío para compatibilidad. */
 .bg-grain {
-    position: fixed;
-    inset: -30%;
-    width: 160%;
-    height: 160%;
-    z-index: 0;
-    pointer-events: none;
-    opacity: 0.030;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 200px 200px;
-    animation: grain-shift 0.5s steps(1) infinite;
+    display: none;
 }
 
 
@@ -660,18 +673,9 @@ body {
     overflow: hidden;
 }
 
-/* Orbe decorativo de fondo */
+/* Orbe de login eliminado — el gradiente del fondo ya da suficiente profundidad */
 .login-page::before {
-    content: "";
-    position: absolute;
-    width: 600px;
-    height: 600px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(25, 211, 197, 0.07) 0%, transparent 70%);
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+    display: none;
 }
 
 .login {
@@ -943,41 +947,25 @@ body {
     pointer-events: none;
 }
 
-/* Orbes decorativos */
+/* Orbes decorativos — sustituidos por luces de acento precisas y limpias */
+/* Se eliminan los orbes con filter:blur y colores sólidos que quedaban
+   amorfos y poco profesionales. En su lugar, dos destellos de gradiente
+   suaves que se integran con el fondo sin competir con él. */
 .landing-orb {
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    pointer-events: none;
-    opacity: 0.22;
+    display: none; /* Desactivados: el fondo CSS ya aporta profundidad */
 }
 
 .landing-orb-1 {
-    width: 500px;
-    height: 500px;
-    background: #19d3c5;
-    top: -120px;
-    left: -100px;
-    animation: landing-float 10s ease-in-out infinite alternate;
+    display: none;
 }
 
 .landing-orb-2 {
-    width: 400px;
-    height: 400px;
-    background: #4dd0ff;
-    bottom: -80px;
-    right: -80px;
-    animation: landing-float 14s ease-in-out infinite alternate-reverse;
+    display: none;
 }
 
 @keyframes landing-float {
-    from {
-        transform: translate(0, 0) scale(1);
-    }
-
-    to {
-        transform: translate(30px, 20px) scale(1.06);
-    }
+    from { transform: translate(0, 0); }
+    to   { transform: translate(0, 0); }
 }
 
 .landing-hero-inner {
@@ -2325,41 +2313,24 @@ body {
     line-height: 1.65;
 }
 
-/* Orbes decorativos del hero */
+/* Orbes del hero del marketplace — sustituidos por una línea de acento limpia */
+/* El fondo global ya tiene profundidad cromática; estos orbes sobraban y
+   producían artefactos visuales en pantallas de alta densidad. */
 .mkt-hero-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: 1;
-    filter: blur(60px);
+    display: none;
 }
 
 .mkt-hero-orb--1 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(25, 211, 197, 0.1) 0%, transparent 70%);
-    top: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: mkt-orb-float 8s ease-in-out infinite alternate;
+    display: none;
 }
 
 .mkt-hero-orb--2 {
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.08) 0%, transparent 70%);
-    bottom: 0;
-    right: 5%;
+    display: none;
 }
 
 @keyframes mkt-orb-float {
-    from {
-        transform: translateX(-50%) translateY(0);
-    }
-
-    to {
-        transform: translateX(-50%) translateY(-20px);
-    }
+    from { transform: translateX(-50%) translateY(0); }
+    to   { transform: translateX(-50%) translateY(0); }
 }
 
 /* --- Chips de categoría --- */
@@ -2710,40 +2681,13 @@ body {
     text-align: center;
 }
 
-.cls-hero-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(70px);
-    z-index: 0;
-}
-
-.cls-hero-orb--1 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.12) 0%, transparent 70%);
-    top: -120px;
-    left: 50%;
-    transform: translateX(-50%);
-    animation: cls-orb-float 9s ease-in-out infinite alternate;
-}
-
-.cls-hero-orb--2 {
-    width: 260px;
-    height: 260px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
-    bottom: 0;
-    right: 8%;
-}
+.cls-hero-orb      { display: none; }
+.cls-hero-orb--1   { display: none; }
+.cls-hero-orb--2   { display: none; }
 
 @keyframes cls-orb-float {
-    from {
-        transform: translateX(-50%) translateY(0);
-    }
-
-    to {
-        transform: translateX(-50%) translateY(-18px);
-    }
+    from { transform: translateX(-50%) translateY(0); }
+    to   { transform: translateX(-50%) translateY(0); }
 }
 
 .cls-hero-inner {
@@ -4031,39 +3975,13 @@ body {
     width: 100%;
 }
 
-/* --- Orbes decorativos --- */
-.prf-orb {
-    position: absolute;
-    border-radius: 50%;
-    pointer-events: none;
-    filter: blur(90px);
-    z-index: 0;
-    opacity: 0;
-    animation: prf-orb-appear 1.4s ease forwards;
-}
-
-.prf-orb--1 {
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(25, 211, 197, 0.08) 0%, transparent 70%);
-    top: -120px;
-    left: -120px;
-    animation-delay: 0.1s;
-}
-
-.prf-orb--2 {
-    width: 380px;
-    height: 380px;
-    background: radial-gradient(circle, rgba(167, 139, 250, 0.07) 0%, transparent 70%);
-    top: 200px;
-    right: -80px;
-    animation-delay: 0.3s;
-}
+/* --- Orbes del perfil eliminados (sustituidos por el fondo global) --- */
+.prf-orb      { display: none; }
+.prf-orb--1   { display: none; }
+.prf-orb--2   { display: none; }
 
 @keyframes prf-orb-appear {
-    to {
-        opacity: 1;
-    }
+    to { opacity: 0; }
 }
 
 /* --- Layout de dos columnas --- */
