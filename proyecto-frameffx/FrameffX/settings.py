@@ -248,7 +248,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'prompt': 'select_account',    # Fuerza a Google a mostrar el selector de cuentas
         },
         # Las credenciales se gestionan desde el Admin de Django (ya configuradas en la BD)
-        'OAUTH_PKCE_ENABLED': True,    # Habilita PKCE para mayor seguridad
+        'OAUTH_PKCE_ENABLED': False,    # Habilita PKCE para mayor seguridad
     }
 }
 
@@ -266,4 +266,20 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', 'pk_test_tymock')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_tymock')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'whsec_tymock')
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'allauth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
 
