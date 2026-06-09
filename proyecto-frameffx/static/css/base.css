@@ -5429,3 +5429,28 @@ body {
     letter-spacing: 0.3px;
     white-space: nowrap;
 }
+
+/* ── GOOGLE LOGIN BUTTON ── */
+.social-login-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 12px 16px;
+    background: #ffffff;
+    color: #3c4043;
+    border: 1px solid #dadce0;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.social-login-btn:hover {
+    background: #f8f9fa;
+    border-color: #d2d4d8;
+    color: #3c4043;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+}
