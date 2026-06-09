@@ -241,7 +241,7 @@
             <div class="cls-card-footer">
                 {% if reserva.clase.is_active_now %}
                 {% if reserva.estado == 'pendiente' or reserva.estado == 'confirmada' %}
-                <form method="post" action="{% url 'booking_cancel' reserva.pk %}">
+                <form method="post" action="{% url 'booking_cancel' reserva.pk %}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar tu plaza para esta clase?\n\nAl confirmar, tu plaza quedará liberada. Los reembolsos no son automáticos. Si tienes derecho a devolución, por favor contacta con soporte@frameffx.com tras cancelar.');">
                     {% csrf_token %}
                     <button type="submit" class="cls-cancel-btn">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
