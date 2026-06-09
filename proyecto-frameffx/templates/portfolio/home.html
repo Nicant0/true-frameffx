@@ -34,7 +34,7 @@
         <p>Aplica filtros para ajustar resultados al instante.</p>
     </div>
 
-    <form method="get" class="home-filters">
+    <form method="get" action="#clases" class="home-filters">
         <div class="form-field">
             <label for="titulo">Nombre de la clase</label>
             <input type="text" id="titulo" name="titulo" value="{{ titulo }}" placeholder="Ej. Blender para principiantes">
@@ -50,14 +50,23 @@
             </select>
         </div>
 
-        <div class="form-field">
-            <label for="orden">Orden</label>
-            <select id="orden" name="orden">
-                <option value="">Mas recientes</option>
-                <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
-                <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
-                <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
-            </select>
+        <div class="form-field" style="display: flex; gap: 10px;">
+            <div style="flex: 2;">
+                <label for="orden">Orden</label>
+                <select id="orden" name="orden">
+                    <option value="recientes" {% if orden == "recientes" %}selected{% endif %}>Mas recientes</option>
+                    <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
+                    <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
+                    <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
+                </select>
+            </div>
+            <div style="flex: 1;">
+                <label for="dir">Dirección</label>
+                <select id="dir" name="dir">
+                    <option value="desc" {% if dir == "desc" %}selected{% endif %}>Descend.</option>
+                    <option value="asc" {% if dir == "asc" %}selected{% endif %}>Ascend.</option>
+                </select>
+            </div>
         </div>
 
         <div class="home-filter-actions">
@@ -123,7 +132,7 @@
 {% if is_paginated %}
 <div class="pagination home-pagination">
     {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&estado={{ estado }}&orden={{ orden }}">
+    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&estado={{ estado }}&orden={{ orden }}&dir={{ dir }}">
         Anterior
     </a>
     {% endif %}
@@ -131,7 +140,7 @@
     <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
     {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&estado={{ estado }}&orden={{ orden }}">
+    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&estado={{ estado }}&orden={{ orden }}&dir={{ dir }}">
         Siguiente
     </a>
     {% endif %}

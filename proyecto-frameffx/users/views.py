@@ -57,6 +57,31 @@ class UsuariosListView(StaffRequiredMixin, ListView):
     template_name = "users/usuarios_list.html"
     context_object_name = "usuarios"
 
+    def get_queryset(self):
+        queryset = Usuario.objects.all()
+        
+        sort = self.request.GET.get("sort", "id")
+        dir = self.request.GET.get("dir", "asc")
+        
+        sort_permitidos = ["id", "email", "activo", "date_joined"]
+        if sort not in sort_permitidos:
+            sort = "id"
+            
+        campo_orden = sort
+        if sort == "date_joined":
+            campo_orden = "date_joined"
+            
+        if dir == "desc":
+            campo_orden = "-" + campo_orden
+            
+        return queryset.order_by(campo_orden)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["sort"] = self.request.GET.get("sort", "id")
+        context["dir"] = self.request.GET.get("dir", "asc")
+        return context
+
 class UsuariosCreateView(StaffRequiredMixin, SetPasswordMixin, CreateView):
     """Vista exclusiva para que el Staff cree manualmente un usuario desde el panel."""
     model = Usuario

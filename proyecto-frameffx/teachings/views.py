@@ -49,20 +49,28 @@ class showTeachings(ListView):
         if estado and user.is_authenticated and user.is_staff:
             queryset = queryset.filter(estado=estado)
 
-        orden = self.request.GET.get("orden", "")
+        orden = self.request.GET.get("orden", "recientes")
+        dir = self.request.GET.get("dir", "desc")
+        
         ordenes_permitidos = {
             "titulo": "title",
             "precio": "price",
             "fecha": "start_at",
-            "recientes": "-fecha_creacion",
+            "recientes": "fecha_creacion",
         }
-        return queryset.order_by(ordenes_permitidos.get(orden, "-fecha_creacion"))
+        
+        campo_orden = ordenes_permitidos.get(orden, "fecha_creacion")
+        if dir == "desc":
+            campo_orden = "-" + campo_orden
+
+        return queryset.order_by(campo_orden)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["titulo"] = self.request.GET.get("titulo", "")
         context["estado"] = self.request.GET.get("estado", "")
-        context["orden"] = self.request.GET.get("orden", "")
+        context["orden"] = self.request.GET.get("orden", "recientes")
+        context["dir"] = self.request.GET.get("dir", "desc")
 
         # Solo inyectamos el historial de reservas si el usuario está logueado
         # y no es staff (los invitados anónimos no tienen reservas).

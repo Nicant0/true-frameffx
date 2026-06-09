@@ -67,7 +67,7 @@
             <p>Filtra por nombre u orden para encontrar la clase que necesitas.</p>
         </div>
 
-        <form method="get" class="cls-search-form" role="search">
+        <form method="get" action="#clases-disponibles" class="cls-search-form" role="search">
             <div class="cls-search-field">
                 <svg class="cls-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -76,11 +76,17 @@
                 <input type="text" id="titulo" name="titulo" value="{{ titulo }}"
                        placeholder="Buscar clase…" class="cls-search-input">
             </div>
+            
             <select id="orden" name="orden" class="cls-select" onchange="this.form.submit()">
-                <option value="">Más recientes</option>
-                <option value="titulo" {% if orden == 'titulo' %}selected{% endif %}>Título</option>
-                <option value="precio" {% if orden == 'precio' %}selected{% endif %}>Precio</option>
-                <option value="fecha" {% if orden == 'fecha' %}selected{% endif %}>Fecha de inicio</option>
+                <option value="recientes" {% if orden == "recientes" %}selected{% endif %}>Mas recientes</option>
+                <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
+                <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
+                <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
+            </select>
+            
+            <select id="dir" name="dir" class="cls-select" onchange="this.form.submit()">
+                <option value="desc" {% if dir == "desc" %}selected{% endif %}>Descendente</option>
+                <option value="asc" {% if dir == "asc" %}selected{% endif %}>Ascendente</option>
             </select>
             {% if titulo or orden %}
             <a href="{% url 'home' %}" class="cls-clear-btn" title="Limpiar filtros" aria-label="Limpiar filtros">
@@ -177,17 +183,19 @@
     {% endif %}
 </section>
 
-{% if is_paginated %}
-<div class="pagination home-pagination">
-    {% if page_obj.has_previous %}
-    <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&orden={{ orden }}">Anterior</a>
+    {% if is_paginated %}
+    <div class="pagination home-pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&titulo={{ titulo }}&orden={{ orden }}&dir={{ dir }}">Anterior</a>
+        {% endif %}
+        
+        <span>Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&orden={{ orden }}&dir={{ dir }}">Siguiente</a>
+        {% endif %}
+    </div>
     {% endif %}
-    <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
-    {% if page_obj.has_next %}
-    <a href="?page={{ page_obj.next_page_number }}&titulo={{ titulo }}&orden={{ orden }}">Siguiente</a>
-    {% endif %}
-</div>
-{% endif %}
 
 {% if user.is_authenticated %}
 

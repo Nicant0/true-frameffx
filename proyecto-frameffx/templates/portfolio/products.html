@@ -45,8 +45,27 @@
         <div class="mkt-hero-orb mkt-hero-orb--2" aria-hidden="true"></div>
     </section>
 
+    {# ── CONTROLES DE ORDENACIÓN ── #}
+    <section style="max-width: 1200px; margin: 0 auto 2rem; padding: 0 20px;">
+        <form method="get" action="#productos" style="display: flex; gap: 15px; justify-content: flex-end; align-items: center;">
+            {% if request.GET.cat %}
+            <input type="hidden" name="cat" value="{{ request.GET.cat }}">
+            {% endif %}
+            <label for="orden" style="color: var(--color-text-muted); font-size: 0.9rem;">Ordenar por:</label>
+            <select name="orden" id="orden" class="cls-select" onchange="this.form.submit()">
+                <option value="recientes" {% if orden == 'recientes' %}selected{% endif %}>Novedades</option>
+                <option value="titulo" {% if orden == 'titulo' %}selected{% endif %}>Título</option>
+                <option value="precio" {% if orden == 'precio' %}selected{% endif %}>Precio</option>
+            </select>
+            <select name="dir" id="dir" class="cls-select" onchange="this.form.submit()">
+                <option value="desc" {% if dir == 'desc' %}selected{% endif %}>Descendente</option>
+                <option value="asc" {% if dir == 'asc' %}selected{% endif %}>Ascendente</option>
+            </select>
+        </form>
+    </section>
+
     {# ── CUADRÍCULA DE PRODUCTOS ── #}
-    <section class="mkt-grid-section" aria-label="Productos">
+    <section id="productos" class="mkt-grid-section" aria-label="Productos">
         {% if productos %}
         <div class="mkt-count-bar">
             <span class="mkt-count-label">{{ productos|length }} resultado{{ productos|length|pluralize }}</span>

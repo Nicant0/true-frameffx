@@ -16,7 +16,28 @@ class showProducts(ListView):
     context_object_name = 'productos'
 
     def get_queryset(self):
-        return Producto.objects.filter(publicado=True)
+        queryset = Producto.objects.filter(publicado=True)
+        
+        orden = self.request.GET.get("orden", "recientes")
+        dir = self.request.GET.get("dir", "desc")
+        
+        ordenes_permitidos = {
+            "titulo": "titulo",
+            "precio": "precio",
+            "recientes": "fecha_creacion",
+        }
+        
+        campo_orden = ordenes_permitidos.get(orden, "fecha_creacion")
+        if dir == "desc":
+            campo_orden = "-" + campo_orden
+
+        return queryset.order_by(campo_orden)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["orden"] = self.request.GET.get("orden", "recientes")
+        context["dir"] = self.request.GET.get("dir", "desc")
+        return context
 
 
 # ── CRUD Admin ────────────────────────────────────────────────────────────────
@@ -26,7 +47,28 @@ class ProductoListAdminView(StaffRequiredMixin, ListView):
     model = Producto
     template_name = 'products/producto_list.html'
     context_object_name = 'productos'
-    queryset = Producto.objects.all().order_by('-fecha_creacion')
+
+    def get_queryset(self):
+        queryset = Producto.objects.all()
+        
+        sort = self.request.GET.get("sort", "fecha_creacion")
+        dir = self.request.GET.get("dir", "desc")
+        
+        sort_permitidos = ["id", "titulo", "precio", "publicado", "fecha_creacion"]
+        if sort not in sort_permitidos:
+            sort = "fecha_creacion"
+            
+        campo_orden = sort
+        if dir == "desc":
+            campo_orden = "-" + sort
+            
+        return queryset.order_by(campo_orden)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["sort"] = self.request.GET.get("sort", "fecha_creacion")
+        context["dir"] = self.request.GET.get("dir", "desc")
+        return context
 
 
 class ProductoCreateView(StaffRequiredMixin, CreateView):

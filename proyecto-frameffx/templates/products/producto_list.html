@@ -227,10 +227,22 @@
         <table class="pl-table" aria-label="Listado de productos">
             <thead>
                 <tr>
-                    <th>Producto</th>
+                    <th>
+                        <a href="?sort=titulo&dir={% if sort == 'titulo' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                            Producto {% if sort == 'titulo' %}{% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
                     <th>Tipo</th>
-                    <th>Precio</th>
-                    <th>Estado</th>
+                    <th>
+                        <a href="?sort=precio&dir={% if sort == 'precio' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                            Precio {% if sort == 'precio' %}{% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a href="?sort=publicado&dir={% if sort == 'publicado' and dir == 'asc' %}desc{% else %}asc{% endif %}" style="color: inherit; text-decoration: none; display: flex; align-items: center; gap: 5px;">
+                            Estado {% if sort == 'publicado' %}{% if dir == 'asc' %}↑{% else %}↓{% endif %}{% endif %}
+                        </a>
+                    </th>
                     <th>Descargas máx.</th>
                     <th>Acciones</th>
                 </tr>
