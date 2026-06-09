@@ -1,0 +1,495 @@
+[
+{
+  "model": "products.producto",
+  "pk": 1,
+  "fields": {
+    "titulo": "Cinematic LUT Pack Vol. 1",
+    "descripcion": "Pack de 15 LUTs cinematográficos listos para DaVinci Resolve y Premiere Pro. Consigue ese look de película de Hollywood en segundos. Compatibles con footage LOG de Sony, Canon, Blackmagic y Fujifilm.",
+    "tipo": "preset",
+    "precio": "29.99",
+    "publicado": true,
+    "archivo_digital": "",
+    "imagen_portada": "productos/portadas/cinematic_lut_no_text.png",
+    "max_descargas": 3,
+    "fecha_creacion": "2026-05-25T07:45:03.365Z"
+  }
+},
+{
+  "model": "products.producto",
+  "pk": 2,
+  "fields": {
+    "titulo": "Guía de Colorización Profesional",
+    "descripcion": "Guía completa en PDF (85 páginas) sobre flujos de trabajo de colorización para cine y publicidad. Incluye teoría del color, uso de nodos en DaVinci y técnicas avanzadas de matching.",
+    "tipo": "guia",
+    "precio": "19.99",
+    "publicado": true,
+    "archivo_digital": "",
+    "imagen_portada": "productos/portadas/color_guide_book.png",
+    "max_descargas": 5,
+    "fecha_creacion": "2026-05-25T07:45:03.366Z"
+  }
+},
+{
+  "model": "products.producto",
+  "pk": 3,
+  "fields": {
+    "titulo": "Motion Graphics Essentials",
+    "descripcion": "Bundle con 30 plantillas de After Effects para títulos, transiciones y elementos de UI. Totalmente customizables. Ideales para YouTube, publicidad y proyectos corporativos.",
+    "tipo": "bundle",
+    "precio": "49.99",
+    "publicado": true,
+    "archivo_digital": "",
+    "imagen_portada": "productos/portadas/motion_graphics_pack.png",
+    "max_descargas": 3,
+    "fecha_creacion": "2026-05-25T07:45:03.367Z"
+  }
+},
+{
+  "model": "products.producto",
+  "pk": 4,
+  "fields": {
+    "titulo": "Plugin de Noise Reduction",
+    "descripcion": "Plugin VST/AU para eliminación de ruido en pistas de audio. Basado en algoritmos de IA, reduce el ruido de fondo hasta un 95% manteniendo la naturalidad de la voz.",
+    "tipo": "plugin",
+    "precio": "39.99",
+    "publicado": true,
+    "archivo_digital": "",
+    "imagen_portada": "productos/portadas/noise_reduction_plugin.png",
+    "max_descargas": 2,
+    "fecha_creacion": "2026-05-25T07:45:03.367Z"
+  }
+},
+{
+  "model": "products.producto",
+  "pk": 5,
+  "fields": {
+    "titulo": "Proyecto DaVinci Resolve — Wedding Cinematic",
+    "descripcion": "Proyecto completo de DaVinci Resolve para edición de bodas cinemáticas. Incluye color grading, títulos, transiciones y timeline pre-montado. Solo importa tu metraje y personaliza.",
+    "tipo": "proyecto",
+    "precio": "34.99",
+    "publicado": true,
+    "archivo_digital": "",
+    "imagen_portada": "productos/portadas/wedding_cinematic_project.png",
+    "max_descargas": 3,
+    "fecha_creacion": "2026-05-25T07:45:03.368Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 1,
+  "fields": {
+    "usuario": 5,
+    "estado": "completado",
+    "total": "29.99",
+    "referencia_pago": "pi_demo_test_frameffx_tfg",
+    "fecha_creacion": "2026-05-25T07:45:03.373Z",
+    "fecha_actualizacion": "2026-05-25T07:45:03.373Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 2,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "49.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-25T08:25:15.549Z",
+    "fecha_actualizacion": "2026-05-25T08:25:15.549Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 3,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-25T08:25:48.270Z",
+    "fecha_actualizacion": "2026-05-25T08:25:48.270Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 4,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-25T08:29:05.626Z",
+    "fecha_actualizacion": "2026-05-25T08:29:05.626Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 5,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-25T08:29:07.666Z",
+    "fecha_actualizacion": "2026-05-25T08:29:07.666Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 6,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-25T08:29:09.197Z",
+    "fecha_actualizacion": "2026-05-25T08:29:09.197Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 7,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "49.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-25T08:29:10.839Z",
+    "fecha_actualizacion": "2026-05-25T08:29:10.839Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 8,
+  "fields": {
+    "usuario": 1,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-26T09:07:19.584Z",
+    "fecha_actualizacion": "2026-05-26T09:07:19.584Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 9,
+  "fields": {
+    "usuario": 1,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-05-26T09:07:21.973Z",
+    "fecha_actualizacion": "2026-05-26T09:07:21.973Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 10,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T07:55:26.656Z",
+    "fecha_actualizacion": "2026-06-01T07:55:26.656Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 11,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T07:55:28.925Z",
+    "fecha_actualizacion": "2026-06-01T07:55:28.925Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 12,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T08:05:21.815Z",
+    "fecha_actualizacion": "2026-06-01T08:05:21.815Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 13,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T08:05:24.217Z",
+    "fecha_actualizacion": "2026-06-01T08:05:24.217Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 14,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T08:06:16.493Z",
+    "fecha_actualizacion": "2026-06-01T08:06:16.493Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 15,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "49.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T08:06:18.665Z",
+    "fecha_actualizacion": "2026-06-01T08:06:18.665Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 16,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T08:10:42.840Z",
+    "fecha_actualizacion": "2026-06-01T08:10:42.840Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 17,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T08:39:19.486Z",
+    "fecha_actualizacion": "2026-06-01T08:39:19.486Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 18,
+  "fields": {
+    "usuario": 5,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-01T09:18:28.060Z",
+    "fecha_actualizacion": "2026-06-01T09:18:28.060Z"
+  }
+},
+{
+  "model": "products.pedido",
+  "pk": 19,
+  "fields": {
+    "usuario": 1,
+    "estado": "pendiente",
+    "total": "39.99",
+    "referencia_pago": "",
+    "fecha_creacion": "2026-06-05T14:44:33.707Z",
+    "fecha_actualizacion": "2026-06-05T14:44:33.707Z"
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 1,
+  "fields": {
+    "pedido": 1,
+    "producto": 1,
+    "precio_unitario": "29.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 2,
+  "fields": {
+    "pedido": 2,
+    "producto": 3,
+    "precio_unitario": "49.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 3,
+  "fields": {
+    "pedido": 3,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 4,
+  "fields": {
+    "pedido": 4,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 5,
+  "fields": {
+    "pedido": 5,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 6,
+  "fields": {
+    "pedido": 6,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 7,
+  "fields": {
+    "pedido": 7,
+    "producto": 3,
+    "precio_unitario": "49.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 8,
+  "fields": {
+    "pedido": 8,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 9,
+  "fields": {
+    "pedido": 9,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 10,
+  "fields": {
+    "pedido": 10,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 11,
+  "fields": {
+    "pedido": 11,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 12,
+  "fields": {
+    "pedido": 12,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 13,
+  "fields": {
+    "pedido": 13,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 14,
+  "fields": {
+    "pedido": 14,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 15,
+  "fields": {
+    "pedido": 15,
+    "producto": 3,
+    "precio_unitario": "49.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 16,
+  "fields": {
+    "pedido": 16,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 17,
+  "fields": {
+    "pedido": 17,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 18,
+  "fields": {
+    "pedido": 18,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+},
+{
+  "model": "products.detallepedido",
+  "pk": 19,
+  "fields": {
+    "pedido": 19,
+    "producto": 4,
+    "precio_unitario": "39.99",
+    "cantidad": 1
+  }
+}
+]

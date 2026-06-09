@@ -3,5 +3,14 @@ __pycache__/
 *.pyc
 db.sqlite3
 .env
-media/
+
+# staticfiles se genera con collectstatic, no hace falta versionar
 staticfiles/
+
+# ──────────────────────────────────────────────────────────────
+# media/  →  SÍ versionamos para conservar imágenes de productos
+#            y perfiles entre entornos (importante para el TFG).
+#            Sólo ignoramos los archivos digitales descargables
+#            porque pueden ser grandes y no son necesarios en demo.
+# ──────────────────────────────────────────────────────────────
+media/productos/archivos/
