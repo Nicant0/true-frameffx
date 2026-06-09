@@ -247,15 +247,7 @@ SOCIALACCOUNT_PROVIDERS = {
             'access_type': 'online',
             'prompt': 'select_account',    # Fuerza a Google a mostrar el selector de cuentas
         },
-        # Las credenciales se gestionan desde el Admin de Django (método seguro)
-        # o se pueden definir aqui para entornos de desarrollo:
-        'APPS': [
-            {
-                'client_id': os.getenv('GOOGLE_CLIENT_ID', ''),
-                'secret':    os.getenv('GOOGLE_CLIENT_SECRET', ''),
-                'key':       '',
-            }
-        ],
+        # Las credenciales se gestionan desde el Admin de Django (ya configuradas en la BD)
         'OAUTH_PKCE_ENABLED': True,    # Habilita PKCE para mayor seguridad
     }
 }
