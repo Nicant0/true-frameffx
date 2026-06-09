@@ -240,7 +240,22 @@
             </div>
             <div class="cls-card-footer">
                 {% if reserva.clase.is_active_now %}
-                {% if reserva.estado == 'pendiente' or reserva.estado == 'confirmada' %}
+                
+                {% if reserva.estado == 'pendiente_pago' %}
+                <!-- Si se quedó a medias en Stripe, le damos la opción de reintentar -->
+                <form method="post" action="{% url 'booking_checkout' reserva.clase.pk %}" style="margin-bottom: 8px;">
+                    {% csrf_token %}
+                    <button type="submit" class="cls-book-btn">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                             stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <rect x="2" y="5" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/>
+                        </svg>
+                        Finalizar Pago
+                    </button>
+                </form>
+                {% endif %}
+
+                {% if reserva.estado == 'pendiente' or reserva.estado == 'confirmada' or reserva.estado == 'pendiente_pago' %}
                 <form method="post" action="{% url 'booking_cancel' reserva.pk %}" onsubmit="return confirm('¿Estás seguro de que deseas cancelar tu plaza para esta clase?\n\nAl confirmar, tu plaza quedará liberada. Los reembolsos no son automáticos. Si tienes derecho a devolución, por favor contacta con soporte@frameffx.com tras cancelar.');">
                     {% csrf_token %}
                     <button type="submit" class="cls-cancel-btn">

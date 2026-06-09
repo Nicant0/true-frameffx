@@ -63,43 +63,44 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
             usuario=request.user,
         ).exclude(estado__in=["cancelada", "caducada"]).first()
 
+        reserva = None
+
         if reserva_existente:
             if reserva_existente.estado == "confirmada":
                 messages.info(
                     request,
                     f"Ya tienes una reserva confirmada para «{clase.title}».",
                 )
+                return redirect("home")
             elif reserva_existente.estado == "pendiente_pago":
-                messages.warning(
-                    request,
-                    f"Ya tienes un pago pendiente para «{clase.title}». "
-                    "Completa el pago o cancela la reserva antes de intentarlo de nuevo.",
-                )
+                # En lugar de bloquear, REUTILIZAMOS la reserva pendiente
+                reserva = reserva_existente
             else:
                 messages.info(
                     request,
                     f"Ya tienes una reserva activa para «{clase.title}» "
                     f"(estado: {reserva_existente.get_estado_display()}).",
                 )
-            return redirect("home")
+                return redirect("home")
 
-        # ── 4. Crear reserva en estado 'pendiente_pago' ────────────────────
-        try:
-            reserva = Reserva.objects.create(
-                clase=clase,
-                usuario=request.user,
-                estado="pendiente_pago",
-            )
-        except IntegrityError:
-            messages.error(
-                request,
-                "Ya existe una reserva para esta clase. "
-                "Puede que la hayas creado en otra pestaña.",
-            )
-            return redirect("home")
-        except DatabaseError:
-            messages.error(request, "Error interno de base de datos. Inténtalo de nuevo.")
-            return redirect("home")
+        # ── 4. Crear reserva en estado 'pendiente_pago' si no existe ────────
+        if not reserva:
+            try:
+                reserva = Reserva.objects.create(
+                    clase=clase,
+                    usuario=request.user,
+                    estado="pendiente_pago",
+                )
+            except IntegrityError:
+                messages.error(
+                    request,
+                    "Ya existe una reserva para esta clase. "
+                    "Puede que la hayas creado en otra pestaña.",
+                )
+                return redirect("home")
+            except DatabaseError:
+                messages.error(request, "Error interno de base de datos. Inténtalo de nuevo.")
+                return redirect("home")
 
         # ── 5. Crear sesión de Stripe ──────────────────────────────────────
         try:

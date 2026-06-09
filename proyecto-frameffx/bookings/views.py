@@ -103,7 +103,7 @@ class ReservaCancelView(LoginRequiredMixin, View):
             usuario=request.user,  # Garantiza que solo cancela SUS reservas
         )
 
-        if reserva.estado not in ["pendiente", "confirmada"]:
+        if reserva.estado not in ["pendiente", "confirmada", "pendiente_pago"]:
             messages.warning(
                 request,
                 "Esta reserva no puede cancelarse porque ya está "
