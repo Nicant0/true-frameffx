@@ -103,13 +103,12 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
 
         # ── 5. Crear sesión de Stripe ──────────────────────────────────────
         try:
-            # Incluimos reserva.pk en el success_url para confirmar sin webhook
-            success_url = request.build_absolute_uri(
-                reverse("booking_success") + f"?reserva_id={reserva.pk}&session_id={{CHECKOUT_SESSION_ID}}"
-            )
-            cancel_url = request.build_absolute_uri(
-                reverse("home") + "?reserva_cancelada=1"
-            )
+            # Construimos la URL base absoluta sin el querystring y lo concatenamos manualmente
+            # para evitar que build_absolute_uri URL-codifique las llaves {} que necesita Stripe.
+            base_url = request.build_absolute_uri(reverse("booking_success"))
+            success_url = f"{base_url}?reserva_id={reserva.pk}&session_id={{CHECKOUT_SESSION_ID}}"
+            
+            cancel_url = request.build_absolute_uri(reverse("home") + "?reserva_cancelada=1")
 
             checkout_session = stripe.checkout.Session.create(
                 client_reference_id=f"reserva:{reserva.pk}",
