@@ -229,7 +229,7 @@ ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Login por email, no por username
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False          # El modelo Usuario no usa username
 ACCOUNT_EMAIL_VERIFICATION = 'optional'    # Cambiar a 'mandatory' en producción
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'https'    # Fuerza HTTPS en emails de allauth
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'  # HTTP en local para Google OAuth
 
 # Configuración del proveedor de Google
 # Las credenciales (CLIENT_ID y SECRET) NUNCA deben estar en código fuente.
@@ -245,6 +245,7 @@ SOCIALACCOUNT_PROVIDERS = {
         # Solicita siempre el email aunque el usuario ya haya autorizado antes
         'AUTH_PARAMS': {
             'access_type': 'online',
+            'prompt': 'select_account',    # Fuerza a Google a mostrar el selector de cuentas
         },
         # Las credenciales se gestionan desde el Admin de Django (método seguro)
         # o se pueden definir aqui para entornos de desarrollo:
