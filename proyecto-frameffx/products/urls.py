@@ -6,7 +6,7 @@ from .views import (
     ProductoUpdateView,
     ProductoDeleteView,
 )
-from .checkout_views import CreateCheckoutSessionView, StripeWebhookView, DownloadProductView
+from .checkout_views import CreateCheckoutSessionView, StripeWebhookView, DownloadProductView, ProductSuccessView
 
 app_name = 'products'
 
@@ -14,6 +14,7 @@ urlpatterns = [
     # ── Marketplace público ──────────────────────────────────────────────
     path('', showProducts.as_view(), name='showProducts'),
     path('checkout/<int:pk>/', CreateCheckoutSessionView.as_view(), name='checkout_session'),
+    path('checkout/success/', ProductSuccessView.as_view(), name='product_success'),
     path('webhook/stripe/', StripeWebhookView.as_view(), name='stripe_webhook'),
     path('download/<int:pk>/', DownloadProductView.as_view(), name='download_product'),
 

@@ -39,8 +39,12 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
         )
         
         try:
+            base_url = request.build_absolute_uri(reverse('products:product_success'))
+            success_url = f"{base_url}?pedido_id={pedido.id}&session_id={{CHECKOUT_SESSION_ID}}"
+            cancel_url = request.build_absolute_uri(reverse('products:showProducts') + '?canceled=true')
+
             checkout_session = stripe.checkout.Session.create(
-                client_reference_id=pedido.id,
+                client_reference_id=str(pedido.id),
                 payment_method_types=['card'],
                 line_items=[
                     {
@@ -55,13 +59,62 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
                     },
                 ],
                 mode='payment',
-                success_url=request.build_absolute_uri(reverse('home') + '?success=true'),
-                cancel_url=request.build_absolute_uri(reverse('home') + '?canceled=true'),
+                success_url=success_url,
+                cancel_url=cancel_url,
             )
             return redirect(checkout_session.url, code=303)
         except Exception as e:
             messages.error(request, f"Error al iniciar el pago: {str(e)}")
             return redirect('products:showProducts')
+
+
+class ProductSuccessView(LoginRequiredMixin, View):
+    """
+    Vista de retorno tras un pago exitoso en Stripe para Productos.
+    Verifica directamente la sesión para confirmar el pedido localmente.
+    """
+    http_method_names = ["get"]
+
+    def get(self, request, *args, **kwargs):
+        pedido_id = request.GET.get("pedido_id")
+        session_id = request.GET.get("session_id")
+
+        if not pedido_id or not session_id:
+            messages.warning(request, "Parámetros de pago incompletos.")
+            return redirect("products:showProducts")
+
+        try:
+            pedido = Pedido.objects.get(id=pedido_id, usuario=request.user)
+        except Pedido.DoesNotExist:
+            messages.error(request, "Pedido no encontrado.")
+            return redirect("products:showProducts")
+
+        if pedido.estado == "completado":
+            messages.success(request, f"¡Tu compra de «{pedido.detalles.first().producto.titulo}» ya estaba confirmada!")
+            return redirect(reverse("products:showProducts") + "?compra_ok=1")
+
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            if session.payment_status == "paid":
+                pedido.estado = "completado"
+                pedido.referencia_pago = session.get('payment_intent', '')
+                pedido.save(update_fields=["estado", "referencia_pago"])
+                
+                titulo = pedido.detalles.first().producto.titulo if pedido.detalles.exists() else "tu producto"
+                messages.success(
+                    request,
+                    f"¡Compra confirmada! Ya puedes descargar «{titulo}» desde tu perfil.",
+                )
+                return redirect(reverse("products:showProducts") + "?compra_ok=1")
+            else:
+                messages.warning(
+                    request,
+                    "El pago aún no está procesado. Espera unos segundos y recarga.",
+                )
+                return redirect("products:showProducts")
+        except Exception as e:
+            messages.error(request, f"Error al verificar el pago: {e}")
+            return redirect("products:showProducts")
 
 
 @method_decorator(csrf_exempt, name='dispatch')
