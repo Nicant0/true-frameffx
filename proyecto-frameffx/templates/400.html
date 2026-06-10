@@ -1,0 +1,23 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}Solicitud Incorrecta · FrameffX{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login">
+        <div class="login-box fade-in-up" style="text-align: center;">
+            <div class="auth-icon" style="font-size: 5rem; color: var(--color-danger); margin-bottom: 1rem;">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <h1 style="margin-bottom: 0.5rem; font-size: 4rem; color: var(--color-text);">400</h1>
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Solicitud Incorrecta</h2>
+            <p class="login-subtitle" style="margin-bottom: 2rem;">
+                Tu navegador ha enviado una petición que este servidor no ha podido entender.
+            </p>
+            <a href="{% url 'home' %}" class="submit-btn" style="text-decoration: none; display: inline-block;">
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

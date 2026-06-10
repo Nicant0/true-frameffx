@@ -33,7 +33,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     """
     Modelo de Usuario personalizado (Custom User Model) para FrameffX.
 
-    He reemplazado la implementación estándar de Django para obligar a usar el 'email'
+    He reemplazado la implementación estándar de Django para obligar a usar el email
     como credencial de acceso principal (USERNAME_FIELD). Sigo manteniendo los roles
     y permisos estándar (is_staff, is_superuser, is_active) y dejo el campo 'username'
     como secundario y opcional, pensado para mostrar un apodo en la interfaz sin
@@ -50,7 +50,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
         unique=True
     )
 
-    # Campos de Perfil de Usuario
+    # Campos del perfil público del usuario
     foto_perfil = models.ImageField(
         upload_to='perfiles/',
         null=True,
@@ -80,10 +80,8 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    # Manager personalizado
     objects = UsuarioManager()
 
-    # Campo identificador
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 

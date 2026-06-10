@@ -37,8 +37,10 @@ class AdminDashboardView(StaffRequiredMixin, TemplateView):
         context["usuarios_activos"] = Usuario.objects.filter(is_active=True).count()
         
         # Métricas de Ventas
-        ingresos = Pedido.objects.filter(estado="completado").aggregate(total_sum=Sum("total"))["total_sum"]
-        context["total_ingresos"] = ingresos if ingresos else 0
+        ingresos_pedidos = Pedido.objects.filter(estado="completado").aggregate(total_sum=Sum("total"))["total_sum"] or 0
+        ingresos_reservas = Reserva.objects.filter(estado="confirmada").aggregate(total_sum=Sum("clase__price"))["total_sum"] or 0
+        
+        context["total_ingresos"] = ingresos_pedidos + ingresos_reservas
         context["ultimos_pedidos"] = Pedido.objects.all().select_related("usuario").order_by("-fecha_creacion")[:5]
         
         # Métricas de Reservas

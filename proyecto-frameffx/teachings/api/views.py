@@ -6,13 +6,15 @@ from teachings.models import Teaching
 from .pagination import paginador_teaching1
 
 
+from django.utils import timezone
+
 class TeachingViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     permission_classes = [AllowAny]
     serializer_class = TeachingSerializer
     pagination_class = paginador_teaching1
 
     def get_queryset(self):
-        return Teaching.objects.all()
+        return Teaching.objects.filter(estado="activa", start_at__gt=timezone.now())
 
 
 class TeachingAuthenticatedListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
@@ -21,7 +23,7 @@ class TeachingAuthenticatedListViewSet(mixins.ListModelMixin, viewsets.GenericVi
     pagination_class = paginador_teaching1
 
     def get_queryset(self):
-        return Teaching.objects.all()
+        return Teaching.objects.filter(estado="activa", start_at__gt=timezone.now())
 
 
 class TeachingCRUDView(viewsets.ModelViewSet):

@@ -7,12 +7,12 @@ from .models import Usuario
 
 class RegistroForm(forms.Form):
     """
-    Formulario de registro público para nuevos usuarios (Signup).
+    Formulario de registro público para nuevos usuarios (Sign up).
 
     Este formulario valida que el correo electrónico no esté duplicado,
     aplica las validaciones de seguridad de contraseña definidas en Django,
-    y verifica que ambas contraseñas coincidan. Utiliza el modelo Usuario
-    personalizado (email como USERNAME_FIELD).
+    y verifica que ambas contraseñas coincidan.
+     Utiliza el modelo Usuario personalizado (email como USERNAME_FIELD).
     """
 
     nombre = forms.CharField(
@@ -55,7 +55,7 @@ class RegistroForm(forms.Form):
         }),
     )
 
-    # ── Validaciones ─────────────────────────────────────────────
+    # ── Validaciones ──
 
     def clean_email(self):
         """Verifica que el email no esté ya registrado."""
@@ -67,14 +67,13 @@ class RegistroForm(forms.Form):
         return email
 
     def clean_password1(self):
-        """Aplica los validadores de contraseña de Django (settings.AUTH_PASSWORD_VALIDATORS)."""
+        """Aplica los validadores de contraseña de Django."""
         password = self.cleaned_data.get("password1")
         if password:
             validate_password(password)
         return password
 
     def clean(self):
-        """Comprueba que ambas contraseñas coincidan."""
         cleaned = super().clean()
         p1 = cleaned.get("password1")
         p2 = cleaned.get("password2")
@@ -82,7 +81,7 @@ class RegistroForm(forms.Form):
             self.add_error("password2", "Las contraseñas no coinciden.")
         return cleaned
 
-    # ── Creación del usuario ──────────────────────────────────────
+    # ── Creación del usuario ──
 
     def save(self):
         """
@@ -98,10 +97,10 @@ class RegistroForm(forms.Form):
         user = Usuario(
             email=email,
             username=nombre or None,
-            is_active=True,   # rol usuario estándar: puede acceder a vistas protegidas
-            is_staff=False,   # no tiene acceso al panel de administración
+            is_active=True,  
+            is_staff=False,  
         )
-        user.set_password(password)   # encripta la contraseña con PBKDF2
+        user.set_password(password)
         user.save()
         return user
 
@@ -130,3 +129,11 @@ class UserProfileForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['email'].disabled = True
+
+    def clean_foto_perfil(self):
+        foto = self.cleaned_data.get('foto_perfil')
+        if foto:
+            # Límite de 5 MB para evitar que llenen el disco
+            if foto.size > 5 * 1024 * 1024:
+                raise ValidationError("La imagen de perfil no puede pesar más de 5MB.")
+        return foto

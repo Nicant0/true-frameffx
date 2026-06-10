@@ -1,4 +1,3 @@
-# Inter_3.a – Definición del modelo Producto y lógica transaccional de la tienda
 from django.conf import settings
 from django.db import models
 
@@ -6,11 +5,11 @@ from django.db import models
 class Producto(models.Model):
     """
     Representa un artículo digital en el marketplace (presets, guías, bundles).
-    He definido este modelo para que sea lo suficientemente flexible como para soportar
-    distintos tipos de archivos y limitar sus descargas por seguridad.
+    Diseñado para ser flexible y soportar distintos tipos de archivos,
+    con un límite de descargas por comprador para mayor control.
     """
 
-    # Inter_3.a – Tipos posibles de producto
+    # Tipos posibles de producto
     TIPOS_PRODUCTO = [
         ("preset", "Preset"),
         ("guia", "Guía"),
@@ -19,7 +18,7 @@ class Producto(models.Model):
         ("bundle", "Bundle"),
     ]
 
-    # Inter_3.a – Campos principales del modelo
+    # Campos principales
     titulo = models.CharField(
         max_length=150,
         verbose_name="Título"
@@ -42,7 +41,7 @@ class Producto(models.Model):
         verbose_name="Publicado"
     )
 
-    # ── Recurso digital ──────────────────────────────────────────────────────
+    # Recurso digital y archivos asociados
     archivo_digital = models.FileField(
         upload_to="productos/archivos/",
         null=True,
@@ -67,11 +66,9 @@ class Producto(models.Model):
         verbose_name="Fecha de creación"
     )
 
-    # Inter_3.b – Representación textual del modelo
     def __str__(self):
         return self.titulo
 
-    # Inter_3.c – Configuración avanzada del modelo
     class Meta:
         verbose_name = "Producto"
         verbose_name_plural = "Productos"
@@ -79,14 +76,12 @@ class Producto(models.Model):
         unique_together = ("titulo", "tipo")
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# MODELOS TRANSACCIONALES DE LA TIENDA
-# ─────────────────────────────────────────────────────────────────────────────
+# Modelos transaccionales de la tienda
 
 class Pedido(models.Model):
     """
     Representa la cabecera de una compra realizada por un usuario.
-    He separado el pedido en Cabecera (Pedido) y Líneas (DetallePedido) 
+    El pedido se divide en cabecera (Pedido) y líneas de detalle (DetallePedido)
     siguiendo las buenas prácticas de normalización de bases de datos.
     """
 
@@ -136,9 +131,8 @@ class Pedido(models.Model):
 class DetallePedido(models.Model):
     """
     Línea de detalle que vincula un Producto a un Pedido.
-    Aquí es fundamental guardar el 'precio_unitario' histórico para que, 
-    si cambio el precio del producto en el futuro, no se altere el total
-    de los pedidos ya completados.
+    Almacena el 'precio_unitario' histórico para que futuros cambios de precio
+    en el producto no alteren el total de los pedidos ya completados.
     """
 
     pedido = models.ForeignKey(
@@ -149,12 +143,12 @@ class DetallePedido(models.Model):
     )
     producto = models.ForeignKey(
         Producto,
-        on_delete=models.PROTECT,   # Nunca borrar el producto si tiene pedidos
+        on_delete=models.PROTECT,   # El producto no puede eliminarse si tiene pedidos asociados
         related_name="detalles_pedido",
         verbose_name="Producto",
     )
-    # Precio histórico: guardamos el precio en el momento de la compra para
-    # evitar que cambios futuros al producto alteren el registro contable.
+    # El precio se guarda en el momento de la compra para preservar el registro contable
+    # aunque el precio del producto se modifique en el futuro
     precio_unitario = models.DecimalField(
         max_digits=8,
         decimal_places=2,
@@ -177,9 +171,8 @@ class DetallePedido(models.Model):
 class Descarga(models.Model):
     """
     Registra cada descarga efectiva de un archivo digital por parte de un usuario.
-    He implementado este modelo para tener un control estricto de seguridad y
-    poder limitar el número de veces que un comprador se baja el archivo
-    (usando el campo max_descargas del Producto).
+    Permite controlar el número de veces que un comprador descarga el archivo,
+    haciendo respetar el límite definido en el campo max_descargas del Producto.
     """
 
     detalle = models.ForeignKey(

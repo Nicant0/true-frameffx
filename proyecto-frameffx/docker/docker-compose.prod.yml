@@ -10,8 +10,7 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "5432:5432"
+    # Puerto NO expuesto al exterior — solo accesible desde la red Docker interna
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
@@ -24,16 +23,14 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.prod
     container_name: frameffx_web
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn FrameffX.wsgi:application --bind 0.0.0.0:8000 --workers 4 --worker-class sync"
+    # El entrypoint.sh ya ejecuta migrate, collectstatic y arranca gunicorn
     volumes:
       - ..:/code
       - static_volume:/code/staticfiles
       - media_volume:/code/media
-    ports:
-      - "8000:8000"
+    # Puerto NO expuesto al exterior — nginx hace de proxy inverso
+    env_file:
+      - ../.env.prod
     environment:
       DEBUG: "False"
       DJANGO_SETTINGS_MODULE: FrameffX.settings
@@ -51,6 +48,12 @@ services:
       EMAIL_USE_TLS: ${EMAIL_USE_TLS}
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      STRIPE_PUBLIC_KEY: ${STRIPE_PUBLIC_KEY}
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+      STRIPE_WEBHOOK_SECRET: ${STRIPE_WEBHOOK_SECRET}
+      SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-False}
+      SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-False}
+      CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-False}
     depends_on:
       postgres:
         condition: service_healthy

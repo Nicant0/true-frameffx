@@ -6,8 +6,7 @@ from users.forms import RegistroForm
 class RegistroFormTests(TestCase):
     """
     Pruebas unitarias para el formulario de registro y creación de usuarios.
-    Verifica que la lógica de negocio (validaciones y cifrado) funciona
-    correctamente, asegurando la robustez de la aplicación.
+    Verifica que la lógica de negocio funciona correctamente.
     """
 
     def setUp(self):
@@ -65,9 +64,11 @@ class RegistroFormTests(TestCase):
         
         form = RegistroForm(data=data)
         self.assertFalse(form.is_valid())
-        self.assertIn("email", form.errors)
+        errors = form.errors
+        assert errors is not None
+        self.assertIn("email", errors)
         self.assertEqual(
-            form.errors["email"][0],
+            errors["email"][0],
             "Ya existe una cuenta con este correo electrónico."
         )
 
@@ -80,8 +81,10 @@ class RegistroFormTests(TestCase):
         
         form = RegistroForm(data=data)
         self.assertFalse(form.is_valid())
-        self.assertIn("password2", form.errors)
+        errors = form.errors
+        assert errors is not None
+        self.assertIn("password2", errors)
         self.assertEqual(
-            form.errors["password2"][0],
+            errors["password2"][0],
             "Las contraseñas no coinciden."
         )

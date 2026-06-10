@@ -1,6 +1,6 @@
 from django.contrib import messages
 from django.db import DatabaseError, IntegrityError
-from django.db.models import Q
+from django.db.models import Q, ProtectedError
 from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
@@ -18,10 +18,10 @@ class showTeachings(ListView):
     """
     Vista principal del catálogo de clases virtuales.
     
-    He unificado aquí la lógica de visualización para tres tipos de perfiles:
-    ─ Staff/Admins: Ven todo el catálogo histórico y filtros avanzados.
-    ─ Usuarios Logueados: Ven solo clases 'activas' y cruzo los datos con su historial de reservas.
-    ─ Invitados (anónimos): Ven el catálogo público sin inyección de datos personales.
+    Unifica la lógica de visualización para tres tipos de perfil:
+    - Staff y administradores: ven todo el catálogo histórico con filtros avanzados.
+    - Usuarios autenticados: ven solo clases activas cruzadas con su historial de reservas.
+    - Invitados anónimos: ven el catálogo público sin datos personales.
     """
 
     model = Teaching
@@ -72,8 +72,7 @@ class showTeachings(ListView):
         context["orden"] = self.request.GET.get("orden", "recientes")
         context["dir"] = self.request.GET.get("dir", "desc")
 
-        # Solo inyectamos el historial de reservas si el usuario está logueado
-        # y no es staff (los invitados anónimos no tienen reservas).
+        # Inyecta el historial de reservas solo para usuarios autenticados que no sean staff
         user = self.request.user
         if user.is_authenticated and not user.is_staff:
             reservas_usuario = (
@@ -92,10 +91,10 @@ class showTeachings(ListView):
                 Q(clase__estado="finalizada") | Q(clase__end_at__lt=timezone.now())
             ).order_by("-clase__end_at")
 
-            # Pedidos completados: inyectamos los pedidos con sus líneas de detalle
+            # Incluye los pedidos con sus líneas de detalle
             context["pedidos_completados"] = get_pedidos_completados_para_usuario(user)
         else:
-            # Garantizamos que el template siempre reciba estas variables seguras
+            # Inyecta variables seguras cuando el usuario no está autenticado o es staff
             context["reservas_ids"] = set()
             context["reservas_activas"] = Reserva.objects.none()
             context["reservas_finalizadas"] = Reserva.objects.none()
@@ -106,8 +105,8 @@ class showTeachings(ListView):
 
 class TeachingCreateView(StaffRequiredMixin, CreateView):
     """
-    Vista (solo para staff) encargada de la creación de una nueva clase en el catálogo.
-    Manejo excepciones de integridad por si intento crear una clase duplicada en horario.
+    Vista exclusiva para staff encargada de la creación de nuevas clases en el catálogo.
+    Captura excepciones de integridad para gestionar clases duplicadas en el mismo horario.
     """
     model = Teaching
     form_class = TeachingForm
@@ -138,8 +137,8 @@ class TeachingDetailView(StaffRequiredMixin, DetailView):
 
 class TeachingUpdateView(StaffRequiredMixin, UpdateView):
     """
-    Permite al Staff actualizar los datos de la clase. Incluye capturas de 
-    excepciones para evitar crasheos si introduzco datos que rompen reglas de BD.
+    Permite al staff actualizar los datos de una clase.
+    Captura excepciones para evitar errores si los datos introducidos incumplen reglas de base de datos.
     """
     model = Teaching
     form_class = TeachingForm
@@ -161,8 +160,8 @@ class TeachingUpdateView(StaffRequiredMixin, UpdateView):
 
 class TeachingDeleteView(StaffRequiredMixin, DeleteView):
     """
-    Elimina permanentemente una clase del sistema. Sobrescribo el método form_valid
-    para poder mostrar un mensaje amigable al administrador con el título de la clase borrada.
+    Elimina permanentemente una clase del sistema.
+    Sobreescribe form_valid para mostrar un mensaje con el título de la clase eliminada.
     """
     model = Teaching
     template_name = "portfolio/teaching_confirm_delete.html"
@@ -171,12 +170,21 @@ class TeachingDeleteView(StaffRequiredMixin, DeleteView):
     def form_valid(self, form):
         # DeleteView usa form_valid para manejar el borrado en las versiones recientes de Django
         try:
-            # self.object se necesita para el mensaje
+            # Recupera el objeto antes de borrarlo para usarlo en el mensaje de confirmación
             self.object = self.get_object()
             titulo = self.object.title
             response = super().form_valid(form)
             messages.success(self.request, f"La clase «{titulo}» ha sido eliminada permanentemente.")
             return response
+        except ProtectedError:
+            messages.error(
+                self.request,
+                "No se puede eliminar esta clase porque tiene reservas asociadas. "
+                "Para mantener la integridad contable de los pagos, cambia su estado "
+                "a 'Cancelada' o 'Finalizada' en lugar de eliminarla."
+            )
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(self.get_success_url())
         except DatabaseError:
             messages.error(self.request, "No se pudo eliminar la clase por un error interno de base de datos.")
             from django.http import HttpResponseRedirect

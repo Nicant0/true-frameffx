@@ -23,7 +23,7 @@ class Reserva(models.Model):
 
     clase = models.ForeignKey(
         "teachings.Teaching", 
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="reservas",
         verbose_name="Clase"
     )      
@@ -31,7 +31,7 @@ class Reserva(models.Model):
 
     usuario = models.ForeignKey(
         settings.AUTH_USER_MODEL,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="reservas",
         verbose_name="Usuario",
     )   

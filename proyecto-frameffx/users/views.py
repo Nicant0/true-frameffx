@@ -18,15 +18,15 @@ from .mixins import StaffRequiredMixin, SetPasswordMixin
 from common.utils import get_pedidos_completados_para_usuario
 
 
-# ── Registro público ──────────────────────────────────────────────────────────
+# Vistas de gestión de usuarios
 
 class SignupView(TemplateView):
     """
-    Controlador (Vista) para el registro público de nuevos usuarios.
+    Vista para el registro público de nuevos usuarios.
 
-    He creado esta vista basándome en TemplateView en lugar de FormView o CreateView 
-    para poder controlar manualmente en el método `post` el inicio de sesión 
-    automático tras un registro exitoso, mejorando así la experiencia de usuario.
+    Extiende TemplateView en lugar de FormView o CreateView para controlar
+    manualmente en el método post el inicio de sesión automático tras un
+    registro exitoso, mejorando la experiencia de usuario.
     """
     template_name = "portfolio/signup.html"
 
@@ -40,19 +40,18 @@ class SignupView(TemplateView):
         return render(request, self.template_name, {"form": form})
 
     def post(self, request, *args, **kwargs):
-        # Proceso manualmente los datos enviados en el formulario de registro
         form = RegistroForm(request.POST)
         if form.is_valid():
-            user = form.save()                      # Guardo el usuario (contraseña encriptada)
-            login(request, user,                    # Fuerzo el inicio de sesión automático
+            user = form.save()                      # Guarda el usuario con la contraseña encriptada
+            login(request, user,                    # Inicia la sesión automáticamente tras el registro
                   backend="django.contrib.auth.backends.ModelBackend")
             return redirect("home")
-        # Si hay errores, devuelvo la plantilla con los errores para que el usuario corrija
+        # Si el formulario tiene errores, lo devuelve con los mensajes de validación
         return render(request, self.template_name, {"form": form})
 
 
 class UsuariosListView(StaffRequiredMixin, ListView):
-    """Vista que he creado exclusiva para que el Staff (Admin) liste los usuarios."""
+    """Listado de todos los usuarios del sistema, accesible solo para el staff."""
     model = Usuario
     template_name = "users/usuarios_list.html"
     context_object_name = "usuarios"
@@ -63,13 +62,13 @@ class UsuariosListView(StaffRequiredMixin, ListView):
         sort = self.request.GET.get("sort", "id")
         dir = self.request.GET.get("dir", "asc")
         
-        sort_permitidos = ["id", "email", "activo", "date_joined"]
+        sort_permitidos = ["id", "email", "is_active", "create_date"]
         if sort not in sort_permitidos:
             sort = "id"
             
         campo_orden = sort
-        if sort == "date_joined":
-            campo_orden = "date_joined"
+        if sort == "create_date":
+            campo_orden = "create_date"
             
         if dir == "desc":
             campo_orden = "-" + campo_orden
@@ -83,35 +82,46 @@ class UsuariosListView(StaffRequiredMixin, ListView):
         return context
 
 class UsuariosCreateView(StaffRequiredMixin, SetPasswordMixin, CreateView):
-    """Vista exclusiva para que el Staff cree manualmente un usuario desde el panel."""
+    """Vista exclusiva para el staff para crear manualmente un nuevo usuario desde el panel."""
     model = Usuario
-    fields = ["username", "email", "activo"]
+    fields = ["username", "email", "is_active"]
     template_name = "users/usuarios_form.html"
     success_url = reverse_lazy("usuarios_list")
 
 class UsuariosUpdateView(StaffRequiredMixin, SetPasswordMixin, UpdateView):
-    """Permite al Staff actualizar los datos (incluyendo contraseñas mediante el mixin) de un usuario."""
+    """Permite al staff actualizar los datos de un usuario, incluyendo su contraseña mediante el mixin."""
     model = Usuario
-    fields = ["username", "email", "activo"]
+    fields = ["username", "email", "is_active"]
     template_name = "users/usuarios_form.html"
     success_url = reverse_lazy("usuarios_list")
 
+from django.db.models import ProtectedError
+
 class UsuariosDeleteView(StaffRequiredMixin, DeleteView):
-    """Vista exclusiva de Staff para eliminar (baja lógica o física) a un usuario."""
+    """Vista exclusiva del staff para eliminar un usuario del sistema."""
     model = Usuario
     template_name = "users/usuarios_confirm_delete.html"
     success_url = reverse_lazy("usuarios_list")
 
-class HomeView(TemplateView):
-    template_name = "portfolio/home.html"
-    login_url = '/'
+    def form_valid(self, form):
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, "Usuario eliminado correctamente.")
+            return response
+        except ProtectedError:
+            messages.error(
+                self.request,
+                "No se puede eliminar este usuario porque tiene pedidos o reservas asociados en el sistema. "
+                "Para preservar la integridad contable, por favor, desactívalo desmarcando la opción "
+                "'Activo' en lugar de eliminarlo."
+            )
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(self.get_success_url())
 
-class LoginView(TemplateView):
-    template_name = "portfolio/login.html"
 
 class UserProfileView(LoginRequiredMixin, UpdateView):
     """
-    Vista para que el usuario autenticado edite su perfil.
+    Permite al usuario autenticado editar los datos de su perfil.
     """
     model = Usuario
     form_class = UserProfileForm

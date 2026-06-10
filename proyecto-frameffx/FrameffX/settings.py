@@ -13,12 +13,11 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
-# Carga las variables de entorno desde el archivo .env (opcional)
+# Carga las variables de entorno desde el archivo .env si está disponible
 try:
     from dotenv import load_dotenv
     load_dotenv()
 except ImportError:
-    pass
     pass
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -51,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'ads',
     'bookings',
+    'login',
     'teachings',
     'common',
     'users',
@@ -60,7 +60,7 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    'allauth.socialaccount.providers.google',   # ← Proveedor de Google OAuth
+    'allauth.socialaccount.providers.google',   # Proveedor de Google OAuth
     'djoser',
 ]
 
@@ -96,11 +96,10 @@ TEMPLATES = [
 ]
 
 AUTHENTICATION_BACKENDS = (
-    # Necesaria para realizar el login usando username en el 
-    # administrador de Django, independiente de django allauth
+    # Habilita el login mediante username en el panel de administración de Django
     'django.contrib.auth.backends.ModelBackend',
 
-    # métodos de autenticación especifica, como por ejemplo email
+    # Habilita el login mediante email a través de django-allauth
     'allauth.account.auth_backends.AuthenticationBackend',
 )
 
@@ -113,7 +112,7 @@ WSGI_APPLICATION = 'FrameffX.wsgi.application'
 DB_ENGINE = os.getenv('DB_ENGINE', 'django.db.backends.sqlite3')
 
 if DB_ENGINE == 'django.db.backends.postgresql':
-    # PostgreSQL (Producción)
+    # Base de datos PostgreSQL para entornos de producción
     DATABASES = {
         'default': {
             'ENGINE': DB_ENGINE,
@@ -125,7 +124,7 @@ if DB_ENGINE == 'django.db.backends.postgresql':
         }
     }
 else:
-    # SQLite (Desarrollo)
+    # Base de datos SQLite para entornos de desarrollo local
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -165,14 +164,12 @@ USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
 STATIC_URL = '/static/'
 
-# Donde collectstatic copia TODO (producción)
+# Directorio destino de collectstatic (producción)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# Donde Django busca tus static originales
+# Directorio donde Django busca los archivos estáticos del proyecto
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
@@ -182,8 +179,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Configuración de Email
-# https://docs.djangoproject.com/en/5.2/topics/email/
+# Configuración de email
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')
@@ -191,18 +187,31 @@ EMAIL_PORT = int(os.getenv('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True') == 'True'
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+SERVER_EMAIL = os.getenv('SERVER_EMAIL', EMAIL_HOST_USER)
 
 
-# Ajustes de Seguridad
-# https://docs.djangoproject.com/en/5.2/topics/security/
+# Ajustes de seguridad activos únicamente en producción (cuando DEBUG es False)
 
 if not DEBUG:
+    # Necesario para que Django sepa que la petición original era HTTPS
+    # cuando corre detrás de un proxy inverso (Nginx). Sin esto,
+    # SECURE_SSL_REDIRECT causa un bucle infinito de redirecciones.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
     SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
     SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
     CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False') == 'True'
     SECURE_BROWSER_XSS_FILTER = os.getenv('SECURE_BROWSER_XSS_FILTER', 'False') == 'True'
     SECURE_CONTENT_SECURITY_POLICY = os.getenv('SECURE_CONTENT_SECURITY_POLICY', 'False') == 'True'
     X_FRAME_OPTIONS = os.getenv('X_FRAME_OPTIONS', 'DENY')
+
+    # Requerido por Django 4.0+ para aceptar peticiones POST desde HTTPS a través de Nginx.
+    # Sin esto, el middleware CSRF bloquea todos los formularios en producción.
+    _allowed_hosts = os.getenv('ALLOWED_HOSTS', '')
+    CSRF_TRUSTED_ORIGINS = [
+        f'https://{h.strip()}' for h in _allowed_hosts.split(',') if h.strip()
+    ]
 
 
 # Default primary key field type
@@ -215,57 +224,69 @@ AUTH_USER_MODEL = 'users.Usuario'
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
 
-# Redirects de autenticación
-LOGIN_REDIRECT_URL = '/'      # Redirige a la raíz para que LandingView enrute al Marketplace
+# Rutas de redirección tras el inicio y cierre de sesión
+LOGIN_REDIRECT_URL = '/'      # Redirige a la raíz, donde LandingView enruta al marketplace
 LOGIN_URL = '/login/'
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONFIGURACIÓN DE ALLAUTH Y GOOGLE OAUTH 2.0
-# ─────────────────────────────────────────────────────────────────────────────
+# Configuración de allauth y Google OAuth 2.0
 
 # Comportamiento general de allauth
-ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Login por email, no por username
+ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Usa el email como método de autenticación
 ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False          # El modelo Usuario no usa username
-ACCOUNT_EMAIL_VERIFICATION = 'optional'    # Cambiar a 'mandatory' en producción
-ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'  # HTTP en local para Google OAuth
+ACCOUNT_USERNAME_REQUIRED = False          # El modelo Usuario no utiliza username
+ACCOUNT_EMAIL_VERIFICATION = 'optional'    # En producción se recomienda 'mandatory'
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'  # HTTP en local, HTTPS en producción
 
 # Configuración del proveedor de Google
-# Las credenciales (CLIENT_ID y SECRET) NUNCA deben estar en código fuente.
-# Déjalas en blanco aquí: se cargan desde el .env o se configuran directamente
-# en el panel de Django Admin (Sites > Social Applications > Añadir).
+# Las credenciales (CLIENT_ID y SECRET) no se almacenan en código fuente.
+# Se cargan desde el archivo .env o se configuran en el panel de Django Admin
+# (Sites > Social Applications).
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        # Scopes mínimos necesarios: perfil básico + email
+        # Scopes mínimos requeridos: perfil básico y email
         'SCOPE': [
             'profile',
             'email',
         ],
-        # Solicita siempre el email aunque el usuario ya haya autorizado antes
+        # Solicita el email en cada autorización, aunque el usuario ya haya autorizado previamente
         'AUTH_PARAMS': {
             'access_type': 'online',
-            'prompt': 'select_account',    # Fuerza a Google a mostrar el selector de cuentas
+            'prompt': 'select_account',    # Muestra el selector de cuentas de Google
         },
-        # Las credenciales se gestionan desde el Admin de Django (ya configuradas en la BD)
-        'OAUTH_PKCE_ENABLED': False,    # Habilita PKCE para mayor seguridad
+        # Las credenciales OAuth se configuran desde el Admin de Django
+        'OAUTH_PKCE_ENABLED': False,
     }
 }
 
-# Permite iniciar sesión directamente al hacer clic en el enlace GET sin la pantalla de confirmación intermedia
+# Inicia la sesión directamente al hacer clic en el enlace OAuth sin pantalla de confirmación intermedia
 SOCIALACCOUNT_LOGIN_ON_GET = True
 
-# Evita crear cuentas duplicadas si el email ya existe en la BD local
+# Vincula la cuenta social al usuario existente si el email ya está registrado localmente
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# CONFIGURACIÓN DE STRIPE
-# ─────────────────────────────────────────────────────────────────────────────
+# Configuración de Stripe
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', 'pk_test_tymock')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_tymock')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET', 'whsec_tymock')
+
+# Configuración de API REST (DRF y Simple JWT)
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
 
 LOGGING = {
     'version': 1,

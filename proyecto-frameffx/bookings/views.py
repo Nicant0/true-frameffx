@@ -43,19 +43,30 @@ class ReservaCreateView(LoginRequiredMixin, View):
             )
             return redirect("home")
 
-        # Validación 3: no duplicar reserva activa
+        # Validación 3: no duplicar reserva activa y reciclar canceladas
         reserva_existente = Reserva.objects.filter(
             clase=clase,
             usuario=request.user,
-        ).exclude(estado__in=["cancelada", "caducada"]).first()
+        ).first()
 
         if reserva_existente:
-            messages.info(
-                request,
-                f"Ya tienes una reserva activa para «{clase.title}» "
-                f"(estado: {reserva_existente.get_estado_display()}).",
-            )
-            return redirect("home")
+            if reserva_existente.estado in ["cancelada", "caducada"]:
+                # RECICLAJE: La base de datos tiene unique_together(clase, usuario)
+                reserva_existente.estado = "pendiente"
+                reserva_existente.save(update_fields=["estado"])
+                messages.success(
+                    request,
+                    f"¡Reserva para «{clase.title}» reactivada con éxito! "
+                    "Recibirás la confirmación por correo electrónico.",
+                )
+                return redirect("home")
+            else:
+                messages.info(
+                    request,
+                    f"Ya tienes una reserva activa para «{clase.title}» "
+                    f"(estado: {reserva_existente.get_estado_display()}).",
+                )
+                return redirect("home")
 
         # Crear la reserva 
         try:

@@ -1,4 +1,3 @@
-# Inter_7.a – Vistas de Marketplace (pública) y gestión admin (CRUD)
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -8,7 +7,7 @@ from .forms import ProductoForm
 from users.mixins import StaffRequiredMixin
 
 
-# ── Vista pública ─────────────────────────────────────────────────────────────
+# Vista pública del marketplace
 
 class showProducts(ListView):
     model = Producto
@@ -40,7 +39,7 @@ class showProducts(ListView):
         return context
 
 
-# ── CRUD Admin ────────────────────────────────────────────────────────────────
+# CRUD de productos para el administrador
 
 class ProductoListAdminView(StaffRequiredMixin, ListView):
     """Listado de todos los productos para el administrador."""
@@ -95,6 +94,8 @@ class ProductoUpdateView(StaffRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
+from django.db.models import ProtectedError
+
 class ProductoDeleteView(StaffRequiredMixin, DeleteView):
     """Confirmar y eliminar un producto."""
     model = Producto
@@ -102,5 +103,16 @@ class ProductoDeleteView(StaffRequiredMixin, DeleteView):
     success_url = reverse_lazy('products:product_list_admin')
 
     def form_valid(self, form):
-        messages.success(self.request, "Producto eliminado correctamente.")
-        return super().form_valid(form)
+        try:
+            response = super().form_valid(form)
+            messages.success(self.request, "Producto eliminado correctamente.")
+            return response
+        except ProtectedError:
+            messages.error(
+                self.request, 
+                "No se puede eliminar este producto porque ya tiene pedidos asociados. "
+                "Para evitar pérdida de datos contables y de descargas de clientes, "
+                "por favor edítalo y desmarca la opción 'Publicado' en lugar de borrarlo."
+            )
+            from django.http import HttpResponseRedirect
+            return HttpResponseRedirect(self.get_success_url())

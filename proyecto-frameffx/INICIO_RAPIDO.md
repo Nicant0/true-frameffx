@@ -137,8 +137,7 @@ pip install -r requirements.txt
 # Crear .env con SECRET_KEY, DEBUG=True, ALLOWED_HOSTS=localhost,127.0.0.1
 
 python manage.py migrate
-python manage.py seed_products
-python manage.py seed_teachings
+python manage.py loaddata demo_data.json   # carga el catálogo completo de demo
 python manage.py createsuperuser
 python manage.py runserver
 ```

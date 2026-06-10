@@ -1,37 +1,54 @@
 #!/bin/bash
-# Script para renovar certificados SSL con Certbot
+# ============================================================
+# ssl_renew.sh — Renueva el certificado SSL de Let's Encrypt
+# Llamar manualmente o via cron cada ~2 meses
+# ============================================================
 
 set -e
 
-DOMAIN="yourdomain.com"
-EMAIL="admin@yourdomain.com"
+# ── Directorio raíz del proyecto ───────────────────────────
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_DIR"
+
+# ── Leer el dominio desde .env.prod ────────────────────────
+if [ -f ".env.prod" ]; then
+    DOMAIN=$(grep "^ALLOWED_HOSTS=" .env.prod | head -1 | cut -d'=' -f2 | cut -d',' -f1)
+else
+    echo "❌  No se encontró .env.prod. Ejecuta setup_prod.sh primero."
+    exit 1
+fi
+
+if [ -z "$DOMAIN" ]; then
+    echo "❌  No se pudo leer el dominio de .env.prod"
+    exit 1
+fi
 
 echo "================================"
-echo "🔐 Renovando certificados SSL"
+echo "🔐 Renovando certificado SSL"
+echo "   Dominio: $DOMAIN"
 echo "================================"
-
-# Cambiar a directorio del proyecto
-cd "$(dirname "$0")/.."
 
 echo "📋 Verificando certificados existentes..."
 if [ -d "docker/certbot/conf/live/$DOMAIN" ]; then
     echo "♻️  Renovando certificado existente..."
-    docker-compose -f docker/docker-compose.prod.yml run --rm certbot renew --webroot
-else
-    echo "🆕 Obteniendo nuevo certificado..."
-    docker-compose -f docker/docker-compose.prod.yml run --rm certbot certonly \
+    docker run --rm \
+        -v "$(pwd)/docker/certbot/conf:/etc/letsencrypt" \
+        -v "$(pwd)/docker/certbot/www:/var/www/certbot" \
+        certbot/certbot renew \
         --webroot \
         --webroot-path=/var/www/certbot \
-        --email $EMAIL \
-        --agree-tos \
-        --no-eff-email \
-        -d $DOMAIN \
-        -d www.$DOMAIN
+        --non-interactive \
+        --quiet
+else
+    echo "❌  No se encontró certificado para $DOMAIN"
+    echo "   Ejecuta setup_prod.sh para obtener el certificado por primera vez."
+    exit 1
 fi
 
 echo "🔄 Recargando Nginx..."
-docker-compose -f docker/docker-compose.prod.yml exec -T nginx nginx -s reload
+docker compose -f docker/docker-compose.prod.yml exec -T nginx nginx -s reload
 
 echo "================================"
-echo "✅ Certificados SSL actualizados"
+echo "✅ Certificado SSL actualizado"
 echo "================================"

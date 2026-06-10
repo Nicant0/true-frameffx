@@ -2,14 +2,14 @@
 bookings/checkout_views.py
 Gestiona el flujo de pago Stripe para la reserva de clases virtuales.
 
-He programado el siguiente flujo de vida de la reserva:
+Flujo de vida de la reserva:
   1. El usuario hace POST a ReservaCheckoutView.
-  2. Compruebo que la clase esté activa y que el usuario no la tenga ya reservada.
-  3. Creo un registro en la BD con estado='pendiente_pago'.
-  4. Levanto una sesión de Stripe Checkout y redirijo al usuario allí.
+  2. Se verifica que la clase esté activa y que el usuario no tenga ya una reserva.
+  3. Se crea un registro en la BD con estado='pendiente_pago'.
+  4. Se inicia una sesión de Stripe Checkout y se redirige al usuario.
   5a. (Producción) El webhook asíncrono actualiza la Reserva a 'confirmada'.
   5b. (Desarrollo/Demo) ReservaSuccessView verifica la sesión directamente con la API
-      de Stripe y confirma la reserva — no requiere webhook local.
+      de Stripe y confirma la reserva sin necesidad de webhook local.
 """
 
 import stripe
@@ -31,12 +31,13 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
     """
     Controlador para iniciar el pago Stripe al reservar una clase.
 
-    Para proteger la integridad de los datos, realizo tres validaciones previas:
-      1. Evito que los administradores puedan reservar clases.
-      2. Verifico que la clase siga estando 'activa'.
-      3. Consulto la BD para evitar duplicados si el usuario ya tiene una reserva activa.
+    Aplica tres validaciones previas para proteger la integridad de los datos:
+      1. Los administradores no pueden reservar clases.
+      2. La clase debe seguir en estado 'activa'.
+      3. Se comprueba que el usuario no tenga ya una reserva activa para esa clase.
 
-    Si todo es correcto, creo la Reserva ('pendiente_pago') y redirijo a Stripe.
+    Si las validaciones son correctas, crea la Reserva en estado 'pendiente_pago'
+    y redirige a Stripe.
     """
 
     http_method_names = ["post"]
@@ -57,11 +58,11 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
             )
             return redirect("home")
 
-        # 3. No duplicar reserva activa
+        # 3. No duplicar reserva activa y reciclar canceladas
         reserva_existente = Reserva.objects.filter(
             clase=clase,
             usuario=request.user,
-        ).exclude(estado__in=["cancelada", "caducada"]).first()
+        ).first()
 
         reserva = None
 
@@ -72,17 +73,16 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
                     f"Ya tienes una reserva confirmada para «{clase.title}».",
                 )
                 return redirect("home")
-            elif reserva_existente.estado == "pendiente_pago":
-                # En lugar de bloquear, reutilizamos la reserva pendiente
+            elif reserva_existente.estado in ["pendiente_pago", "pendiente"]:
+                # Se reutiliza la reserva pendiente en lugar de bloquear al usuario
                 reserva = reserva_existente
-            else:
-                messages.info(
-                    request,
-                    f"Ya tienes una reserva activa para «{clase.title}» "
-                    f"(estado: {reserva_existente.get_estado_display()}).",
-                )
-                return redirect("home")
-
+            elif reserva_existente.estado in ["cancelada", "caducada"]:
+                # RECICLAJE: La base de datos tiene unique_together(clase, usuario)
+                # No podemos crear una nueva, así que reactivamos la antigua
+                reserva = reserva_existente
+                reserva.estado = "pendiente_pago"
+                reserva.save(update_fields=["estado"])
+                
         # 4. Crear reserva en estado 'pendiente_pago' si no existe
         if not reserva:
             try:
@@ -102,9 +102,17 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
                 messages.error(request, "Error interno de base de datos. Inténtalo de nuevo.")
                 return redirect("home")
 
+        # 4.5. Si la clase es gratis, confirmar directamente sin pasar por Stripe
+        if clase.price <= 0:
+            reserva.estado = "confirmada"
+            reserva.save(update_fields=["estado"])
+            messages.success(request, f"¡Reserva confirmada! Tu plaza para «{clase.title}» es gratuita.")
+            return redirect(reverse("home") + "?reserva_ok=1")
+
         # 5. Crear sesión de Stripe
         try:
-            # Construimos la URL base absoluta sin el querystring y se concatena manualmente para evitar que build_absolute_uri URL-codifique las llaves {} que necesita Stripe.
+            # La URL base se construye sin querystring y se concatena manualmente
+            # para evitar que build_absolute_uri codifique las llaves {} que necesita Stripe
             base_url = request.build_absolute_uri(reverse("booking_success"))
             success_url = f"{base_url}?reserva_id={reserva.pk}&session_id={{CHECKOUT_SESSION_ID}}"
             
@@ -136,7 +144,7 @@ class ReservaCheckoutView(LoginRequiredMixin, View):
             return redirect(checkout_session.url, code=303)
 
         except Exception as e:
-            # Si Stripe falla, eliminamos la reserva para no dejar datos huérfanos
+            # Si Stripe falla, se elimina la reserva para evitar registros huérfanos
             reserva.delete()
             messages.error(
                 request,
@@ -150,11 +158,11 @@ class ReservaSuccessView(LoginRequiredMixin, View):
     Vista de retorno tras un pago exitoso en Stripe.
 
     Stripe redirige aquí con ?reserva_id=X&session_id=cs_test_...
-    Verificamos directamente con la API de Stripe que el pago está 'paid'
-    y confirmamos la reserva en base de datos.
+    Verifica directamente con la API de Stripe que el pago esté en estado 'paid'
+    y confirma la reserva en base de datos.
 
     Esto hace el flujo funcional en desarrollo local sin necesidad de webhook.
-    En producción, el webhook también confirmará para mayor seguridad.
+    En producción, el webhook también confirma la reserva para mayor seguridad.
     """
 
     http_method_names = ["get"]
@@ -177,10 +185,10 @@ class ReservaSuccessView(LoginRequiredMixin, View):
             messages.success(request, f"¡Tu reserva para «{reserva.clase.title}» ya está confirmada!")
             return redirect(reverse("home") + "?reserva_ok=1")
 
-        # Verificar con Stripe que el pago está realmente completado
+        # Verifica con Stripe que el pago está realmente completado
         try:
             session = stripe.checkout.Session.retrieve(session_id)
-            if session.payment_status == "paid":
+            if session.payment_status == "paid" and session.get('client_reference_id') == f"reserva:{reserva.pk}":
                 reserva.estado = "confirmada"
                 reserva.save(update_fields=["estado"])
                 messages.success(

@@ -11,7 +11,6 @@ class LoginFormView(LoginView):
     """
     template_name = "portfolio/login.html"
     redirect_authenticated_user = True
-    success_url = reverse_lazy("home")
 
     def dispatch(self, request, *args, **kwargs):
         if request.user.is_authenticated:
@@ -22,9 +21,6 @@ class LoginFormView(LoginView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Iniciar sesion"
         return context
-
-    def get_success_url(self):
-        return str(self.success_url)
 
 
 class Logout(LogoutView):

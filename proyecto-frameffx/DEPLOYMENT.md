@@ -1,21 +1,30 @@
-# FrameffX - Deployment Guide
+# FrameffX — Deployment Guide
 
 Guía completa para desplegar FrameffX en un VPS con dominio.
+
+> **Nota**: Para un primer despliegue totalmente automatizado usa el script
+> `bash scripts/setup_prod.sh` que configura todo sin editar archivos manualmente.
+> Esta guía es la referencia técnica detallada de cada paso.
+
+---
 
 ## 📋 Requisitos
 
 - VPS con Ubuntu 20.04+ o similar
-- Docker y Docker Compose instalados
+- Docker Engine (v24+) y Docker Compose plugin v2 instalados
 - Git instalado
-- Dominio apuntando al VPS
+- Dominio apuntando al VPS (DNS propagado)
 - Acceso SSH al servidor
+- Puertos 80 y 443 abiertos en el firewall
+
+---
 
 ## 🚀 Instalación Inicial
 
 ### 1. Conectarse al VPS
 
 ```bash
-ssh user@your-vps-ip
+ssh usuario@IP_DEL_VPS
 ```
 
 ### 2. Instalar dependencias
@@ -24,253 +33,327 @@ ssh user@your-vps-ip
 # Actualizar sistema
 sudo apt update && sudo apt upgrade -y
 
-# Instalar Docker
-curl -fsSL https://get.docker.com -o get-docker.sh
-sudo sh get-docker.sh
+# Instalar Docker Engine (incluye el plugin Compose v2)
+curl -fsSL https://get.docker.com | sudo sh
 sudo usermod -aG docker $USER
+newgrp docker    # aplica el grupo sin cerrar sesión
 
-# Instalar Docker Compose
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+# Verificar instalación
+docker --version
+docker compose version
 
 # Instalar Git
 sudo apt install -y git
-
-# Instalar Certbot para SSL
-sudo apt install -y certbot python3-certbot-nginx
 ```
+
+> **Importante**: Usar `docker compose` (v2, plugin integrado), NO `docker-compose` (v1, obsoleto y descontinuado).
 
 ### 3. Clonar el repositorio
 
 ```bash
-git clone https://github.com/your-repo/frameffx.git
-cd frameffx
+git clone https://github.com/TU_USUARIO/frameffx.git
+cd frameffx/proyecto-frameffx
 ```
 
-### 4. Configurar variables de entorno
+### 4. Despliegue automatizado (recomendado)
 
 ```bash
-# Copiar archivo de ejemplo
-cp .env.example .env.prod
+chmod +x scripts/setup_prod.sh
+bash scripts/setup_prod.sh
+```
 
-# Editar con tus valores
+El script pedirá de forma interactiva: dominio, email, contraseñas, Stripe.
+Genera `.env.prod`, configura nginx, obtiene SSL y levanta los contenedores.
+
+---
+
+## ⚙️ Configuración manual (referencia)
+
+Si prefieres hacerlo paso a paso:
+
+### Crear .env.prod
+
+```bash
+cp .env.example .env.prod
 nano .env.prod
 ```
 
-**Variables importantes a configurar:**
+**Variables obligatorias:**
 
 ```env
-SECRET_KEY=your-very-secure-random-key-here
+# Django
+SECRET_KEY=<cadena-aleatoria-50-caracteres>
 DEBUG=False
-ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
-DB_PASSWORD=very-secure-password-here
-EMAIL_HOST_USER=your-email@gmail.com
-EMAIL_HOST_PASSWORD=your-app-password
+ALLOWED_HOSTS=tudominio.com,www.tudominio.com
+
+# PostgreSQL
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=frameffx_db
+DB_USER=frameffx_user
+DB_PASSWORD=<contraseña-segura>
+DB_HOST=postgres
+DB_PORT=5432
+
+# HTTPS (activar tras obtener certificado SSL)
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+
+# Email
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.gmail.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_HOST_USER=tu@email.com
+EMAIL_HOST_PASSWORD=<app-password-gmail>
+
+# Stripe
+STRIPE_PUBLIC_KEY=pk_live_...
+STRIPE_SECRET_KEY=sk_live_...
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-### 5. Generar SECRET_KEY segura
-
+**Generar SECRET_KEY segura:**
 ```bash
-python3 -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits + '!@#\$%^&*') for _ in range(50)))"
 ```
 
-### 6. Crear directorios necesarios
+### Actualizar nginx con tu dominio
 
-```bash
-mkdir -p docker/certbot/conf docker/certbot/www scripts
-chmod +x scripts/*.sh docker/entrypoint.sh
-```
+Editar `docker/nginx/django.conf` y descomentar el bloque HTTPS cambiando
+`frameffx.online` por tu dominio real en:
+- `server_name`
+- `ssl_certificate`  
+- `ssl_certificate_key`
 
-### 7. Actualizar dominio en Nginx
-
-Editar `docker/nginx/django.conf` y cambiar:
-
-```nginx
-server_name yourdomain.com www.yourdomain.com;
-
-ssl_certificate /etc/letsencrypt/live/yourdomain.com/fullchain.pem;
-ssl_certificate_key /etc/letsencrypt/live/yourdomain.com/privkey.pem;
-```
+---
 
 ## 🔐 SSL con Let's Encrypt
 
-### Obtener certificado inicial
+### Fase 1 — Obtener certificado (ACME Challenge)
 
 ```bash
-# Crear directorio temporal
-sudo mkdir -p docker/certbot/www
+# Crear directorios necesarios
+mkdir -p docker/certbot/conf docker/certbot/www
 
-# Ejecutar certbot
-docker run --rm -v "$(pwd)/docker/certbot/conf:/etc/letsencrypt" \
+# Levantar nginx en HTTP para el ACME challenge
+docker compose -f docker/docker-compose.prod.yml up -d nginx
+
+# Obtener certificado
+docker run --rm \
+  -v "$(pwd)/docker/certbot/conf:/etc/letsencrypt" \
   -v "$(pwd)/docker/certbot/www:/var/www/certbot" \
   certbot/certbot certonly --webroot \
   -w /var/www/certbot \
-  -d yourdomain.com \
-  -d www.yourdomain.com \
-  --email your-email@example.com \
+  -d tudominio.com \
+  -d www.tudominio.com \
+  --email tu@email.com \
   --agree-tos \
   --non-interactive
 ```
+
+### Fase 2 — Activar HTTPS en nginx
+
+Descomentar el bloque `server { listen 443 ssl ... }` en `docker/nginx/django.conf`
+y añadir redirección 301 en el bloque HTTP:
+
+```nginx
+location / {
+    return 301 https://$host$request_uri;
+}
+```
+
+---
 
 ## 🐳 Despliegue con Docker
 
 ### Iniciar servicios
 
 ```bash
-cd docker
-docker-compose -f docker-compose.prod.yml up -d
+docker compose -f docker/docker-compose.prod.yml up -d --build
 ```
 
 ### Ver logs
 
 ```bash
-docker-compose -f docker-compose.prod.yml logs -f web
+docker compose -f docker/docker-compose.prod.yml logs -f web
 ```
 
-### Ejecutar comandos Django
+### Ejecutar comandos Django manualmente
 
 ```bash
-# Migraciones
-docker-compose -f docker-compose.prod.yml exec web python manage.py migrate
+# Migraciones (el entrypoint.sh las ejecuta automáticamente al arrancar)
+docker compose -f docker/docker-compose.prod.yml exec web python manage.py migrate
 
 # Crear superusuario
-docker-compose -f docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker/docker-compose.prod.yml exec web python manage.py createsuperuser
 
-# Recopilar estáticos
-docker-compose -f docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+# Recopilar estáticos (el entrypoint.sh lo ejecuta automáticamente)
+docker compose -f docker/docker-compose.prod.yml exec web python manage.py collectstatic --noinput
 ```
 
-## 📦 Scripts de Automatización
+---
 
-### Deploy automático
+## 📦 Scripts de automatización
 
 ```bash
-# Hacer scripts ejecutables
-chmod +x scripts/*.sh
+# Primer despliegue completo (recomendado)
+bash scripts/setup_prod.sh
 
-# Ejecutar deploy
-./scripts/deploy.sh
+# Actualizar la aplicación (git pull + rebuild)
+bash scripts/deploy.sh
+
+# Renovar certificado SSL
+bash scripts/ssl_renew.sh
+
+# Inicializar BD manualmente (si entrypoint falló)
+bash scripts/init_db.sh
 ```
 
-### Renovar SSL automáticamente
+### Renovación SSL automática via cron
 
 ```bash
-# Crear tarea cron
 sudo crontab -e
-
-# Agregar línea (renovar cada día a las 3 AM):
-0 3 * * * /ruta/al/proyecto/scripts/ssl_renew.sh
+# Añadir (renovar cada domingo a las 3 AM):
+0 3 * * 0 /ruta/al/proyecto/scripts/ssl_renew.sh >> /var/log/ssl_renew.log 2>&1
 ```
 
-### Inicializar base de datos
-
-```bash
-./scripts/init_db.sh
-```
+---
 
 ## 🔄 Actualizar aplicación
 
 ```bash
-# Pull cambios
+# Pull cambios y rebuild
 git pull origin main
-
-# Rebuild y restart
-docker-compose -f docker/docker-compose.prod.yml down
-docker-compose -f docker/docker-compose.prod.yml up -d --build
+docker compose -f docker/docker-compose.prod.yml down
+docker compose -f docker/docker-compose.prod.yml up -d --build
 ```
+
+---
 
 ## 📊 Monitoreo
 
-### Ver estado de contenedores
-
 ```bash
-docker-compose -f docker/docker-compose.prod.yml ps
-```
+# Estado de contenedores
+docker compose -f docker/docker-compose.prod.yml ps
 
-### Ver logs en tiempo real
+# Logs en tiempo real
+docker compose -f docker/docker-compose.prod.yml logs -f
 
-```bash
-docker-compose -f docker/docker-compose.prod.yml logs -f
-```
-
-### Estadísticas de recursos
-
-```bash
+# Estadísticas de recursos
 docker stats
 ```
+
+---
 
 ## 🆘 Troubleshooting
 
 ### Los contenedores no inician
 
 ```bash
-# Ver logs detallados
-docker-compose -f docker/docker-compose.prod.yml logs web postgres nginx
-
-# Reiniciar todo
-docker-compose -f docker/docker-compose.prod.yml restart
+docker compose -f docker/docker-compose.prod.yml logs web postgres nginx
+docker compose -f docker/docker-compose.prod.yml restart
 ```
 
 ### Problemas de conexión a BD
 
 ```bash
-# Verificar que PostgreSQL está corriendo
-docker-compose -f docker/docker-compose.prod.yml ps postgres
+docker compose -f docker/docker-compose.prod.yml ps postgres
+docker compose -f docker/docker-compose.prod.yml logs postgres
+# Verificar variables de entorno del contenedor web:
+docker compose -f docker/docker-compose.prod.yml exec web env | grep DB
+```
 
-# Ver logs de PostgreSQL
-docker-compose -f docker/docker-compose.prod.yml logs postgres
+### CSS no carga (página sin estilos)
+
+```bash
+# Verificar que collectstatic se ejecutó correctamente:
+docker compose -f docker/docker-compose.prod.yml exec web ls /code/staticfiles/
+docker compose -f docker/docker-compose.prod.yml exec nginx ls /code/staticfiles/
+# Si está vacío, forzar:
+docker compose -f docker/docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker/docker-compose.prod.yml restart nginx
+```
+
+### Bucle de redirecciones (ERR_TOO_MANY_REDIRECTS)
+
+Ocurre si `SECURE_SSL_REDIRECT=True` sin SSL activo todavía.
+
+```bash
+# Cambiar en .env.prod:
+SECURE_SSL_REDIRECT=False
+# Reiniciar:
+docker compose -f docker/docker-compose.prod.yml restart web
 ```
 
 ### SSL no funciona
 
 ```bash
+# Verificar que el dominio apunta al servidor
+nslookup tudominio.com
+# Verificar puerto 80 accesible
+curl http://tudominio.com/.well-known/acme-challenge/test
+# Si usas UFW:
+sudo ufw allow 80 && sudo ufw allow 443
 # Verificar certificado
-ls -la docker/certbot/conf/live/yourdomain.com/
-
-# Reinstalar certificado
-./scripts/ssl_renew.sh
+ls -la docker/certbot/conf/live/tudominio.com/
 ```
+
+### Error 403 en formularios (CSRF)
+
+Django 4.0+ requiere `CSRF_TRUSTED_ORIGINS` configurado. Verificar en `.env.prod`
+que `ALLOWED_HOSTS` incluye el dominio correcto (el setting lo lee automáticamente).
+
+---
 
 ## 📝 Estructura de carpetas
 
 ```
 proyecto-frameffx/
 ├── docker/
-│   ├── Dockerfile (desarrollo)
-│   ├── Dockerfile.prod (producción)
-│   ├── docker-compose.yml
-│   ├── docker-compose.override.yml
-│   ├── docker-compose.prod.yml
-│   ├── entrypoint.sh
+│   ├── Dockerfile              (imagen desarrollo)
+│   ├── Dockerfile.prod         (imagen producción — multi-stage)
+│   ├── docker-compose.yml      (base mínima)
+│   ├── docker-compose.override.yml  (desarrollo local)
+│   ├── docker-compose.prod.yml (producción completa)
+│   ├── entrypoint.sh           (migrate + collectstatic + gunicorn)
 │   ├── nginx/
-│   │   ├── nginx.conf
-│   │   └── django.conf
+│   │   ├── nginx.conf          (config global)
+│   │   └── django.conf         (virtual host HTTP/HTTPS)
 │   └── certbot/
-│       ├── conf/ (certificados SSL)
-│       └── www/
+│       ├── conf/               (certificados SSL — NO versionar)
+│       └── www/                (archivos ACME challenge)
 ├── scripts/
-│   ├── deploy.sh
-│   ├── init_db.sh
-│   └── ssl_renew.sh
-├── .env.example
-├── .env.prod (no versionar)
-├── requirements.txt
-└── ...
+│   ├── setup_prod.sh           (primer despliegue automatizado)
+│   ├── deploy.sh               (actualizar aplicación)
+│   ├── ssl_renew.sh            (renovar certificado)
+│   ├── init_db.sh              (inicializar BD manualmente)
+│   └── frameffx.service        (systemd service opcional)
+├── .env.example                (plantilla — copiar a .env / .env.prod)
+├── .env                        (desarrollo — NO versionar)
+├── .env.prod                   (producción — NO versionar)
+└── requirements.txt
 ```
+
+---
 
 ## 🔒 Seguridad
 
-- ✅ Variables sensibles en `.env.prod` (nunca versionar)
-- ✅ SSL/TLS con Let's Encrypt
-- ✅ PostgreSQL con contraseña segura
-- ✅ DEBUG = False en producción
-- ✅ ALLOWED_HOSTS configurado
-- ✅ Headers de seguridad en Nginx
-- ✅ Rate limiting habilitado
+- ✅ Variables sensibles en `.env.prod` (en `.gitignore`, nunca versionar)
+- ✅ SSL/TLS con Let's Encrypt (TLSv1.2 + TLSv1.3)
+- ✅ PostgreSQL no expuesto al exterior (solo accesible en red Docker interna)
+- ✅ Puerto 8000 de Gunicorn no expuesto (nginx hace proxy inverso)
+- ✅ `DEBUG = False` en producción
+- ✅ `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS` configurados
+- ✅ `SECURE_PROXY_SSL_HEADER` configurado para Django detrás de Nginx
+- ✅ Headers de seguridad en Nginx (HSTS, X-Frame-Options, etc.)
+- ✅ Rate limiting habilitado en Nginx
 
-## 📞 Soporte
+---
 
-Para más información, consultar la documentación oficial:
-- [Django Deployment](https://docs.djangoproject.com/en/5.2/howto/deployment/)
-- [Docker Documentation](https://docs.docker.com/)
+## 📞 Referencias
+
+- [Django Deployment Checklist](https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/)
+- [Docker Compose Documentation](https://docs.docker.com/compose/)
 - [Nginx Documentation](https://nginx.org/en/docs/)
+- [Certbot Documentation](https://certbot.eff.org/docs/)

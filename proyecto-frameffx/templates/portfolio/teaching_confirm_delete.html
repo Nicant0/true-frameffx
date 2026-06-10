@@ -180,12 +180,16 @@
 
             <span class="tcd-eyebrow">Acción irreversible</span>
             <h1 class="tcd-title">Eliminar clase</h1>
-            <p class="tcd-subtitle">Estás a punto de eliminar permanentemente la siguiente clase:</p>
+            <p class="tcd-subtitle">
+                Esta acción es <strong>permanente e irreversible</strong>.<br>
+            </p>
+
             <span class="tcd-class-name">{{ object.title }}</span>
 
             <div class="tcd-warning-note" role="alert">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                Esta acción no se puede deshacer. Todas las reservas asociadas a esta clase también podrían verse afectadas.
+                <span style="color: #ffb703; font-weight: 600; margin-right: 4px;">Atención:</span>
+                Si esta clase ya tiene reservas, el sistema bloqueará su eliminación para proteger el historial de los alumnos. En ese caso, deberás cambiar su estado a "Cancelada".
             </div>
         </div>
 

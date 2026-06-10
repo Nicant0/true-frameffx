@@ -790,8 +790,8 @@ class Reserva(models.Model):
         ("cancelada",      "Cancelada"),
         ("caducada",       "Caducada"),
     ]
-    clase = models.ForeignKey("teachings.Teaching", on_delete=models.CASCADE)
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    clase = models.ForeignKey("teachings.Teaching", on_delete=models.PROTECT)
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
     estado = models.CharField(max_length=20, choices=ESTADO_RESERVA_CHOICES, default="pendiente")
     caducidad = models.DateTimeField(null=True, blank=True)
     nota = models.TextField(blank=True)
@@ -1157,11 +1157,10 @@ services:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]  # Comprueba si PostgreSQL está listo
 
   web:                          # Django + Gunicorn
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn FrameffX.wsgi:application --bind 0.0.0.0:8000 --workers 4"
-    depends_on:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.prod
+    # El entrypoint.sh ya ejecuta migrate, collectstatic y arranca gunicorn
       postgres:
         condition: service_healthy  # No arranca hasta que PostgreSQL esté listo
 

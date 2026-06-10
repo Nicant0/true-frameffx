@@ -5,11 +5,14 @@ from django.http import HttpResponseForbidden
 class StaffRequiredMixin(LoginRequiredMixin):
     """
     Solo usuarios staff pueden acceder.
+    Redirige al login si no está autenticado, devuelve 403 si no es staff.
     """
     def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return self.handle_no_permission()
         if not request.user.is_staff:
             return HttpResponseForbidden("No tienes permisos")
-        return super().dispatch(request, *args, **kwargs)
+        return super(LoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 
 class SetPasswordMixin:

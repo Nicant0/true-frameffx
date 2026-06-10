@@ -1,3 +1,4 @@
+import os
 import stripe
 import stripe.error
 from django.conf import settings
@@ -17,9 +18,9 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 class CreateCheckoutSessionView(LoginRequiredMixin, View):
     """
-    Vista que inicializa la sesión de pago con Stripe para un producto digital.
-    Aquí construyo el Pedido y el DetallePedido antes de saltar a la pasarela,
-    para dejar el rastro en base de datos en estado 'pendiente'.
+    Inicializa la sesión de pago con Stripe para un producto digital.
+    Crea el Pedido y el DetallePedido antes de redirigir a la pasarela,
+    dejando el registro en base de datos en estado 'pendiente'.
     """
     def post(self, request, *args, **kwargs):
         producto = get_object_or_404(Producto, pk=kwargs.get("pk"))
@@ -37,6 +38,13 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
             precio_unitario=producto.precio,
             cantidad=1
         )
+        
+        # Si el producto es gratuito, confirmar pedido directamente sin pasar por Stripe
+        if producto.precio <= 0:
+            pedido.estado = 'completado'
+            pedido.save(update_fields=['estado'])
+            messages.success(request, f"¡Has obtenido «{producto.titulo}» gratis! Ya puedes descargarlo.")
+            return redirect(reverse("products:showProducts") + "?compra_ok=1")
         
         try:
             base_url = request.build_absolute_uri(reverse('products:product_success'))
@@ -70,8 +78,9 @@ class CreateCheckoutSessionView(LoginRequiredMixin, View):
 
 class ProductSuccessView(LoginRequiredMixin, View):
     """
-    Vista de retorno tras un pago exitoso en Stripe para Productos.
-    Verifica directamente la sesión para confirmar el pedido localmente.
+    Vista de retorno tras un pago exitoso en Stripe para productos digitales.
+    Verifica directamente la sesión con la API de Stripe para confirmar el pedido
+    en base de datos sin depender del webhook.
     """
     http_method_names = ["get"]
 
@@ -90,12 +99,13 @@ class ProductSuccessView(LoginRequiredMixin, View):
             return redirect("products:showProducts")
 
         if pedido.estado == "completado":
-            messages.success(request, f"¡Tu compra de «{pedido.detalles.first().producto.titulo}» ya estaba confirmada!")
+            titulo = pedido.detalles.first().producto.titulo if pedido.detalles.exists() else "tu producto"
+            messages.success(request, f"¡Tu compra de «{titulo}» ya estaba confirmada!")
             return redirect(reverse("products:showProducts") + "?compra_ok=1")
 
         try:
             session = stripe.checkout.Session.retrieve(session_id)
-            if session.payment_status == "paid":
+            if session.payment_status == "paid" and session.get('client_reference_id') == str(pedido.id):
                 pedido.estado = "completado"
                 pedido.referencia_pago = session.get('payment_intent', '')
                 pedido.save(update_fields=["estado", "referencia_pago"])
@@ -120,12 +130,12 @@ class ProductSuccessView(LoginRequiredMixin, View):
 @method_decorator(csrf_exempt, name='dispatch')
 class StripeWebhookView(View):
     """
-    Webhook público para recibir la notificación de Stripe cuando un pago es exitoso.
+    Webhook público para recibir notificaciones de Stripe cuando un pago es exitoso.
 
-    He configurado este endpoint para que Stripe lo llame asíncronamente (de ahí el csrf_exempt).
-    Lo he programado para distinguir dos casos mediante el `client_reference_id`:
-      - "reserva:<pk>" → Confirmo la reserva de una clase virtual.
-      - "<pk numérico>" → Confirmo la compra de un producto digital.
+    Este endpoint es llamado por Stripe de forma asíncrona (de ahí el csrf_exempt).
+    Distingue dos casos mediante el `client_reference_id`:
+      - "reserva:<pk>" → Confirma la reserva de una clase virtual.
+      - "<pk numérico>" → Confirma la compra de un producto digital.
     """
     def post(self, request, *args, **kwargs):
         payload = request.body
@@ -146,7 +156,7 @@ class StripeWebhookView(View):
             ref = session.get('client_reference_id', '')
 
             if ref and ref.startswith('reserva:'):
-                # ── Confirmación de reserva de clase ──────────────────────
+                # Confirmación de reserva de clase
                 try:
                     reserva_id = int(ref.split('reserva:')[1])
                     reserva = Reserva.objects.get(pk=reserva_id)
@@ -156,13 +166,13 @@ class StripeWebhookView(View):
                     pass
 
             elif ref:
-                # ── Confirmación de compra de producto digital ─────────────
+                # Confirmación de compra de producto digital
                 try:
                     pedido = Pedido.objects.get(id=ref)
                     pedido.estado = 'completado'
                     pedido.referencia_pago = session.get('payment_intent', '')
                     pedido.save(update_fields=['estado', 'referencia_pago'])
-                except Pedido.DoesNotExist:
+                except (Pedido.DoesNotExist, ValueError):
                     pass
 
         return HttpResponse(status=200)
@@ -172,10 +182,10 @@ class StripeWebhookView(View):
 class DownloadProductView(LoginRequiredMixin, View):
     """
     Controlador para despachar archivos digitales de forma segura.
-    
-    En esta vista me aseguro de que el usuario haya pagado realmente,
-    compruebo que no haya excedido el límite de descargas del producto,
-    y registro cada bajada usando el modelo `Descarga` por seguridad.
+
+    Verifica que el usuario haya completado el pago, comprueba que no haya
+    superado el límite de descargas del producto, y registra cada descarga
+    en el modelo Descarga para trazabilidad.
     """
     def get(self, request, *args, **kwargs):
         detalle_id = kwargs.get('pk')
@@ -194,8 +204,14 @@ class DownloadProductView(LoginRequiredMixin, View):
             messages.error(request, "El archivo digital no está disponible en este momento.")
             return redirect('home')
             
-        # Registrar la descarga
-        ip = request.META.get('REMOTE_ADDR')
+        # Registra la descarga con la IP real del usuario (detrás del proxy Nginx)
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+            
         Descarga.objects.create(detalle=detalle, ip_origen=ip)
         
-        return FileResponse(producto.archivo_digital.open('rb'), as_attachment=True, filename=producto.archivo_digital.name)
+        safe_filename = os.path.basename(producto.archivo_digital.name)
+        return FileResponse(producto.archivo_digital.open('rb'), as_attachment=True, filename=safe_filename)

@@ -23,8 +23,7 @@ from teachings.views import (
     TeachingDeleteView
 )
 
-# ───── Configuración de Routers para la API ─────
-# He configurado un DefaultRouter de Django Rest Framework para exponer automáticamente los endpoints de la API de las clases (Teachings).
+# Router de la API para exponer los endpoints de clases (Teachings) automáticamente
 router = routers.DefaultRouter()
 router.register('teachings', TeachingViewSet, basename='teachings')
 router.register('teachings-auth', TeachingAuthenticatedListViewSet, basename='teachings-auth')
@@ -34,24 +33,24 @@ urlpatterns = [
     # Panel de administración por defecto de Django
     path('admin/', admin.site.urls),
     
-    # Panel de control analítico que he desarrollado para los admins
+    # Panel de control analítico para administradores
     path('dashboard-admin/', AdminDashboardView.as_view(), name='admin_dashboard'),
 
     # Landing page
     path('', LandingView.as_view(), name='landing'),
 
-    # ── Rutas de Autenticación ──
-    # Redirigen a las vistas que he creado personalizadas en 'login' y 'users'
+    # Autenticación
     path('login/', LoginFormView.as_view(), name='site_login'),
     path('accounts/login/', LoginFormView.as_view(), name='accounts_login'),
     path('logout/', Logout.as_view(), name="site_logout"),
     path('signup/', views.SignupView.as_view(), name='signup'),
+    path('accounts/signup/', views.SignupView.as_view(), name='account_signup'),
 
-    # ── Vistas principales (Core) ──
-    # Home (panel de clases — catálogo principal)
+    # Vistas principales
+    # Home: catálogo principal de clases
     path('home/', showTeachings.as_view(), name='home'),
     
-    # Inclusión de las URLs secundarias de la app de productos digitales
+    # URLs de la app de productos digitales
     path('products/', include('products.urls')),
 
     # CRUD Teaching
@@ -73,11 +72,10 @@ urlpatterns = [
     path('bookings/<int:pk>/checkout/', ReservaCheckoutView.as_view(), name='booking_checkout'),
     path('bookings/success/', ReservaSuccessView.as_view(), name='booking_success'),
 
-    # ── Sistema de Autenticación de Terceros ──
+    # Autenticación con terceros (Google OAuth via allauth)
     path('accounts/', include('allauth.urls')),
 
-    # ── Endpoints de la API REST ──
-    # Todo lo relacionado con la gestión de tokens
+    # Endpoints de la API REST
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
     path('api/auth/', include('djoser.urls')),

@@ -1,0 +1,23 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}Página no encontrada · FrameffX{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login">
+        <div class="login-box fade-in-up" style="text-align: center;">
+            <div class="auth-icon" style="font-size: 5rem; color: var(--color-primary); margin-bottom: 1rem;">
+                <i class="fas fa-search"></i>
+            </div>
+            <h1 style="margin-bottom: 0.5rem; font-size: 4rem; color: var(--color-text);">404</h1>
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Página no encontrada</h2>
+            <p class="login-subtitle" style="margin-bottom: 2rem;">
+                Parece que el enlace que has seguido no existe o la página ha sido movida.
+            </p>
+            <a href="{% url 'home' %}" class="submit-btn" style="text-decoration: none; display: inline-block;">
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

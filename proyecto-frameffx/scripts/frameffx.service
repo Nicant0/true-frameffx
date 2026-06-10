@@ -5,12 +5,14 @@ Requires=docker.service
 
 [Service]
 Type=simple
-WorkingDirectory=/ruta/al/proyecto
-ExecStart=/usr/local/bin/docker-compose -f docker/docker-compose.prod.yml up
-ExecStop=/usr/local/bin/docker-compose -f docker/docker-compose.prod.yml down
+# IMPORTANTE: cambiar esta ruta al directorio real del proyecto en el servidor
+WorkingDirectory=/home/usuario/frameffx/proyecto-frameffx
+ExecStart=/usr/bin/docker compose -f docker/docker-compose.prod.yml up
+ExecStop=/usr/bin/docker compose -f docker/docker-compose.prod.yml down
 Restart=always
 RestartSec=10
-User=docker-user
+# IMPORTANTE: cambiar 'usuario' por el usuario real del sistema que tiene acceso a Docker
+User=usuario
 
 [Install]
 WantedBy=multi-user.target

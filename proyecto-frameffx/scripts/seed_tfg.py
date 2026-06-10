@@ -21,15 +21,14 @@ import django
 from datetime import timedelta
 from decimal import Decimal
 
-# ── Configuración de Django ───────────────────────────────────────────────────
-# Añade el directorio del proyecto al path de Python
+# Configuración de Django: añade el directorio del proyecto al path de Python
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE_DIR)
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "FrameffX.settings")
 django.setup()
 
-# ── Imports de modelos (DESPUÉS de django.setup()) ───────────────────────────
+# Imports de modelos (deben ir después de django.setup())
 from django.utils import timezone
 from django.db import transaction
 
@@ -39,7 +38,7 @@ from teachings.models import Teaching
 from bookings.models import Reserva
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# Funciones auxiliares de creación de datos
 
 def crear_usuario(email, password, is_staff=False, is_superuser=False):
     if Usuario.objects.filter(email=email).exists():
@@ -96,14 +95,14 @@ def crear_clase(titulo, descripcion, precio, duracion, inicio_offset_days, estad
     return obj
 
 
-# ── Script principal ──────────────────────────────────────────────────────────
+# Función principal del script
 
 def main():
     print("\n" + "="*60)
     print("  FrameFFX — Generador de Datos TFG")
     print("="*60)
 
-    # ── 1. Usuarios ───────────────────────────────────────────────────────────
+    # 1. Usuarios
     print("\n[1/4] Creando usuarios...")
     admin = crear_usuario(
         email="admin@frameffx.com",
@@ -116,7 +115,7 @@ def main():
         password="Demo1234!",
     )
 
-    # ── 2. Productos ──────────────────────────────────────────────────────────
+    # 2. Productos
     print("\n[2/4] Creando productos digitales...")
     p1 = crear_producto(
         titulo="Cinematic LUT Pack Vol. 1",
@@ -174,7 +173,7 @@ def main():
         max_descargas=3,
     )
 
-    # ── 3. Clases virtuales ───────────────────────────────────────────────────
+    # 3. Clases virtuales
     print("\n[3/4] Creando clases virtuales...")
     c1 = crear_clase(
         titulo="Introducción a DaVinci Resolve",
@@ -236,7 +235,7 @@ def main():
         estado="finalizada",
     )
 
-    # ── 4. Reservas y Pedidos para el usuario demo ────────────────────────────
+    # 4. Reservas y pedidos para el usuario demo
     print("\n[4/4] Creando reservas y pedido de demo...")
 
     # Reserva activa para demo
@@ -271,7 +270,7 @@ def main():
     else:
         print(f"  [SKIP] Pedido completado ya existe para {demo.email}")
 
-    # ── Resumen ───────────────────────────────────────────────────────────────
+    # Resumen final
     print("\n" + "="*60)
     print("  ¡Datos generados con exito!")
     print("="*60)
@@ -286,5 +285,5 @@ def main():
 
 
 if __name__ == "__main__":
-    with transaction.atomic():
+    with transaction.atomic():  # type: ignore[attr-defined]
         main()

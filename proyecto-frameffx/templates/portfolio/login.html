@@ -52,6 +52,9 @@
                         required
                         autocomplete="current-password"
                     >
+                    <div style="text-align: right; margin-top: 5px;">
+                        <a href="{% url 'account_reset_password' %}" class="form-switch-link" style="font-size: 0.85rem; color: var(--color-primary);">¿Olvidaste tu contraseña?</a>
+                    </div>
                 </div>
 
                 <button type="submit" class="submit-btn" id="login-submit-btn">

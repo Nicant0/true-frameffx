@@ -1,0 +1,24 @@
+{% extends "portfolio/base.html" %}
+
+{% block title %}Error del Servidor · FrameffX{% endblock %}
+
+{% block content %}
+<div class="login-page">
+    <div class="login">
+        <div class="login-box fade-in-up" style="text-align: center;">
+            <div class="auth-icon" style="font-size: 5rem; color: var(--color-danger); margin-bottom: 1rem;">
+                <i class="fas fa-server"></i>
+            </div>
+            <h1 style="margin-bottom: 0.5rem; font-size: 4rem; color: var(--color-text);">500</h1>
+            <h2 style="margin-bottom: 1rem; font-size: 1.5rem;">Error Interno del Servidor</h2>
+            <p class="login-subtitle" style="margin-bottom: 2rem;">
+                Vaya, algo ha salido mal por nuestra parte. 
+                El equipo técnico ha sido notificado y estamos trabajando para solucionarlo.
+            </p>
+            <a href="{% url 'home' %}" class="submit-btn" style="text-decoration: none; display: inline-block;">
+                Volver al inicio
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
