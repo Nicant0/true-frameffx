@@ -25,7 +25,7 @@ from bookings.models import Reserva
 class AdminDashboardView(StaffRequiredMixin, TemplateView):
     """
     Panel de control exclusivo para administradores (Staff).
-    Proporciona métricas de negocio en tiempo real.
+    Proporciona métricas en tiempo real.
     """
     template_name = "portfolio/dashboard_admin.html"
 

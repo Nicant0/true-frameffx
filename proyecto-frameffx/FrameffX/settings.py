@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
-# Load environment variables from .env file (opcional)
+# Carga las variables de entorno desde el archivo .env (opcional)
 try:
     from dotenv import load_dotenv
     load_dotenv()
@@ -182,7 +182,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 
-# Email Configuration
+# Configuración de Email
 # https://docs.djangoproject.com/en/5.2/topics/email/
 
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
@@ -193,7 +193,7 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 
 
-# Security Settings
+# Ajustes de Seguridad
 # https://docs.djangoproject.com/en/5.2/topics/security/
 
 if not DEBUG:
@@ -261,7 +261,7 @@ SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# STRIPE CONFIGURATION
+# CONFIGURACIÓN DE STRIPE
 # ─────────────────────────────────────────────────────────────────────────────
 STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY', 'pk_test_tymock')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY', 'sk_test_tymock')

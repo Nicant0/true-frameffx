@@ -20,21 +20,20 @@ class ReservaCreateView(LoginRequiredMixin, View):
 
     Reglas de validación:
     1. El usuario debe estar autenticado (LoginRequiredMixin redirige al login).
-    2. Los administradores (is_staff) no pueden reservar sus propias clases.
-    3. La clase debe existir y tener estado 'activa'.
-    4. El usuario no puede tener ya una reserva activa para esa misma clase
-       (se considera activa si no está en 'cancelada' ni 'caducada').
+    2. Los administradores no pueden reservar sus propias clases.
+    3. La clase debe existir y estar 'activa'.
+    4. El usuario no puede tener ya una reserva activa para esa misma clase.
     """
 
     http_method_names = ["post"]  # Solo acepta POST; GET devuelve 405
 
     def post(self, request, *args, **kwargs):
-        # ── Validación 1: admins no reservan ──────────────────────────────────
+        # Validación 1: admins no reservan
         if request.user.is_staff:
             messages.error(request, "Los administradores no pueden realizar reservas.")
             return redirect("home")
 
-        # ── Validación 2: la clase existe y está activa ───────────────────────
+        # Validación 2: la clase existe y está activa
         clase = get_object_or_404(Teaching, pk=request.POST.get("clase_id"))
         if not clase.is_active_now:
             messages.warning(
@@ -44,7 +43,7 @@ class ReservaCreateView(LoginRequiredMixin, View):
             )
             return redirect("home")
 
-        # ── Validación 3: no duplicar reserva activa ──────────────────────────
+        # Validación 3: no duplicar reserva activa
         reserva_existente = Reserva.objects.filter(
             clase=clase,
             usuario=request.user,
@@ -58,7 +57,7 @@ class ReservaCreateView(LoginRequiredMixin, View):
             )
             return redirect("home")
 
-        # ── Crear la reserva ──────────────────────────────────────────────────
+        # Crear la reserva 
         try:
             Reserva.objects.create(
                 clase=clase,

@@ -23,9 +23,8 @@ from teachings.views import (
     TeachingDeleteView
 )
 
-# ── Configuración de Routers para la API ──────────────────────────────────────
-# He configurado un DefaultRouter de Django Rest Framework para exponer
-# automáticamente los endpoints de la API de las clases (Teachings).
+# ───── Configuración de Routers para la API ─────
+# He configurado un DefaultRouter de Django Rest Framework para exponer automáticamente los endpoints de la API de las clases (Teachings).
 router = routers.DefaultRouter()
 router.register('teachings', TeachingViewSet, basename='teachings')
 router.register('teachings-auth', TeachingAuthenticatedListViewSet, basename='teachings-auth')
@@ -35,20 +34,20 @@ urlpatterns = [
     # Panel de administración por defecto de Django
     path('admin/', admin.site.urls),
     
-    # Panel de control analítico que he desarrollado para el Staff
+    # Panel de control analítico que he desarrollado para los admins
     path('dashboard-admin/', AdminDashboardView.as_view(), name='admin_dashboard'),
 
-    # Landing (página de bienvenida pública y presentación del proyecto)
+    # Landing page
     path('', LandingView.as_view(), name='landing'),
 
-    # ── Rutas de Autenticación ────────────────────────────────────────────────
+    # ── Rutas de Autenticación ──
     # Redirigen a las vistas que he creado personalizadas en 'login' y 'users'
     path('login/', LoginFormView.as_view(), name='site_login'),
     path('accounts/login/', LoginFormView.as_view(), name='accounts_login'),
     path('logout/', Logout.as_view(), name="site_logout"),
     path('signup/', views.SignupView.as_view(), name='signup'),
 
-    # ── Vistas principales (Core) ─────────────────────────────────────────────
+    # ── Vistas principales (Core) ──
     # Home (panel de clases — catálogo principal)
     path('home/', showTeachings.as_view(), name='home'),
     
@@ -74,11 +73,11 @@ urlpatterns = [
     path('bookings/<int:pk>/checkout/', ReservaCheckoutView.as_view(), name='booking_checkout'),
     path('bookings/success/', ReservaSuccessView.as_view(), name='booking_success'),
 
-    # ── Sistema de Autenticación de Terceros (Opcional) ───────────────────────
+    # ── Sistema de Autenticación de Terceros ──
     path('accounts/', include('allauth.urls')),
 
-    # ── Endpoints de la API REST ──────────────────────────────────────────────
-    # He agrupado aquí todo lo relacionado con DRF y Djoser (gestión de tokens)
+    # ── Endpoints de la API REST ──
+    # Todo lo relacionado con la gestión de tokens
     path('api/', include(router.urls)),
     path('api-auth/', include('rest_framework.urls')),
     path('api/auth/', include('djoser.urls')),
