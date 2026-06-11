@@ -5,7 +5,13 @@
         <img src="{% static 'img/FrameffX LOGO.png' %}" alt="FrameffX" class="logo-img">
     </a>
 
-    <nav class="nav">
+    <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Abrir menú" aria-expanded="false">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="nav" id="main-nav">
         {# Enlaces universales para Catálogo y Clases #}
         <a href="{% url 'products:showProducts' %}">Marketplace</a>
         <a href="{% url 'products:showProducts' %}?cat=presets">Presets</a>
@@ -50,3 +56,17 @@
         {% endif %}
     </nav>
 </header>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("mobile-menu-btn");
+        const nav = document.getElementById("main-nav");
+        if (btn && nav) {
+            btn.addEventListener("click", () => {
+                const isOpen = nav.classList.toggle("nav-open");
+                btn.classList.toggle("open");
+                btn.setAttribute("aria-expanded", isOpen);
+            });
+        }
+    });
+</script>

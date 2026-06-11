@@ -80,6 +80,19 @@ ask "STRIPE_WEBHOOK_SECRET (dejar vacío para placeholder):"
 read -r STRIPE_WEBHOOK_SECRET
 STRIPE_WEBHOOK_SECRET="${STRIPE_WEBHOOK_SECRET:-whsec_placeholder}"
 
+ask "Email del superusuario administrador (admin del panel Django):"
+read -r DJANGO_SUPERUSER_EMAIL
+DJANGO_SUPERUSER_EMAIL="${DJANGO_SUPERUSER_EMAIL:-admin@${DOMAIN}}"
+
+ask "Contraseña del superusuario administrador [genera una aleatoria]:"
+read -r -s DJANGO_SUPERUSER_PASSWORD
+if [ -z "$DJANGO_SUPERUSER_PASSWORD" ]; then
+    DJANGO_SUPERUSER_PASSWORD=$(openssl rand -base64 18 | tr -dc 'a-zA-Z0-9' | head -c 24)
+    info "Contraseña de admin generada automáticamente: $DJANGO_SUPERUSER_PASSWORD"
+else
+    echo ""
+fi
+
 # ── 2. Calcular variables derivadas ────────────────────────
 SECRET_KEY=$(python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits + '!@#\$%^&*-_=+') for _ in range(50)))")
 
@@ -138,6 +151,11 @@ EMAIL_HOST_PASSWORD=${EMAIL_HOST_PASSWORD}
 STRIPE_PUBLIC_KEY=${STRIPE_PUBLIC_KEY}
 STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY}
 STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET}
+
+# Superusuario inicial del panel de administración
+# ¡Cambia la contraseña desde el admin tras el primer despliegue!
+DJANGO_SUPERUSER_EMAIL=${DJANGO_SUPERUSER_EMAIL}
+DJANGO_SUPERUSER_PASSWORD=${DJANGO_SUPERUSER_PASSWORD}
 EOF
 
 log ".env.prod generado correctamente"
@@ -262,10 +280,12 @@ echo -e "${BOLD}============================================================${NC
 echo ""
 echo -e "  🌐  Sitio web:    ${BOLD}https://${DOMAIN}${NC}"
 echo -e "  🔑  Admin:        ${BOLD}https://${DOMAIN}/admin/${NC}"
-echo -e "  📋  DB Password:  ${BOLD}${DB_PASSWORD}${NC}  ← guárdala!"
+echo -e "  💻  Admin email:  ${BOLD}${DJANGO_SUPERUSER_EMAIL}${NC}"
+echo -e "  📊  DB Password:  ${BOLD}${DB_PASSWORD}${NC}  ← guárdala!"
+echo -e "  📊  Admin Pass:   ${BOLD}${DJANGO_SUPERUSER_PASSWORD}${NC}  ← guárdala!"
 echo ""
 echo -e "  Para ver los logs:"
 echo -e "  ${CYAN}docker compose -f docker/docker-compose.prod.yml logs -f${NC}"
 echo ""
-warn "Cambia la contraseña del superusuario admin@example.com desde el panel de administración."
+warn "¡Cambia la contraseña del superusuario desde el panel de administración!"
 echo ""

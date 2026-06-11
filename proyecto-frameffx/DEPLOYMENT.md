@@ -111,6 +111,10 @@ EMAIL_HOST_PASSWORD=<app-password-gmail>
 STRIPE_PUBLIC_KEY=pk_live_...
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
+
+# Superusuario inicial (el entrypoint lo crea automáticamente si no existe)
+DJANGO_SUPERUSER_EMAIL=admin@tudominio.com
+DJANGO_SUPERUSER_PASSWORD=<contraseña-muy-segura>
 ```
 
 **Generar SECRET_KEY segura:**
@@ -347,7 +351,9 @@ proyecto-frameffx/
 - ✅ `ALLOWED_HOSTS` y `CSRF_TRUSTED_ORIGINS` configurados
 - ✅ `SECURE_PROXY_SSL_HEADER` configurado para Django detrás de Nginx
 - ✅ Headers de seguridad en Nginx (HSTS, X-Frame-Options, etc.)
-- ✅ Rate limiting habilitado en Nginx
+- ✅ Rate limiting activo en Nginx (`limit_req zone=general burst=30 nodelay`)
+- ✅ Superusuario creado desde variables de entorno (sin credenciales hardcodeadas)
+- ✅ `ACCOUNT_EMAIL_VERIFICATION = 'mandatory'` en producción (registros verificados)
 
 ---
 

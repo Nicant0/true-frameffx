@@ -193,16 +193,16 @@ class DownloadProductView(LoginRequiredMixin, View):
         
         if detalle.pedido.estado != 'completado':
             messages.error(request, "El pedido no está completado.")
-            return redirect('home')
+            return redirect('user_profile')
             
         if not Descarga.puede_descargar(detalle):
             messages.error(request, "Has excedido el límite de descargas permitidas para este producto.")
-            return redirect('home')
+            return redirect('user_profile')
             
         producto = detalle.producto
         if not producto.archivo_digital:
             messages.error(request, "El archivo digital no está disponible en este momento.")
-            return redirect('home')
+            return redirect('user_profile')
             
         # Registra la descarga con la IP real del usuario (detrás del proxy Nginx)
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')

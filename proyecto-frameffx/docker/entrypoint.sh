@@ -33,12 +33,17 @@ echo "✅ Archivos estáticos recopilados"
 echo "👤 Verificando superusuario..."
 python manage.py shell << END
 from django.contrib.auth import get_user_model
+import os
 User = get_user_model()
-if not User.objects.filter(email='admin@example.com').exists():
-    User.objects.create_superuser('admin@example.com', 'changeme')
-    print("✅ Superusuario creado: admin@example.com / changeme")
+email    = os.environ.get('DJANGO_SUPERUSER_EMAIL', 'admin@frameffx.local')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '')
+if not email or not password:
+    print("⚠️  DJANGO_SUPERUSER_EMAIL o DJANGO_SUPERUSER_PASSWORD no definidos — se omite creación.")
+elif not User.objects.filter(email=email).exists():
+    User.objects.create_superuser(email, password)
+    print(f"✅ Superusuario creado: {email}")
 else:
-    print("✅ Superusuario ya existe")
+    print(f"✅ Superusuario ya existe: {email}")
 END
 
 echo "================================"

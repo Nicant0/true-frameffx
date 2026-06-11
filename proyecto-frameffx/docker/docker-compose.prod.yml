@@ -24,8 +24,10 @@ services:
       dockerfile: docker/Dockerfile.prod
     container_name: frameffx_web
     # El entrypoint.sh ya ejecuta migrate, collectstatic y arranca gunicorn
+    # NOTA: ..:/code NO se monta en producción — el código ya está copiado
+    # dentro de la imagen por Dockerfile.prod. Solo se montan los directorios
+    # de datos que necesitan persistencia fuera del contenedor.
     volumes:
-      - ..:/code
       - static_volume:/code/staticfiles
       - media_volume:/code/media
     # Puerto NO expuesto al exterior — nginx hace de proxy inverso
@@ -54,6 +56,9 @@ services:
       SECURE_SSL_REDIRECT: ${SECURE_SSL_REDIRECT:-False}
       SESSION_COOKIE_SECURE: ${SESSION_COOKIE_SECURE:-False}
       CSRF_COOKIE_SECURE: ${CSRF_COOKIE_SECURE:-False}
+      # Superusuario inicial — cambiar desde el admin tras el primer arranque
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
     depends_on:
       postgres:
         condition: service_healthy

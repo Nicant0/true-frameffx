@@ -235,7 +235,9 @@ LOGIN_URL = '/login/'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Usa el email como método de autenticación
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False          # El modelo Usuario no utiliza username
-ACCOUNT_EMAIL_VERIFICATION = 'optional'    # En producción se recomienda 'mandatory'
+# En producción se requiere verificación de email para evitar registros fraudulentos.
+# En desarrollo se deja opcional para facilitar las pruebas.
+ACCOUNT_EMAIL_VERIFICATION = 'optional' if DEBUG else 'mandatory'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'  # HTTP en local, HTTPS en producción
 
 # Configuración del proveedor de Google
@@ -299,7 +301,9 @@ LOGGING = {
     'loggers': {
         'allauth': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            # DEBUG en desarrollo para facilitar el diagnóstico de OAuth.
+            # WARNING en producción para evitar saturar los logs con información sensible.
+            'level': 'DEBUG' if DEBUG else 'WARNING',
         },
     },
 }

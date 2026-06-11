@@ -1,10 +1,7 @@
 /* =============================================================================
    SISTEMA DE DISEÑO BASE — FRAMEFFX
    =============================================================================
-   Vanilla CSS sin frameworks externos, para demostrar dominio total
-   sobre diseño y maquetación. Estructurado con principios de Atomic Design,
-   variables nativas (CSS Custom Properties) y layouts modernos con
-   flex y grid.
+   Vanilla CSS sin frameworks externos. Estructurado con variables nativas y layouts modernos con flex y grid.
    ============================================================================= */
 
 
@@ -47,30 +44,22 @@ body {
        3. Violeta (inferior derecha)                     — acento de profundidad
        4. Base lineal con variación cromática perceptible */
     background-image:
-        radial-gradient(
-            ellipse 80% 60% at 0% 0%,
+        radial-gradient(ellipse 80% 60% at 0% 0%,
             hsla(178, 85%, 38%, 0.38) 0%,
             hsla(178, 80%, 30%, 0.10) 45%,
-            transparent 70%
-        ),
-        radial-gradient(
-            ellipse 65% 55% at 100% 0%,
+            transparent 70%),
+        radial-gradient(ellipse 65% 55% at 100% 0%,
             hsla(205, 95%, 52%, 0.22) 0%,
             hsla(205, 90%, 40%, 0.06) 50%,
-            transparent 72%
-        ),
-        radial-gradient(
-            ellipse 55% 45% at 100% 100%,
+            transparent 72%),
+        radial-gradient(ellipse 55% 45% at 100% 100%,
             hsla(258, 75%, 58%, 0.18) 0%,
-            transparent 65%
-        ),
-        linear-gradient(
-            160deg,
+            transparent 65%),
+        linear-gradient(160deg,
             #071320 0%,
             #040d18 35%,
             #030b15 65%,
-            #05101c 100%
-        );
+            #05101c 100%);
 
     background-attachment: fixed;
     background-size: cover;
@@ -108,7 +97,8 @@ body {
     flex-direction: column;
     min-height: 100vh;
     position: relative;
-    z-index: 1; /* Siempre por encima de las capas de fondo */
+    z-index: 1;
+    /* Siempre por encima de las capas de fondo */
 }
 
 /* El main crece para empujar el footer hacia el fondo */
@@ -320,6 +310,100 @@ body {
     color: #ff7b86;
     background: rgba(255, 123, 134, 0.08);
     box-shadow: 0 0 10px rgba(255, 123, 134, 0.12);
+}
+
+/* --- Mobile Menu Styles --- */
+.mobile-menu-btn {
+    display: none;
+    flex-direction: column;
+    justify-content: space-around;
+    width: 28px;
+    height: 24px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    z-index: 1001;
+}
+
+.mobile-menu-btn span {
+    width: 100%;
+    height: 2.5px;
+    background: #EAF1F5;
+    border-radius: 10px;
+    transition: all 0.3s linear;
+    position: relative;
+    transform-origin: 1px;
+}
+
+.mobile-menu-btn.open span:nth-child(1) {
+    transform: rotate(45deg);
+}
+
+.mobile-menu-btn.open span:nth-child(2) {
+    opacity: 0;
+}
+
+.mobile-menu-btn.open span:nth-child(3) {
+    transform: rotate(-45deg);
+}
+
+@media (max-width: 900px) {
+    .mobile-menu-btn {
+        display: flex;
+    }
+
+    .nav {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        height: 100vh;
+        width: 280px;
+        background: #0E1924;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 80px 24px 24px;
+        transition: right 0.3s ease-in-out;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        overflow-y: auto;
+    }
+
+    .nav.nav-open {
+        right: 0;
+    }
+
+    .nav a {
+        margin-left: 0;
+        margin-bottom: 20px;
+        font-size: 16px;
+        width: 100%;
+        display: block;
+    }
+
+    .nav-user {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: none;
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        gap: 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.12);
+        padding-top: 20px;
+        margin-top: 10px;
+    }
+
+    .nav-user-profile-link {
+        width: 100%;
+    }
+
+    .nav-login-btn {
+        margin-left: 0;
+        width: 100%;
+        text-align: center;
+        margin-top: 20px;
+    }
 }
 
 
@@ -950,7 +1034,8 @@ body {
    amorfos y poco profesionales. En su lugar, dos destellos de gradiente
    suaves que se integran con el fondo sin competir con él. */
 .landing-orb {
-    display: none; /* Desactivados: el fondo CSS ya aporta profundidad */
+    display: none;
+    /* Desactivados: el fondo CSS ya aporta profundidad */
 }
 
 .landing-orb-1 {
@@ -962,8 +1047,13 @@ body {
 }
 
 @keyframes landing-float {
-    from { transform: translate(0, 0); }
-    to   { transform: translate(0, 0); }
+    from {
+        transform: translate(0, 0);
+    }
+
+    to {
+        transform: translate(0, 0);
+    }
 }
 
 .landing-hero-inner {
@@ -1230,7 +1320,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255,255,255,0.05) inset;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -1277,7 +1367,7 @@ body {
 
 .landing-feature-card:hover {
     transform: translateY(-6px);
-    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255,255,255,0.07) inset;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.07) inset;
 }
 
 .landing-feature-card--teal:hover {
@@ -1470,7 +1560,7 @@ body {
     transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255,255,255,0.05) inset;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.05) inset;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
 }
@@ -1489,7 +1579,7 @@ body {
 
 .landing-svc-row:hover {
     transform: translateX(4px);
-    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255,255,255,0.07) inset;
+    box-shadow: 0 20px 56px rgba(0, 0, 0, 0.65), 0 1px 0 rgba(255, 255, 255, 0.07) inset;
 }
 
 .landing-svc-row:nth-child(1):hover {
@@ -2063,16 +2153,16 @@ body {
     background: rgba(0, 0, 0, 0.18);
 }
 
-.home-meta-row > div {
+.home-meta-row>div {
     padding: 0 10px;
     border-right: 1px solid rgba(255, 255, 255, 0.07);
 }
 
-.home-meta-row > div:first-child {
+.home-meta-row>div:first-child {
     padding-left: 0;
 }
 
-.home-meta-row > div:last-child {
+.home-meta-row>div:last-child {
     border-right: none;
 }
 
@@ -2152,7 +2242,7 @@ body {
     margin-bottom: 40px;
 }
 
-.home-listing + .home-listing {
+.home-listing+.home-listing {
     padding-top: 16px;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -2215,7 +2305,7 @@ body {
         padding: 10px 16px;
     }
 
-    .home-meta-row > div {
+    .home-meta-row>div {
         padding: 0 8px;
     }
 
@@ -2327,8 +2417,13 @@ body {
 }
 
 @keyframes mkt-orb-float {
-    from { transform: translateX(-50%) translateY(0); }
-    to   { transform: translateX(-50%) translateY(0); }
+    from {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 /* --- Chips de categoría --- */
@@ -2668,7 +2763,6 @@ body {
 
 /* =============================================================================
    14. CLASES Y MENTORÍAS
-   Identidad: violeta / índigo para diferenciarse del marketplace (cian)
    ============================================================================= */
 
 /* --- Hero --- */
@@ -2679,13 +2773,26 @@ body {
     text-align: center;
 }
 
-.cls-hero-orb      { display: none; }
-.cls-hero-orb--1   { display: none; }
-.cls-hero-orb--2   { display: none; }
+.cls-hero-orb {
+    display: none;
+}
+
+.cls-hero-orb--1 {
+    display: none;
+}
+
+.cls-hero-orb--2 {
+    display: none;
+}
 
 @keyframes cls-orb-float {
-    from { transform: translateX(-50%) translateY(0); }
-    to   { transform: translateX(-50%) translateY(0); }
+    from {
+        transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+        transform: translateX(-50%) translateY(0);
+    }
 }
 
 .cls-hero-inner {
@@ -3974,12 +4081,22 @@ body {
 }
 
 /* --- Orbes del perfil eliminados (sustituidos por el fondo global) --- */
-.prf-orb      { display: none; }
-.prf-orb--1   { display: none; }
-.prf-orb--2   { display: none; }
+.prf-orb {
+    display: none;
+}
+
+.prf-orb--1 {
+    display: none;
+}
+
+.prf-orb--2 {
+    display: none;
+}
 
 @keyframes prf-orb-appear {
-    to { opacity: 0; }
+    to {
+        opacity: 0;
+    }
 }
 
 /* --- Layout de dos columnas --- */
@@ -4994,10 +5111,10 @@ body {
     width: 800px;
     height: 1px;
     background: linear-gradient(90deg,
-        transparent,
-        rgba(25, 211, 197, 0.6) 30%,
-        rgba(77, 208, 255, 0.6) 70%,
-        transparent);
+            transparent,
+            rgba(25, 211, 197, 0.6) 30%,
+            rgba(77, 208, 255, 0.6) 70%,
+            transparent);
     pointer-events: none;
 }
 
@@ -5380,6 +5497,7 @@ body {
     color: #4dd0ff;
     border-color: rgba(77, 208, 255, 0.2);
 }
+
 .hca-btn--detail:hover {
     background: rgba(77, 208, 255, 0.14);
     border-color: rgba(77, 208, 255, 0.45);
@@ -5392,6 +5510,7 @@ body {
     color: #19d3c5;
     border-color: rgba(25, 211, 197, 0.2);
 }
+
 .hca-btn--edit:hover {
     background: rgba(25, 211, 197, 0.14);
     border-color: rgba(25, 211, 197, 0.45);
@@ -5404,6 +5523,7 @@ body {
     color: #ff7b86;
     border-color: rgba(230, 57, 70, 0.2);
 }
+
 .hca-btn--danger:hover {
     background: rgba(230, 57, 70, 0.14);
     border-color: rgba(230, 57, 70, 0.45);
@@ -5452,5 +5572,36 @@ body {
     background: #f8f9fa;
     border-color: #d2d4d8;
     color: #3c4043;
-    box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+    box-shadow: 0 1px 3px rgba(60, 64, 67, 0.1);
+}
+
+/* =============================================================================
+   MOBILE RESPONSIVE FIXES
+   ============================================================================= */
+
+@media (max-width: 640px) {
+    .login-box {
+        padding: 32px 24px;
+        border-radius: 16px;
+    }
+
+    .form-box {
+        padding: 16px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .content {
+        padding: 20px 15px;
+    }
+
+    #login-title, #signup-title {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 16px;
+    }
 }
