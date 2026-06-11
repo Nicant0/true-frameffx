@@ -628,7 +628,7 @@ body {
    ============================================================================= */
 
 .grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 24px;
     margin: 30px 0;
@@ -1300,7 +1300,7 @@ body {
 
 /* --- Tarjetas de características --- */
 .landing-features-grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 24px;
     width: 100%;
@@ -1452,7 +1452,7 @@ body {
 
 /* --- Sección marketplace --- */
 .landing-market-layout {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr 1fr;
     gap: 40px;
     align-items: center;
@@ -1549,7 +1549,7 @@ body {
 }
 
 .landing-svc-row {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr auto;
     gap: 32px;
     align-items: center;
@@ -1827,7 +1827,7 @@ body {
    ============================================================================= */
 
 .home-hero {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1.4fr 1fr;
     gap: 24px;
     align-items: stretch;
@@ -1883,7 +1883,7 @@ body {
 /* KPIs del hero (3 columnas: diseño fusionado de las dos definiciones originales) */
 .home-kpis {
     margin-top: 10px;
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
 }
@@ -1943,8 +1943,8 @@ body {
 
 /* Grid de filtros: input + select + botones */
 .home-filters {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1.2fr auto;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
+    
     gap: 10px;
     align-items: end;
 }
@@ -2165,7 +2165,7 @@ body {
 
 /* Fila de metadatos: sangra hasta los bordes de la card */
 .home-meta-row {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 0;
     margin-top: auto;
@@ -2251,7 +2251,7 @@ body {
 /* Estado vacío */
 .home-empty-state {
     text-align: center;
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     gap: 12px;
     justify-items: center;
     padding: 40px;
@@ -2513,7 +2513,7 @@ body {
 }
 
 .mkt-grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 28px;
 }
@@ -3066,7 +3066,7 @@ body {
 
 /* --- Grid --- */
 .cls-grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
     gap: 22px;
 }
@@ -3428,7 +3428,7 @@ body {
 
     .cls-search-form {
         width: 100%;
-        display: grid;
+        display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
         grid-template-columns: 1fr auto;
         gap: 10px;
     }
@@ -3766,7 +3766,7 @@ body {
 
 /* Grid de detalles: duración, inicio, precio */
 .booking-modal-meta {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr 1fr 1fr;
     gap: 0;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -3991,7 +3991,7 @@ body {
 
 /* --- Layout antiguo (mantenido para compatibilidad) --- */
 .profile-layout {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr;
     gap: 40px;
     padding: 20px;
@@ -4068,7 +4068,7 @@ body {
 }
 
 .profile-form-grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 }
@@ -4131,7 +4131,7 @@ body {
     max-width: 1300px;
     margin: 0 auto;
     padding: 0 40px;
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 420px 1fr;
     gap: 40px;
     align-items: start;
@@ -4382,7 +4382,7 @@ body {
 
 /* Grid de dos columnas para nombre y email */
 .prf-grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr 1fr;
     gap: 0 14px;
 }
@@ -4556,7 +4556,7 @@ body {
 
 /* Grid de compras */
 .prf-purchases-grid {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 18px;
 }
@@ -4682,7 +4682,7 @@ body {
 
 /* Metadatos en cuadrícula 2x2 */
 .prf-purchase-meta {
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr 1fr;
     gap: 0;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
@@ -5160,7 +5160,7 @@ body {
     max-width: 1280px;
     margin: 0 auto;
     padding: 72px 32px 56px;
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1.6fr 1fr 1fr 1.4fr;
     gap: 48px;
     align-items: start;
@@ -5667,7 +5667,7 @@ body {
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
     transform: translateY(20px) scale(0.98);
     transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    display: grid;
+    display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-end;
     grid-template-columns: 1fr 1fr;
     gap: 0;
     position: relative;
