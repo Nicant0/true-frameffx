@@ -50,23 +50,22 @@
             </select>
         </div>
 
-        <div class="form-field" style="display: flex; gap: 10px;">
-            <div style="flex: 2;">
-                <label for="orden">Orden</label>
-                <select id="orden" name="orden">
-                    <option value="recientes" {% if orden == "recientes" %}selected{% endif %}>Mas recientes</option>
-                    <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
-                    <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
-                    <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
-                </select>
-            </div>
-            <div style="flex: 1;">
-                <label for="dir">Dirección</label>
-                <select id="dir" name="dir">
-                    <option value="desc" {% if dir == "desc" %}selected{% endif %}>Descend.</option>
-                    <option value="asc" {% if dir == "asc" %}selected{% endif %}>Ascend.</option>
-                </select>
-            </div>
+        <div class="form-field" style="flex: 1.5;">
+            <label for="orden">Orden</label>
+            <select id="orden" name="orden">
+                <option value="recientes" {% if orden == "recientes" %}selected{% endif %}>Mas recientes</option>
+                <option value="titulo" {% if orden == "titulo" %}selected{% endif %}>Titulo</option>
+                <option value="precio" {% if orden == "precio" %}selected{% endif %}>Precio</option>
+                <option value="fecha" {% if orden == "fecha" %}selected{% endif %}>Fecha de inicio</option>
+            </select>
+        </div>
+
+        <div class="form-field" style="flex: 1;">
+            <label for="dir">Dirección</label>
+            <select id="dir" name="dir">
+                <option value="desc" {% if dir == "desc" %}selected{% endif %}>Descend.</option>
+                <option value="asc" {% if dir == "asc" %}selected{% endif %}>Ascend.</option>
+            </select>
         </div>
 
         <div class="home-filter-actions">
