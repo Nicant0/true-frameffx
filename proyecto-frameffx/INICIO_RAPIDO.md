@@ -71,6 +71,10 @@ ALLOWED_HOSTS=localhost,127.0.0.1
 
 > Para la demo del TFG, los valores de arriba son suficientes.
 > El proyecto funciona sin Stripe ni claves externas en modo local.
+> 
+> En local el email se imprime en la terminal (no se envía realmente).
+> Para crear el superusuario usa `python manage.py createsuperuser` (paso 7);
+> las variables `DJANGO_SUPERUSER_EMAIL/PASSWORD` solo son necesarias en Docker.
 
 ---
 
@@ -153,3 +157,5 @@ python manage.py runserver
 | Las imágenes no aparecen | Falta la carpeta `media/` | Ya está en el repo; si falta, ejecuta `seed_products` |
 | `OperationalError: no such table` | Migraciones no aplicadas | `python manage.py migrate` |
 | Scripts de PS1 bloqueados | Política de ejecución de PowerShell | `Set-ExecutionPolicy RemoteSigned -Scope CurrentUser` |
+| `django.core.exceptions.ImproperlyConfigured` | Falta el archivo `.env` | Crear el `.env` según el paso 4 |
+| El admin (`/admin/`) no funciona | Superusuario no creado | `python manage.py createsuperuser` |

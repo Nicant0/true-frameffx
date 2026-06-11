@@ -220,10 +220,12 @@ Esta es quizás la línea más importante de todo `settings.py`. Le dice a Djang
 #### Configuración de Allauth y Google OAuth
 
 ```python
-ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Usa el email como método de autenticación
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_EMAIL_VERIFICATION = 'optional'
+# En desarrollo se deja opcional para facilitar las pruebas.
+# En producción (DEBUG=False) se exige verificación obligatoria.
+ACCOUNT_EMAIL_VERIFICATION = 'optional' if DEBUG else 'mandatory'
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -252,9 +254,27 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = ...
     CSRF_COOKIE_SECURE = ...
     X_FRAME_OPTIONS = 'DENY'
+    # CSRF_TRUSTED_ORIGINS se genera automáticamente a partir de ALLOWED_HOSTS:
+    # ['https://tudominio.com', 'https://www.tudominio.com']
+    CSRF_TRUSTED_ORIGINS = [f'https://{h}' for h in ALLOWED_HOSTS]
 ```
 
 Todos los headers de seguridad HTTP (HSTS, cookies seguras, protección de clickjacking) solo se activan cuando `DEBUG = False`, evitando problemas en desarrollo local.
+
+#### Logging condicional
+
+```python
+LOGGING = {
+    'loggers': {
+        'allauth': {
+            # DEBUG en desarrollo (diagnóstico OAuth); WARNING en producción
+            'level': 'DEBUG' if DEBUG else 'WARNING',
+        },
+    },
+}
+```
+
+Evita saturar los logs de producción con la traza interna de allauth, que puede contener información sensible del flujo OAuth.
 
 ---
 
@@ -735,23 +755,27 @@ class DownloadProductView(LoginRequiredMixin, View):
         # Comprobación 1: El pedido debe estar completado
         if detalle.pedido.estado != 'completado':
             messages.error(request, "El pedido no está completado.")
-            return redirect('home')
+            return redirect('user_profile')  # Redirige al perfil (donde están las compras)
         
         # Comprobación 2: No ha superado el límite de descargas
         if not Descarga.puede_descargar(detalle):
             messages.error(request, "Has excedido el límite de descargas permitidas.")
-            return redirect('home')
+            return redirect('user_profile')
         
-        # Registrar la descarga con la IP para trazabilidad
-        ip = request.META.get('REMOTE_ADDR')
+        # Registrar la descarga con la IP real (compatible con proxy Nginx)
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        ip = x_forwarded_for.split(',')[0] if x_forwarded_for else request.META.get('REMOTE_ADDR')
         Descarga.objects.create(detalle=detalle, ip_origen=ip)
         
         # FileResponse sirve el archivo sin exponer la URL directa
+        safe_filename = os.path.basename(producto.archivo_digital.name)
         return FileResponse(producto.archivo_digital.open('rb'),
-                            as_attachment=True, filename=...)
+                            as_attachment=True, filename=safe_filename)
 ```
 
-**Seguridad en la entrega del archivo:** Se usa `FileResponse` en lugar de devolver una URL directa al archivo. Esto significa que el archivo se sirve a través de Django, no directamente desde el sistema de archivos. El usuario nunca ve la URL real del archivo en `media/productos/archivos/`, y si intenta acceder directamente a esa URL, solo puede hacerlo si Django lo ha validado. El `get_object_or_404` con `pedido__usuario=request.user` es el doble seguro: si alguien introduce un ID ajeno, recibe 404 en lugar de acceso no autorizado.
+**Seguridad en la entrega del archivo:** Se usa `FileResponse` en lugar de devolver una URL directa al archivo. Esto significa que el archivo se sirve a través de Django, no directamente desde el sistema de archivos. El usuario nunca ve la URL real del archivo en `media/productos/archivos/`, y si intenta acceder directamente a esa URL, Nginx la bloquea con `deny all` (configurado en `docker/nginx/django.conf`).
+
+En caso de error, la vista redirige a `user_profile` (la página de perfil del usuario, donde puede ver sus compras) en lugar de al catálogo de clases, lo que es mucho más intuitivo.
 
 ### El Admin de Productos (admin.py)
 
@@ -1191,12 +1215,10 @@ python manage.py migrate --noinput
 # Recopilar archivos estáticos
 python manage.py collectstatic --noinput
 
-# Crear superusuario por defecto si no existe
+# Crear superusuario desde variables de entorno (si están definidas y no existe)
+# Ver sección 18 para detalle de DJANGO_SUPERUSER_EMAIL / DJANGO_SUPERUSER_PASSWORD
 python manage.py shell <<END
-from django.contrib.auth import get_user_model
-User = get_user_model()
-if not User.objects.filter(email='admin@example.com').exists():
-    User.objects.create_superuser('admin@example.com', 'changeme')
+...
 END
 
 # Arrancar Gunicorn
@@ -1204,6 +1226,27 @@ exec gunicorn FrameffX.wsgi:application --bind 0.0.0.0:8000 --workers 4
 ```
 
 El script migra `users` primero porque todas las demás apps tienen Foreign Keys a `AUTH_USER_MODEL`. Si se migraran en orden aleatorio, Django no encontraría la tabla de usuarios al crear las tablas de `bookings` o `products`.
+
+#### Creación de superusuario desde variables de entorno
+
+En la versión actual, el superusuario inicial **no tiene credenciales hardcodeadas**. El `entrypoint.sh` lee las variables `DJANGO_SUPERUSER_EMAIL` y `DJANGO_SUPERUSER_PASSWORD` del entorno:
+
+```bash
+python manage.py shell << END
+import os
+from django.contrib.auth import get_user_model
+User = get_user_model()
+email    = os.environ.get('DJANGO_SUPERUSER_EMAIL', '')
+password = os.environ.get('DJANGO_SUPERUSER_PASSWORD', '')
+if not email or not password:
+    print("⚠️  Vars no definidas — superusuario no creado automáticamente.")
+elif not User.objects.filter(email=email).exists():
+    User.objects.create_superuser(email, password)
+    print(f"✅ Superusuario creado: {email}")
+END
+```
+
+Si las variables no están definidas, el script las omite sin fallar; el administrador puede crear el superusuario manualmente con `createsuperuser` una vez en marcha el contenedor.
 
 ---
 
@@ -1267,9 +1310,15 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 SECURE_SSL_REDIRECT=True
 SESSION_COOKIE_SECURE=True
 CSRF_COOKIE_SECURE=True
+
+# Superusuario inicial (Docker lo crea automáticamente al arrancar)
+DJANGO_SUPERUSER_EMAIL=admin@tudominio.com
+DJANGO_SUPERUSER_PASSWORD=contraseña-segura
 ```
 
 En desarrollo local, `EMAIL_BACKEND=console.EmailBackend` hace que los emails no se envíen realmente sino que se impriman en la terminal, lo que facilita el debugging sin necesidad de un servidor SMTP real.
+
+> **Nota sobre el superusuario**: En desarrollo **no** es necesario definir `DJANGO_SUPERUSER_*`. Usa `python manage.py createsuperuser` manualmente. En producción, el `setup_prod.sh` genera estas variables automáticamente y las incluye en `.env.prod`.
 
 ---
 

@@ -62,8 +62,7 @@ chmod +x scripts/setup_prod.sh
 bash scripts/setup_prod.sh
 ```
 
-El script pedirá de forma interactiva: dominio, email, contraseñas, Stripe.
-Genera `.env.prod`, configura nginx, obtiene SSL y levanta los contenedores.
+El script pedirá de forma interactiva: dominio, email SSL, contraseñas de BD, credenciales de Stripe y el **email/contraseña del superusuario administrador** (los genera aleatoriamente si se pulsa ENTER). Genera `.env.prod`, configura nginx, obtiene SSL y levanta los contenedores. Al terminar muestra un resumen con todas las credenciales.
 
 ---
 
@@ -189,8 +188,11 @@ docker compose -f docker/docker-compose.prod.yml logs -f web
 # Migraciones (el entrypoint.sh las ejecuta automáticamente al arrancar)
 docker compose -f docker/docker-compose.prod.yml exec web python manage.py migrate
 
-# Crear superusuario
+# Crear superusuario manualmente (solo si no se definieron DJANGO_SUPERUSER_* en .env.prod)
 docker compose -f docker/docker-compose.prod.yml exec web python manage.py createsuperuser
+
+# Ver si el superusuario ya fue creado por el entrypoint
+docker compose -f docker/docker-compose.prod.yml logs web | grep -i superusuario
 
 # Recopilar estáticos (el entrypoint.sh lo ejecuta automáticamente)
 docker compose -f docker/docker-compose.prod.yml exec web python manage.py collectstatic --noinput
@@ -305,8 +307,23 @@ ls -la docker/certbot/conf/live/tudominio.com/
 
 ### Error 403 en formularios (CSRF)
 
-Django 4.0+ requiere `CSRF_TRUSTED_ORIGINS` configurado. Verificar en `.env.prod`
-que `ALLOWED_HOSTS` incluye el dominio correcto (el setting lo lee automáticamente).
+Django 4.0+ requiere `CSRF_TRUSTED_ORIGINS` configurado. En este proyecto se genera automáticamente a partir de `ALLOWED_HOSTS` (ver `settings.py`), por lo que basta con que `ALLOWED_HOSTS` incluya el dominio correcto:
+
+```env
+ALLOWED_HOSTS=tudominio.com,www.tudominio.com
+```
+
+### El superusuario no se creó automáticamente
+
+El `entrypoint.sh` crea el superusuario solo si `DJANGO_SUPERUSER_EMAIL` y `DJANGO_SUPERUSER_PASSWORD` están definidos en `.env.prod`. Si se omitieron:
+
+```bash
+# Crear manualmente:
+docker compose -f docker/docker-compose.prod.yml exec web python manage.py createsuperuser
+
+# O verificar si las variables están en el contenedor:
+docker compose -f docker/docker-compose.prod.yml exec web env | grep SUPERUSER
+```
 
 ---
 
