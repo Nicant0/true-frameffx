@@ -72,7 +72,15 @@
         </div>
         <div class="mkt-grid">
             {% for producto in productos %}
-            <article class="mkt-card" data-tipo="{{ producto.get_tipo_display|lower }}">
+            <article class="mkt-card product-detail-trigger" style="cursor: pointer;"
+                data-id="{{ producto.id }}"
+                data-title="{{ producto.titulo|escapejs }}"
+                data-desc="{{ producto.descripcion|escapejs }}"
+                data-price="{{ producto.precio }}"
+                data-type="{{ producto.get_tipo_display }}"
+                data-img="{% if producto.imagen_portada %}{{ producto.imagen_portada.url }}{% endif %}"
+                data-buy-url="{% url 'products:checkout_session' producto.id %}"
+            >
 
                 {# Imagen / Portada #}
                 <div class="mkt-card-media">
@@ -138,4 +146,103 @@
     </section>
 
 </div>
+
+{# ── DETAIL MODAL (QUICK VIEW) ── #}
+<div id="product-detail-modal" class="detail-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="product-detail-title">
+    <div class="detail-modal-card">
+        <button class="detail-modal-close" id="product-detail-close" aria-label="Cerrar modal">&times;</button>
+        
+        <div class="detail-modal-media" id="product-detail-media">
+            <!-- La imagen se inyecta por JS -->
+        </div>
+
+        <div class="detail-modal-content">
+            <span class="detail-modal-eyebrow" id="product-detail-type">Tipo de producto</span>
+            <h2 class="detail-modal-title" id="product-detail-title">Título del Producto</h2>
+            <div class="detail-modal-desc" id="product-detail-desc">Descripción completa del producto.</div>
+            
+            <div class="detail-modal-footer">
+                <span class="detail-modal-price-tag" id="product-detail-price">0.00€</span>
+                {% if not user.is_staff %}
+                <form id="product-detail-buy-form" method="POST" action="">
+                    {% csrf_token %}
+                    <button type="submit" class="mkt-buy-btn">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+                            <line x1="3" y1="6" x2="21" y2="6" />
+                            <path d="M16 10a4 4 0 0 1-8 0" />
+                        </svg>
+                        Comprar Ahora
+                    </button>
+                </form>
+                {% else %}
+                <span class="mkt-admin-badge" title="Eres administrador">Vista Admin</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modal = document.getElementById('product-detail-modal');
+    const closeBtn = document.getElementById('product-detail-close');
+    
+    // Elementos del modal
+    const mTitle = document.getElementById('product-detail-title');
+    const mDesc = document.getElementById('product-detail-desc');
+    const mPrice = document.getElementById('product-detail-price');
+    const mType = document.getElementById('product-detail-type');
+    const mMedia = document.getElementById('product-detail-media');
+    const mForm = document.getElementById('product-detail-buy-form');
+
+    function openProductModal(card) {
+        mTitle.textContent = card.dataset.title;
+        // Reemplazar saltos de línea por <br> para conservar formato
+        mDesc.innerHTML = card.dataset.desc.replace(/\n/g, '<br>');
+        mPrice.innerHTML = card.dataset.price + '<small class="mkt-price-currency">€</small>';
+        mType.textContent = card.dataset.type;
+        
+        if (mForm) {
+            mForm.action = card.dataset.buyUrl;
+        }
+
+        if (card.dataset.img) {
+            mMedia.innerHTML = '<img src="' + card.dataset.img + '" alt="Portada">';
+        } else {
+            mMedia.innerHTML = '<div class="detail-modal-media-placeholder">📦</div>';
+        }
+
+        modal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeProductModal() {
+        modal.classList.remove('is-open');
+        document.body.style.overflow = '';
+    }
+
+    // Attach events to cards
+    document.querySelectorAll('.product-detail-trigger').forEach(function(card) {
+        card.addEventListener('click', function(e) {
+            // No abrir modal si se hizo click en el botón de compra o admin badge
+            if (e.target.closest('.mkt-buy-form') || e.target.closest('.mkt-admin-badge')) {
+                return;
+            }
+            openProductModal(this);
+        });
+    });
+
+    closeBtn.addEventListener('click', closeProductModal);
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeProductModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && modal.classList.contains('is-open')) closeProductModal();
+    });
+});
+</script>
 {% endblock %}

@@ -349,6 +349,33 @@ docker compose -f docker/docker-compose.prod.yml exec web python manage.py creat
 docker compose -f docker/docker-compose.prod.yml exec web env | grep SUPERUSER
 ```
 
+### Error 500 al acceder a la página de Login
+
+Si ocurre un error 500 al intentar ir a `/login/`, es probable que no haya proveedores sociales (como Google) configurados en la base de datos o haya un error en la tabla `SocialApp`.
+La plantilla `login.html` ha sido actualizada para comprobar la existencia de providers (`{% if socialaccount_providers %}`), pero si el error persiste, verifica los logs o entra en `/admin/` para añadir la configuración de Google OAuth.
+
+### UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff al cargar demo_data
+
+Este error ocurre si el archivo de fixtures `demo_data.json` fue exportado en un entorno Windows (PowerShell) usando redirección estándar, lo que resulta en un archivo codificado en UTF-16 (con BOM) en lugar del estándar UTF-8 que espera el contenedor Linux.
+Para solucionarlo y prevenirlo, siempre debes forzar la salida en UTF-8 puro en Windows de esta forma:
+```bash
+python -Xutf8 manage.py dumpdata > demo_data.json
+```
+Luego asegúrate de subir este nuevo archivo a git en formato correcto.
+
+### Los cambios de código no se reflejan en la web tras un git pull
+
+Si haces `git pull` en el VPS pero el servidor sigue usando código viejo (o el fixture JSON antiguo), es debido a que estás reiniciando el contenedor (`up -d`) pero utilizando la **imagen de Docker previamente construida**, la cual encapsula la versión antigua de los archivos.
+La solución es forzar siempre la reconstrucción de la imagen:
+```bash
+# Método manual
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod down
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d --build
+
+# O simplemente usa el script preparado:
+bash scripts/deploy.sh
+```
+
 ---
 
 ## 📝 Estructura de carpetas

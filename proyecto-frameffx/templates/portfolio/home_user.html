@@ -106,7 +106,15 @@
     </div>
     <div class="cls-grid">
         {% for teach in teachings %}
-        <article class="cls-card" id="cls-card-{{ teach.id }}">
+        <article class="cls-card teaching-detail-trigger" id="cls-card-{{ teach.id }}" style="cursor: pointer;"
+            data-title="{{ teach.title|escapejs }}"
+            data-desc="{{ teach.description|escapejs }}"
+            data-price="{{ teach.price }}"
+            data-duration="{{ teach.duracion_min }}"
+            data-start="{{ teach.start_at|date:'d M Y, H:i' }}"
+            data-status="{{ teach.get_estado_display }}"
+            data-id="{{ teach.id }}"
+        >
 
             <div class="cls-card-header cls-card-header--{{ teach.estado }}">
                 <span class="cls-status cls-status--{{ teach.estado }}">{{ teach.get_estado_display }}</span>
@@ -386,6 +394,53 @@
   </div>
 </div>
 
+{# ── DETAIL MODAL (QUICK VIEW) PARA CLASES ── #}
+<div id="teaching-detail-modal" class="detail-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="teaching-detail-title">
+    <div class="detail-modal-card">
+        <button class="detail-modal-close" id="teaching-detail-close" aria-label="Cerrar modal">&times;</button>
+        
+        <div class="detail-modal-media" style="min-height: 200px;">
+            <div class="detail-modal-media-placeholder">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
+            </div>
+        </div>
+
+        <div class="detail-modal-content">
+            <span class="detail-modal-eyebrow" id="teaching-detail-status">Estado</span>
+            <h2 class="detail-modal-title" id="teaching-detail-title">Título de la Clase</h2>
+            <div class="detail-modal-desc" id="teaching-detail-desc">Descripción de la clase.</div>
+            
+            <div class="detail-modal-meta">
+                <div class="detail-meta-item">
+                    <span class="detail-meta-label">Fecha de inicio</span>
+                    <span class="detail-meta-value" id="teaching-detail-start">--</span>
+                </div>
+                <div class="detail-meta-item">
+                    <span class="detail-meta-label">Duración</span>
+                    <span class="detail-meta-value" id="teaching-detail-duration">--</span>
+                </div>
+            </div>
+
+            <div class="detail-modal-footer">
+                <span class="detail-modal-price-tag" id="teaching-detail-price">0.00€</span>
+                <button type="button" class="mkt-buy-btn" id="teaching-detail-book-btn" style="background: linear-gradient(90deg, #19d3c5, #4dd0ff); color: #041017;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M20 12V22H4V12"/><path d="M22 7H2v5h20V7z"/>
+                        <path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                    </svg>
+                    Reservar plaza
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -427,6 +482,70 @@
   document.getElementById('modal-cancel-btn').addEventListener('click', closeModal);
   overlay.addEventListener('click', function (e) { if (e.target === overlay) closeModal(); });
   document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !overlay.hidden) closeModal(); });
+
+  // ── QUICK VIEW MODAL LOGIC ──
+  var detailModal = document.getElementById('teaching-detail-modal');
+  var detailCloseBtn = document.getElementById('teaching-detail-close');
+  var detailBookBtn = document.getElementById('teaching-detail-book-btn');
+  
+  var dTitle = document.getElementById('teaching-detail-title');
+  var dDesc = document.getElementById('teaching-detail-desc');
+  var dPrice = document.getElementById('teaching-detail-price');
+  var dStart = document.getElementById('teaching-detail-start');
+  var dDuration = document.getElementById('teaching-detail-duration');
+  var dStatus = document.getElementById('teaching-detail-status');
+  var currentBookingBtn = null; // Para guardar la referencia al botn de reserva original
+
+  function openDetailModal(card) {
+      dTitle.textContent = card.dataset.title;
+      dDesc.innerHTML = card.dataset.desc.replace(/\n/g, '<br>');
+      dPrice.innerHTML = card.dataset.price + '<small style="font-size: 0.6em; margin-left: 2px;">€</small>';
+      dStart.textContent = card.dataset.start;
+      dDuration.textContent = card.dataset.duration + ' min';
+      dStatus.textContent = card.dataset.status;
+      
+      // Buscar el botn original de "Reservar clase" dentro de esta tarjeta
+      currentBookingBtn = card.querySelector('.booking-trigger');
+      if (currentBookingBtn) {
+          detailBookBtn.style.display = 'inline-flex';
+      } else {
+          detailBookBtn.style.display = 'none'; // Ya reservada o no disponible
+      }
+
+      detailModal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+  }
+
+  function closeDetailModal() {
+      detailModal.classList.remove('is-open');
+      if (overlay.hidden) {
+          document.body.style.overflow = '';
+      }
+  }
+
+  // Event listeners para abrir detalle
+  document.querySelectorAll('.teaching-detail-trigger').forEach(function (card) {
+      card.addEventListener('click', function (e) {
+          // No abrir detalle si se hizo clic en un botn o formulario
+          if (e.target.closest('button') || e.target.closest('form')) {
+              return;
+          }
+          openDetailModal(this);
+      });
+  });
+
+  detailCloseBtn.addEventListener('click', closeDetailModal);
+  detailModal.addEventListener('click', function (e) { if (e.target === detailModal) closeDetailModal(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && detailModal.classList.contains('is-open')) closeDetailModal(); });
+
+  // Cuando se hace clic en "Reservar plaza" desde el modal de detalles
+  detailBookBtn.addEventListener('click', function() {
+      closeDetailModal();
+      if (currentBookingBtn) {
+          currentBookingBtn.click(); // Simular clic en el botn original para abrir el modal de pago
+      }
+  });
+
 }());
 </script>
 {% endblock %}
