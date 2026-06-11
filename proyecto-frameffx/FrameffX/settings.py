@@ -235,9 +235,9 @@ LOGIN_URL = '/login/'
 ACCOUNT_AUTHENTICATION_METHOD = 'email'   # Usa el email como método de autenticación
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False          # El modelo Usuario no utiliza username
-# En producción se requiere verificación de email para evitar registros fraudulentos.
-# En desarrollo se deja opcional para facilitar las pruebas.
-ACCOUNT_EMAIL_VERIFICATION = 'optional' if DEBUG else 'mandatory'
+# En producción se recomienda verificación de email, pero si falla el servidor SMTP dará Error 500.
+# Se permite controlarlo por variable de entorno, siendo 'optional' por defecto para evitar bloqueos iniciales.
+ACCOUNT_EMAIL_VERIFICATION = os.getenv('ACCOUNT_EMAIL_VERIFICATION', 'optional')
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http' if DEBUG else 'https'  # HTTP en local, HTTPS en producción
 
 # Configuración del proveedor de Google
