@@ -1775,6 +1775,32 @@ body {
 
 /* Responsive landing — móvil: 2 columnas a 1 */
 @media (max-width: 640px) {
+    /* Evitar overflow horizontal en el hero */
+    .landing-hero {
+        padding: 0 16px;
+        overflow-x: hidden;
+    }
+
+    .landing-hero-inner {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+        padding: 0 4px;
+        box-sizing: border-box;
+    }
+
+    /* Reducir el clamp mínimo para móviles pequeños */
+    .landing-hero h1 {
+        font-size: clamp(1.9rem, 8vw, 2.8rem);
+        word-break: break-word;
+        hyphens: auto;
+    }
+
+    .landing-gradient-text {
+        display: inline;
+        word-break: break-word;
+    }
+
     .landing-section {
         padding: 70px 20px;
     }
@@ -1795,7 +1821,6 @@ body {
         grid-template-columns: 1fr;
     }
 }
-
 
 /* =============================================================================
    12. HOME / DASHBOARD

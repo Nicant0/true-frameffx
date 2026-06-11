@@ -173,29 +173,32 @@ location / {
 ### Iniciar servicios
 
 ```bash
-docker compose -f docker/docker-compose.prod.yml up -d --build
+# IMPORTANTE: --env-file .env.prod es obligatorio.
+# Sin esta bandera Docker busca el archivo ".env" por defecto; si no lo
+# encuentra, los contenedores arrancan sin variables y PostgreSQL falla.
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d --build
 ```
 
 ### Ver logs
 
 ```bash
-docker compose -f docker/docker-compose.prod.yml logs -f web
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod logs -f web
 ```
 
 ### Ejecutar comandos Django manualmente
 
 ```bash
 # Migraciones (el entrypoint.sh las ejecuta automáticamente al arrancar)
-docker compose -f docker/docker-compose.prod.yml exec web python manage.py migrate
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec web python manage.py migrate
 
 # Crear superusuario manualmente (solo si no se definieron DJANGO_SUPERUSER_* en .env.prod)
-docker compose -f docker/docker-compose.prod.yml exec web python manage.py createsuperuser
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec web python manage.py createsuperuser
 
 # Ver si el superusuario ya fue creado por el entrypoint
-docker compose -f docker/docker-compose.prod.yml logs web | grep -i superusuario
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod logs web | grep -i superusuario
 
 # Recopilar estáticos (el entrypoint.sh lo ejecuta automáticamente)
-docker compose -f docker/docker-compose.prod.yml exec web python manage.py collectstatic --noinput
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec web python manage.py collectstatic --noinput
 ```
 
 ---
@@ -231,8 +234,8 @@ sudo crontab -e
 ```bash
 # Pull cambios y rebuild
 git pull origin main
-docker compose -f docker/docker-compose.prod.yml down
-docker compose -f docker/docker-compose.prod.yml up -d --build
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod down
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d --build
 ```
 
 ---
@@ -241,10 +244,10 @@ docker compose -f docker/docker-compose.prod.yml up -d --build
 
 ```bash
 # Estado de contenedores
-docker compose -f docker/docker-compose.prod.yml ps
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod ps
 
 # Logs en tiempo real
-docker compose -f docker/docker-compose.prod.yml logs -f
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod logs -f
 
 # Estadísticas de recursos
 docker stats
@@ -254,31 +257,36 @@ docker stats
 
 ## 🆘 Troubleshooting
 
-### Los contenedores no inician
+### Los contenedores no inician / PostgreSQL unhealthy
 
 ```bash
-docker compose -f docker/docker-compose.prod.yml logs web postgres nginx
-docker compose -f docker/docker-compose.prod.yml restart
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod logs web postgres nginx
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod restart
 ```
+
+> **Causa frecuente**: si no se pasa `--env-file .env.prod`, Docker busca el
+> archivo `.env` por defecto. Si no existe, las variables `DB_USER`, `DB_PASSWORD`,
+> etc. quedan sin definir y PostgreSQL rechaza la conexión. Solución: usar
+> siempre `--env-file .env.prod` o copiar `cp .env.prod .env` como alternativa.
 
 ### Problemas de conexión a BD
 
 ```bash
-docker compose -f docker/docker-compose.prod.yml ps postgres
-docker compose -f docker/docker-compose.prod.yml logs postgres
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod ps postgres
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod logs postgres
 # Verificar variables de entorno del contenedor web:
-docker compose -f docker/docker-compose.prod.yml exec web env | grep DB
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec web env | grep DB
 ```
 
 ### CSS no carga (página sin estilos)
 
 ```bash
 # Verificar que collectstatic se ejecutó correctamente:
-docker compose -f docker/docker-compose.prod.yml exec web ls /code/staticfiles/
-docker compose -f docker/docker-compose.prod.yml exec nginx ls /code/staticfiles/
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec web ls /code/staticfiles/
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec nginx ls /code/staticfiles/
 # Si está vacío, forzar:
-docker compose -f docker/docker-compose.prod.yml exec web python manage.py collectstatic --noinput
-docker compose -f docker/docker-compose.prod.yml restart nginx
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod exec web python manage.py collectstatic --noinput
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod restart nginx
 ```
 
 ### Bucle de redirecciones (ERR_TOO_MANY_REDIRECTS)
@@ -289,7 +297,23 @@ Ocurre si `SECURE_SSL_REDIRECT=True` sin SSL activo todavía.
 # Cambiar en .env.prod:
 SECURE_SSL_REDIRECT=False
 # Reiniciar:
-docker compose -f docker/docker-compose.prod.yml restart web
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod restart web
+```
+
+### WARN: "The \"XYZ\" variable is not set" en SECRET\_KEY
+
+Ocurre si la `SECRET_KEY` generada contiene el carácter `$` seguido de letras.
+Docker Compose lo interpreta como una variable de entorno y falla silenciosamente.
+
+```bash
+# Ver el valor en .env.prod:
+grep SECRET_KEY .env.prod
+
+# Solución A (recomendada): encerrar entre comillas simples
+# SECRET_KEY='mi!clave@sin_dolares'
+
+# Solución B: regenerar con el nuevo generador (ya corregido en setup_prod.sh)
+python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits + '!@#%^&*-_=+') for _ in range(50)))"
 ```
 
 ### SSL no funciona

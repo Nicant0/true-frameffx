@@ -50,6 +50,31 @@ echo "================================"
 echo "✨ Aplicación lista"
 echo "================================"
 
+# Load demo data if the database is empty (first deployment)
+echo "📦 Verificando datos iniciales..."
+python manage.py shell << END
+from teachings.models import Teaching
+from products.models import Producto
+import subprocess, os
+
+has_data = Teaching.objects.exists() or Producto.objects.exists()
+if has_data:
+    print("✅ Datos ya existentes — omitiendo carga del fixture")
+else:
+    print("📥 Base de datos vacía — cargando demo_data.json...")
+    try:
+        result = subprocess.run(
+            ["python", "manage.py", "loaddata", "demo_data.json"],
+            capture_output=True, text=True
+        )
+        if result.returncode == 0:
+            print("✅ Datos de demostración cargados correctamente")
+        else:
+            print(f"⚠️  Error al cargar fixture: {result.stderr}")
+    except Exception as e:
+        print(f"⚠️  No se pudo cargar demo_data.json: {e}")
+END
+
 # Start Gunicorn
 exec gunicorn FrameffX.wsgi:application \
     --bind 0.0.0.0:8000 \

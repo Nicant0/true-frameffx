@@ -69,6 +69,8 @@
                     Entrar
                 </button>
 
+                {% get_providers as socialaccount_providers %}
+                {% if socialaccount_providers %}
                 <div class="login-divider">
                     <span>o</span>
                 </div>
@@ -82,6 +84,7 @@
                     </svg>
                     Continuar con Google
                 </a>
+                {% endif %}
             </form>
 
             <p class="form-switch-link">
@@ -93,3 +96,4 @@
     </div>
 </div>
 {% endblock %}
+

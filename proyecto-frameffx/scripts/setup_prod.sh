@@ -94,7 +94,10 @@ else
 fi
 
 # ── 2. Calcular variables derivadas ────────────────────────
-SECRET_KEY=$(python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits + '!@#\$%^&*-_=+') for _ in range(50)))")
+# IMPORTANTE: Se excluye el carácter '$' del juego de símbolos. Docker Compose y
+# el intérprete de Bash lo interpretarían como inicio de variable de entorno,
+# corrompiendo silenciosamente el valor de SECRET_KEY en .env.prod.
+SECRET_KEY=$(python3 -c "import secrets, string; print(''.join(secrets.choice(string.ascii_letters + string.digits + '!@#%^&*-_=+') for _ in range(50)))")
 
 if [ "$HAS_WWW" = "s" ]; then
     ALLOWED_HOSTS="${DOMAIN},www.${DOMAIN}"
@@ -121,7 +124,9 @@ cat > "$ENV_FILE" <<EOF
 # NO versionar este archivo
 
 # Django
-SECRET_KEY=${SECRET_KEY}
+# SECRET_KEY entre comillas simples: evita que '$' y otros símbolos especiales
+# sean interpretados como variables por el shell o Docker Compose al leer el archivo.
+SECRET_KEY='${SECRET_KEY}'
 DEBUG=False
 ALLOWED_HOSTS=${ALLOWED_HOSTS}
 
@@ -176,7 +181,10 @@ log "Directorios y permisos configurados"
 
 # ── 6. Levantar nginx solo en modo HTTP para el ACME Challenge ──
 info "Levantando nginx en HTTP para el ACME Challenge..."
-docker compose -f docker/docker-compose.prod.yml up -d nginx
+# --env-file .env.prod: fuerza a Docker a leer el archivo correcto.
+# Sin esta bandera, Docker busca el archivo ".env" por defecto y no encuentra
+# las variables, dejando PostgreSQL sin credenciales (estado unhealthy).
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d nginx
 sleep 3
 
 # ── 7. Obtener certificado SSL ─────────────────────────────
@@ -266,7 +274,7 @@ log "Configuración HTTPS activada en nginx"
 
 # ── 9. Levantar todos los servicios ───────────────────────
 info "Levantando todos los contenedores..."
-docker compose -f docker/docker-compose.prod.yml up -d --build
+docker compose -f docker/docker-compose.prod.yml --env-file .env.prod up -d --build
 
 sleep 15
 
@@ -285,7 +293,7 @@ echo -e "  📊  DB Password:  ${BOLD}${DB_PASSWORD}${NC}  ← guárdala!"
 echo -e "  📊  Admin Pass:   ${BOLD}${DJANGO_SUPERUSER_PASSWORD}${NC}  ← guárdala!"
 echo ""
 echo -e "  Para ver los logs:"
-echo -e "  ${CYAN}docker compose -f docker/docker-compose.prod.yml logs -f${NC}"
+echo -e "  ${CYAN}docker compose -f docker/docker-compose.prod.yml --env-file .env.prod logs -f${NC}"
 echo ""
 warn "¡Cambia la contraseña del superusuario desde el panel de administración!"
 echo ""
